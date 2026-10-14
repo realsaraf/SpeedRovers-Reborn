@@ -96,7 +96,7 @@ namespace SpeedRovers.Reborn
                 if (z < 0 || z > RoadProjection.ViewDistance) continue;
                 roadSprites.Add(new RoadSprite(z, 0, number, 0));
                 roadSprites.Add(new RoadSprite(z + 6, 0, number, 1));
-                float route=Mathf.Repeat(number*12,RoadRoute.Length);
+                float route=RoadRoute.ArtMetres(number*12);
                 if(route>=1250 && route<1530 && number%2==0)
                     for(int bank=0;bank<6;bank++)roadSprites.Add(new RoadSprite(z,5,number,bank));
             }

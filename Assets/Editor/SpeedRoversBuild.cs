@@ -19,7 +19,7 @@ public static class SpeedRoversBuild
         EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene("Assets/Scenes/SpeedRovers.unity", true) };
         PlayerSettings.companyName = "Speed Rovers";
         PlayerSettings.productName = "Speed Rovers Reborn";
-        PlayerSettings.bundleVersion = "0.8.0";
+        PlayerSettings.bundleVersion = "0.8.1";
         foreach (var target in new[] { UnityEditor.Build.NamedBuildTarget.Standalone,
                      UnityEditor.Build.NamedBuildTarget.Android, UnityEditor.Build.NamedBuildTarget.iOS,
                      UnityEditor.Build.NamedBuildTarget.WebGL })
@@ -123,7 +123,7 @@ public static class SpeedRoversBuild
         {
             PlayerSettings.SetApplicationIdentifier(UnityEditor.Build.NamedBuildTarget.iOS,"com.philino.speedrovers.reborn");
             PlayerSettings.productName="Speed Rovers 2";
-            PlayerSettings.bundleVersion=Environment.GetEnvironmentVariable("SPEED_ROVERS_IOS_VERSION") ?? "1.0.0";
+            PlayerSettings.bundleVersion=Environment.GetEnvironmentVariable("SPEED_ROVERS_IOS_VERSION") ?? "1.0.1";
             PlayerSettings.iOS.buildNumber="100";
             PlayerSettings.iOS.targetOSVersionString="15.0";
             PlayerSettings.iOS.appleEnableAutomaticSigning=false;

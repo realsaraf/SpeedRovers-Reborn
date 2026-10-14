@@ -148,15 +148,35 @@ public static class SpeedRoversChecks
             Start();AddThing("Traffic",1);Call("AdvanceRun",.02f);
             object passing=((IList)Get("things"))[0];
             Check(!(bool)passing.GetType().GetField("used").GetValue(passing),"other-lane vehicle disappears before passing camera");
-            Check(RoadRoute.District(100)==0 && RoadRoute.District(700)==1 && RoadRoute.District(1500)==2 && RoadRoute.District(2300)==3 && RoadRoute.District(3020)==4 && RoadRoute.District(3710)==5 && RoadRoute.District(4480)==6 && RoadRoute.District(5000)==0,"route does not transition through all seven environments");
+            for(int d=0;d<7;d++)
+            {
+                Check(RoadRoute.District(RoadRoute.Starts[d]+100)==d,"route district start disagrees with scenery");
+                float end=d==6?RoadRoute.Length:RoadRoute.Starts[d+1];
+                Check((end-RoadRoute.Starts[d])/(465f/3.6f*RoadProjection.TravelScale)>=30,"scenery section lasts less than 30 seconds at maximum cruising speed");
+            }
+            Check(RoadRoute.District(RoadRoute.Length)==0,"route does not loop to downtown");
             Check(Resources.Load<Texture2D>("Painted/TravelSkies")!=null && Resources.Load<Texture2D>("Painted/TravelProps")!=null,"travel district art missing");
-            Check(!RoadRoute.Junction(3020) && !RoadRoute.Junction(4520),"cross streets appear on coastal or alpine roads");
-            Check(RoadRoute.Junction(200) && !RoadRoute.Junction(240) && !RoadRoute.Junction(1100),"crossroads are not confined to correct route segments");
+            Check(!RoadRoute.Junction(3020*RoadRoute.PacingScale) && !RoadRoute.Junction(4520*RoadRoute.PacingScale),"cross streets appear on coastal or alpine roads");
+            Check(RoadRoute.Junction(200) && !RoadRoute.Junction(240) && !RoadRoute.Junction(RoadRoute.Starts[1]+100),"crossroads are not confined to correct route segments");
             Check(!RoadRoute.Work(419) && RoadRoute.Work(420) && RoadRoute.Work(461) && !RoadRoute.Work(463),"roadwork patch and hazard boundaries disagree");
             Call("StartRun");Call("SpawnRushTraffic");
             int bikes=0,cars=0;foreach(object t in (IList)Get("things"))
             {string k=t.GetType().GetField("kind").GetValue(t).ToString();if(k=="Rival")bikes++;if(k=="Traffic")cars++;Check(k!="Barrier","legacy roadblocks still spawn");}
             Check(bikes>=2 && bikes+cars<=5,"opening traffic exceeds sparse composition or lacks rivals");
+            Start();Set("distance",3000f);Set("speed",427.5f);Call("ResetEngine",427.5f);AddThing("Rival",-1);
+            object racer=((IList)Get("things"))[0];Type racerType=racer.GetType();
+            racerType.GetField("distance").SetValue(racer,3100f);racerType.GetField("travelSpeed").SetValue(racer,427.5f/3.6f);
+            for(int tick=0;tick<125;tick++)
+            {
+                Call("AdvanceTraffic",racer,.02f);
+                Set("distance",Number("distance")+427.5f/3.6f*RoadProjection.TravelScale*.02f);
+            }
+            Check((float)racerType.GetField("travelSpeed").GetValue(racer)>427.5f/3.6f*.9f,"competition bike cannot sustain racing pace");
+            Check(Mathf.Abs((float)racerType.GetField("distance").GetValue(racer)-Number("distance"))<180,"rival is rapidly abandoned at cruising speed");
+            racerType.GetField("distance").SetValue(racer,Number("distance")-25);
+            Call("AdvanceRun",1f/120);
+            Check(!(bool)racerType.GetField("used").GetValue(racer),"overtaken competitor is removed instead of continuing the race");
+            Check(Resources.Load<Shader>("Painted/ProjectedLine")!=null,"clipped bridge line shader missing");
             Start();AddThing("Oncoming",1);
             object toward=((IList)Get("things"))[0];toward.GetType().GetField("travelSpeed").SetValue(toward,-25f);
             float ahead=(float)toward.GetType().GetField("distance").GetValue(toward);Call("AdvanceRun",.02f);

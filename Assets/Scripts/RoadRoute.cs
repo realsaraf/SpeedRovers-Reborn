@@ -6,12 +6,14 @@ namespace SpeedRovers.Reborn
     // these same district and construction boundaries.
     public static class RoadRoute
     {
-        public const float Length = 5000;
-        public static readonly float[] Starts={0,700,1250,2100,2800,3500,4250};
+        public const float PacingScale = 12;
+        public const float Length = 5000 * PacingScale;
+        public static readonly float[] Starts={0,700*PacingScale,1250*PacingScale,2100*PacingScale,2800*PacingScale,3500*PacingScale,4250*PacingScale};
+        public static float ArtMetres(float metres) => Mathf.Repeat(metres,Length)/PacingScale;
         static readonly string[] Names={"DOWNTOWN","RIVER BRIDGE","OUTSKIRTS","CITY DAY","ITALY · COAST","JAPAN · TOKYO","SWITZERLAND · ALPS"};
         public static int District(float metres)
         {
-            float m = Mathf.Repeat(metres, Length);
+            float m = ArtMetres(metres);
             return m < 700 ? 0 : m < 1250 ? 1 : m < 2100 ? 2 : m < 2800 ? 3 : m < 3500 ? 4 : m < 4250 ? 5 : 6;
         }
         public static string Name(float metres) => Names[District(metres)];

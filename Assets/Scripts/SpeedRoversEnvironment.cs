@@ -17,8 +17,8 @@ namespace SpeedRovers.Reborn
             // Keep the sunset panorama through the river landing; change the
             // distant landscape only once roadside vegetation encloses it.
             float route=Mathf.Repeat(distance,RoadRoute.Length);
-            if(route>=1030 && route<1680)
-            {district=2;blend=Mathf.SmoothStep(0,1,(route-1320)/360);}
+            if(route>=RoadRoute.Starts[2]-220 && route<RoadRoute.Starts[2]+430)
+            {district=2;blend=Mathf.SmoothStep(0,1,(route-RoadRoute.Starts[2]-70)/360);}
             environmentWeights[district]=blend;
             environmentWeights[(district+6)%7]=1-blend;
             sceneHaze=sceneRoad=sceneGround=sceneMarking=Color.clear;
@@ -63,7 +63,7 @@ namespace SpeedRovers.Reborn
 
         Rect LandStrip(float world,float center,float half,float y,float h)
         {
-            float m=Mathf.Repeat(world,RoadRoute.Length);
+            float m=RoadRoute.ArtMetres(world);
             if(m>430 && m<1520)
             {
                 float bank=Mathf.Max(700-m,m-1250);
@@ -84,7 +84,7 @@ namespace SpeedRovers.Reborn
 
         void DrawRiverbank(RoadSprite entry,float depth)
         {
-            float m=Mathf.Repeat(distance+entry.z,RoadRoute.Length);
+            float m=RoadRoute.ArtMetres(distance+entry.z);
             float bankHalf=1.7f+Mathf.Max(0,m-1250)*.055f;
             int side=entry.side%2==0?-1:1;
             float edge=1.9f+(entry.side/2)*1.7f;

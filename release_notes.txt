@@ -1,5 +1,5 @@
-Speed Rovers 2 1.0.0
+Speed Rovers 2 1.0.1
 
-Traffic now uses complete rear-view sprites with matched vehicle proportions and integrated wheel motion. Motorcycle acceleration builds through six gears toward a 50% faster cruising speed. Bike contact reduces speed, drops gears, and requires gradual recovery.
+Fixed displaced bridge cables and guardrails in the scaled portrait view. Scenery sections now last at least 30 seconds at full cruising speed. Three persistent competitors accelerate to racing speed, overtake slower traffic, and continue racing after you pass them. The HUD now shows your position in the pack.
 
 Swipe left or right to steer. Please test acceleration, bike contact recovery, traffic grounding, engine gear changes, frame rate, and installation on your iPhone or iPad.

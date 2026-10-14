@@ -88,6 +88,10 @@ namespace SpeedRovers.Reborn
             Fill(18,896,156,48,new Color(.035f,.05f,.07f,.80f));
             Text(Mathf.RoundToInt(speed)+" km/h",20,900,152,36,bodyStyle,Color.white);
             Text("GEAR "+gear,20,876,152,20,smallStyle,new Color(.85f,.89f,.94f));
+            int place=1,racers=1;
+            foreach(Thing opponent in things)
+                if(opponent.kind==ThingKind.Rival && !opponent.used) {racers++;if(opponent.distance>distance)place++;}
+            Text("PLACE "+place+" / "+racers,295,876,228,24,smallStyle,new Color(.85f,.89f,.94f));
             Text(RoadRoute.Name(distance),295,908,228,28,smallStyle,new Color(.85f,.89f,.94f));
             if (Time.time < bannerUntil && distance > 70)
                 Text(banner, 65, 138, 410, 42, bodyStyle, new Color(1f,.85f,.36f));

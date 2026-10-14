@@ -39,7 +39,8 @@ namespace SpeedRovers.Reborn
                 {
                     int spawnLane=(openLane+1+n+3)%3-1;
                     double roll=random.NextDouble();
-                    ThingKind kind=roll<.36?ThingKind.Rival:roll<.72?ThingKind.Traffic:roll<.91?ThingKind.Coin:ThingKind.Clock;
+                    // Competitors are persistent racers seeded at the start.
+                    ThingKind kind=roll<.36?ThingKind.Traffic:roll<.89?ThingKind.Coin:ThingKind.Clock;
                     int closure=RoadRoute.WorkIndex(spawnDistance+35);
                     if(closure>=0 && spawnDistance<=RoadRoute.WorkStart(closure)+44 && spawnLane==RoadRoute.WorkLane(closure)) continue;
                     int variant=random.Next(0,60);
@@ -219,10 +220,10 @@ namespace SpeedRovers.Reborn
             Directory.CreateDirectory(directory);
             yield return new WaitForSeconds(1);
             StartRun();selectedCity=selectedRider=0;bannerUntil=0;
-            float[] scenes={100,350,390,580,650,687,735,780,980,1188,1250,1320,1460,2280,3020,3710,4480};
+            float[] scenes={100,350,390,580,650,687,735,748,756,759,761,780,980,1188,1250,1320,1460,2280,3020,3710,4480};
             foreach(float location in scenes)
             {
-                distance=location;animationTime=location/75;speed=285;ResetEngine(285);lane=visualLean=0;
+                distance=location*RoadRoute.PacingScale;animationTime=location/75;speed=427.5f;ResetEngine(speed);lane=visualLean=0;
                 things.Clear();spawnDistance=distance+25;nextWork=Mathf.Max(0,RoadRoute.WorkIndex(distance));
                 SpawnRushTraffic();
                 things.Add(new Thing{kind=ThingKind.Rival,distance=distance+45,lane=-1,variant=1});
@@ -231,7 +232,7 @@ namespace SpeedRovers.Reborn
                 yield return new WaitForSeconds(.15f);
             }
             Directory.CreateDirectory(Path.Combine(directory,"motion"));
-            StartRun();random=new System.Random(904);bannerUntil=0;speed=285;
+            StartRun();random=new System.Random(904);bannerUntil=0;
             // The production simulation, 30 fps. Automated lane selection is
             // confined to this review mode; collisions and traffic remain live.
             for(int frame=0;frame<540;frame++)

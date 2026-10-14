@@ -25,6 +25,7 @@ namespace SpeedRovers.Reborn
             public bool trafficReady;
             public float cruiseSpeed;
             public float contactAfter;
+            public float nextRaceDecision;
         }
 
         static readonly string[] Cities = { "NEW YORK", "MEXICO CITY", "SHANGHAI", "LONDON", "TOKYO" };
@@ -229,9 +230,9 @@ namespace SpeedRovers.Reborn
             lane = targetLane = 0;
             runCoins = checkpoints = 0;
             spawnDistance = 230;
-            for (int i=0;i<2;i++)
-                things.Add(new Thing {distance=68+i*66,lane=i==0?-1:1,kind=ThingKind.Rival,variant=i%5,travelSpeed=45+i*7});
-            banner = "CHASE THE CHECKPOINTS";
+            for (int i=0;i<3;i++)
+                things.Add(new Thing {distance=48+i*55,lane=i==0?-1:i==1?1:0,kind=ThingKind.Rival,variant=i+1,travelSpeed=(speed+i*3)/3.6f});
+            banner = "RACE THE PACK";
             bannerUntil = Time.time + 2.4f;
             mode = ScreenMode.Running;
         }
@@ -304,7 +305,7 @@ namespace SpeedRovers.Reborn
                 {thing.passSound=true;PlayPass(thing);}
                 bool pickup=thing.kind==ThingKind.Coin || thing.kind==ThingKind.Clock;
                 if (thing.used || thing.distance > distance + (pickup?8:3.5f)) continue;
-                if(thing.distance<distance-8) {thing.used=true;continue;}
+                if(thing.distance<distance-8) {if(thing.kind!=ThingKind.Rival)thing.used=true;continue;}
                 if (Mathf.Abs(lane - thing.lane - thing.lateral) > (thing.kind == ThingKind.Rival ? .38f : thing.kind==ThingKind.Traffic || thing.kind==ThingKind.Oncoming ? .63f : .42f)) continue;
                 if(thing.kind==ThingKind.Rival && animationTime<thing.contactAfter)continue;
                 if(thing.kind!=ThingKind.Rival)thing.used = true;
@@ -327,6 +328,7 @@ namespace SpeedRovers.Reborn
                     if(thing.kind==ThingKind.Rival)
                     {
                         thing.contactAfter=animationTime+1.25f;
+                        thing.travelSpeed*=.78f;
                         thing.lateral+=lane>=thing.lane+thing.lateral?-.18f:.18f;
                     }
                     timeLeft -= 1.5f;

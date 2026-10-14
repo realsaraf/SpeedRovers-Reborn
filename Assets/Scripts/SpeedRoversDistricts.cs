@@ -8,6 +8,7 @@ namespace SpeedRovers.Reborn
         [Serializable] sealed class DistrictRegions { public ArtRegion[] skies, bridge, day, travel, landscapes, tree, portal; }
         Texture2D districtSkies, bridgeStructures, dayStreetProps, travelSkies, travelProps, dayTree, bridgePortal;
         DistrictRegions districtRegions;
+        Material projectedLine;
 
         void InitDistrictArt()
         {
@@ -19,6 +20,7 @@ namespace SpeedRovers.Reborn
             dayTree=Resources.Load<Texture2D>("Painted/DayTree");
             bridgePortal=Resources.Load<Texture2D>("Painted/BridgePortalV2");
             districtRegions=JsonUtility.FromJson<DistrictRegions>(Resources.Load<TextAsset>("Painted/DistrictRegions").text);
+            projectedLine=new Material(Resources.Load<Shader>("Painted/ProjectedLine"));
         }
 
         Color DistrictHaze(float world) => sceneHaze;
@@ -44,7 +46,7 @@ namespace SpeedRovers.Reborn
             int circuit=Mathf.FloorToInt(distance/RoadRoute.Length);
             for(int lap=circuit;lap<=circuit+1;lap++)for(int n=0;n<3;n++)
             {
-                float z=lap*RoadRoute.Length+760+n*200-distance;
+                float z=lap*RoadRoute.Length+(760+n*200)*RoadRoute.PacingScale-distance;
                 if(z>=-8 && z<470)roadSprites.Add(new RoadSprite(z,4,n));
             }
         }
@@ -69,10 +71,15 @@ namespace SpeedRovers.Reborn
 
         void RoadLine(Vector2 a,Vector2 b,float width,Color color)
         {
-            Matrix4x4 prior=GUI.matrix;
-            GUIUtility.RotateAroundPivot(Mathf.Atan2(b.y-a.y,b.x-a.x)*Mathf.Rad2Deg,a);
-            Fill(a.x,a.y-width*.5f,Vector2.Distance(a,b),width,color);
-            GUI.matrix=prior;
+            // Rotating IMGUI inside the scaled safe-area group displaced
+            // cables into the letterbox. Keep the drawing quad axis-aligned.
+            float pad=width*.5f+1;
+            float x=Mathf.Max(0,Mathf.Min(a.x,b.x)-pad),y=Mathf.Max(0,Mathf.Min(a.y,b.y)-pad);
+            float right=Mathf.Min(540,Mathf.Max(a.x,b.x)+pad),bottom=Mathf.Min(960,Mathf.Max(a.y,b.y)+pad);
+            if(right<=x || bottom<=y || float.IsNaN(x+y+right+bottom))return;
+            projectedLine.SetVector("_Endpoints",new Vector4(a.x-x,a.y-y,b.x-x,b.y-y));
+            projectedLine.SetVector("_Size",new Vector4(right-x,bottom-y,width,0));
+            Graphics.DrawTexture(new Rect(x,y,right-x,bottom-y),pixel,new Rect(0,0,1,1),0,0,0,0,color,projectedLine);
         }
 
         Vector2 BridgePoint(float z,int side,float height,float edge=1.60f)
@@ -107,7 +114,7 @@ namespace SpeedRovers.Reborn
 
         float CableHeight(float world)
         {
-            float m=Mathf.Repeat(world,RoadRoute.Length);
+            float m=RoadRoute.ArtMetres(world);
             float a,b,ha,hb,sag;
             if(m<760) {a=700;b=760;ha=24;hb=800;sag=75;}
             else if(m<960) {a=760;b=960;ha=hb=800;sag=540;}
