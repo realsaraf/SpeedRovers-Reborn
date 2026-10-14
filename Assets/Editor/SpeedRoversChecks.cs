@@ -77,10 +77,10 @@ public static class SpeedRoversChecks
                 }
 
             Start();
-            for (int n = 0; n < 120; n++) Call("AdvanceRun", 1f / 60f);
+            for (int n = 0; n < 120; n++) Call("AdvanceElapsedTime", 1f / 60f);
             float fineDistance = Number("distance");
             Start();
-            for (int n = 0; n < 60; n++) Call("AdvanceRun", 1f / 30f);
+            for (int n = 0; n < 60; n++) Call("AdvanceElapsedTime", 1f / 30f);
             Check(Mathf.Abs(Number("distance") - fineDistance) < .12f, "frame rate changes travel distance");
             Start();
             for(int n=0;n<20;n++)Call("AdvanceElapsedTime",.1f);
@@ -162,11 +162,27 @@ public static class SpeedRoversChecks
             float ahead=(float)toward.GetType().GetField("distance").GetValue(toward);Call("AdvanceRun",.02f);
             Check((float)toward.GetType().GetField("distance").GetValue(toward)<ahead,"oncoming traffic moves away from player");
             Start();AddThing("Oncoming",0);Call("AdvanceRun",.02f);Check(Get("mode").ToString()=="Results","oncoming collision missing");
-            Start();Set("speed",194f);Call("ResetEngine",194f);float rpmBefore=Number("engineRpm");
-            Set("speed",198f);Call("AdvanceEngine",.05f,true);
+            Start();Set("speed",291f);Call("ResetEngine",291f);float rpmBefore=Number("engineRpm");
+            Set("speed",296f);Call("AdvanceEngine",.05f,true);
             Check((int)Get("gear")==5 && Number("engineRpm")<rpmBefore,"upshift does not drop RPM");
             Set("speed",80f);for(int n=0;n<30;n++)Call("AdvanceEngine",.05f,true);
             Check((int)Get("gear")<5,"slowing down does not downshift");
+            Start();Set("easyMode",false);Set("speed",65f);Call("ResetEngine",65f);
+            Check((int)Get("gear")==1,"race does not begin in first gear");
+            for(int n=0;n<240;n++) {Call("AdvanceDrive",1f/120);Call("AdvanceEngine",1f/120,true);}
+            Check(Number("speed")>100 && Number("speed")<190,"acceleration jumps directly to cruising pace");
+            for(int n=0;n<1680;n++) {Call("AdvanceDrive",1f/120);Call("AdvanceEngine",1f/120,true);}
+            Check(Mathf.Abs(Number("speed")-427.5f)<.1f && (int)Get("gear")==6,"cruising pace is not 50 percent above 285 km/h");
+            AddThing("Rival",0);Call("AdvanceRun",1f/120);
+            float bumped=Number("speed");int bumpedGear=(int)Get("gear");
+            Check(bumped<260 && bumpedGear<=4,"bike contact does not slow and downshift clearly");
+            Check(!((bool)((IList)Get("things"))[0].GetType().GetField("used").GetValue(((IList)Get("things"))[0])),"rival disappears when bumped");
+            for(int n=0;n<120;n++) {Call("AdvanceDrive",1f/120);Call("AdvanceEngine",1f/120,true);}
+            Check(Number("speed")>bumped && Number("speed")<300,"bike contact recovery is immediate");
+            for(int n=0;n<960;n++) {Call("AdvanceDrive",1f/120);Call("AdvanceEngine",1f/120,true);}
+            Check(Number("speed")>=427 && (int)Get("gear")==6,"bike fails to regain cruising pace through upshifts");
+            foreach(string art in new[]{"TrafficAlignedA","TrafficAlignedB","TrafficAlignedC"})
+                Check(Resources.Load<Texture2D>("Painted/"+art)!=null,"aligned car art missing: "+art);
             Start();float wheelBefore=Number("wheelTurns");Call("AdvanceRun",.02f);
             Check(Number("wheelTurns")>wheelBefore,"rear wheel phase does not follow distance");
             Mode("Paused");wheelBefore=Number("wheelTurns");Call("AdvanceRun",1f);

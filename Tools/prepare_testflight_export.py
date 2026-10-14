@@ -16,7 +16,7 @@ source=root/'Builds/iOS'
 with (source/'Info.plist').open('rb') as f:info=plistlib.load(f)
 project=(source/'Unity-iPhone.xcodeproj/project.pbxproj').read_text()
 assert 'PRODUCT_BUNDLE_IDENTIFIER = com.philino.speedrovers;' in project
-assert info['CFBundleShortVersionString']=='2.0.0'
+assert info['CFBundleShortVersionString'] in ['2.0.0','2.0.1']
 ci=root/'CI';ci.mkdir(exist_ok=True)
 archive=ci/'ios-export.tar.gz'
 with tarfile.open(archive,'w:gz',compresslevel=6) as tar:

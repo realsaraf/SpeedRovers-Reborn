@@ -6,10 +6,27 @@ namespace SpeedRovers.Reborn
     {
         AudioSource engineAudio, coastAudio, windAudio, sirenAudio, passAudio, impactAudio;
         AudioClip engineClip, windClip;
-        float engineRpm=1200, shiftRemaining, wheelTurns;
+        float engineRpm=1200, shiftRemaining, wheelTurns, impactRecovery;
         int gear=1;
         bool braking, audioReview;
-        static readonly float[] GearTop={0,60,100,145,195,245,320};
+        static readonly float[] GearTop={0,90,150,217.5f,292.5f,367.5f,480};
+        static readonly float[] GearAcceleration={0,60,49,41,35,29,23};
+
+        void AdvanceDrive(float dt)
+        {
+            impactRecovery=Mathf.Max(0,impactRecovery-dt);
+            float target=braking?45:(easyMode?337.5f:427.5f)+Mathf.Min(checkpoints*3,37.5f);
+            float acceleration=braking?180:GearAcceleration[gear]*(shiftRemaining>0?.18f:1)*(impactRecovery>0?.28f:1);
+            speed=Mathf.MoveTowards(speed,target,dt*acceleration);
+        }
+
+        void ImpactDownshift()
+        {
+            while(gear>1 && speed<GearTop[gear-1]*.95f)gear--;
+            shiftRemaining=.34f;
+            engineRpm=Mathf.Min(engineRpm,RpmForSpeed(speed,gear)*.72f);
+            impactRecovery=.85f;
+        }
 
         AudioSource Loop(string resource)
         {
@@ -38,8 +55,8 @@ namespace SpeedRovers.Reborn
             shiftRemaining=Mathf.Max(0,shiftRemaining-dt);
             if(running)
             {
-                if(gear<6 && speed>GearTop[gear] && shiftRemaining<=0) {gear++;shiftRemaining=.18f;}
-                else if(gear>1 && speed<GearTop[gear-1]*.82f && shiftRemaining<=0) {gear--;shiftRemaining=.13f;}
+                if(gear<6 && speed>GearTop[gear] && shiftRemaining<=0) {gear++;shiftRemaining=.30f;}
+                else if(gear>1 && speed<GearTop[gear-1]*.82f && shiftRemaining<=0) {gear--;shiftRemaining=.24f;}
             }
             float wanted=running?RpmForSpeed(speed,gear):1000;
             if(shiftRemaining>0)wanted*=.77f;
@@ -109,10 +126,10 @@ namespace SpeedRovers.Reborn
             things.Add(police);
             while(elapsed<18)
             {
-                float dt=Mathf.Min(Time.deltaTime,.05f);
+                float dt=Time.deltaTime;
                 elapsed+=dt;animationTime+=dt;
                 braking=elapsed>8 && elapsed<10;
-                speed=Mathf.MoveTowards(speed,braking?75:285,dt*(braking?150:65));
+                AdvanceDrive(dt);
                 AdvanceEngine(dt,true);
                 distance+=speed/3.6f*dt;wheelTurns+=speed/3.6f/2.05f*dt;
                 police.distance=distance+(6-elapsed)*70;

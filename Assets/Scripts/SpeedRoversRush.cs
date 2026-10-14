@@ -25,6 +25,7 @@ namespace SpeedRovers.Reborn
             rushRegions=JsonUtility.FromJson<RushRegions>(Resources.Load<TextAsset>("Painted/RushRegions").text);
             InitGrounding();
             InitDistrictArt();
+            InitAlignedTraffic();
         }
 
         void SpawnRushTraffic()
@@ -159,30 +160,7 @@ namespace SpeedRovers.Reborn
             {
                 bool front=thing.kind==ThingKind.Oncoming;
                 int variant=thing.variant%(front?8:12);
-                ArtRegion car=front?rushRegions.oncoming[variant]:rushRegions.traffic[variant];
-                Texture2D sheet=front?rushOncoming:rushTraffic;
-                float width=(front && variant==5?112:!front && (variant==6||variant==8)?325:250)*scale;
-                float height=width*car.h/car.w;
-                float bump=Mathf.Sin(animationTime*19+thing.variant)*.8f*scale;
-                Disc(at.x-width*.49f,at.y-height*.09f,width*.98f,height*.12f,new Color(.025f,.023f,.022f,.36f));
-                Disc(at.x-width*.46f,at.y-4*scale,width*.92f,7*scale,new Color(.015f,.014f,.014f,.60f));
-                GUI.color=tint;
-                // Continuous suspension motion and steering-dependent flank
-                // shear keep the tire contact fixed rather than bobbing the car.
-                SkewSprite(sheet,car,at.x-width/2,at.y-height-bump,width,height+bump,thing.lean*width*.025f);
-                if(front && variant==5)DrawRollingRear(at.x,at.y,height*.6f,thing.lean,animationTime*Mathf.Abs(thing.travelSpeed)/2.1f,Mathf.Abs(thing.travelSpeed)*3.6f,tint);
-                else DrawCarWheels(at.x,at.y,width,height,variant,front,animationTime*Mathf.Abs(thing.travelSpeed)/2.1f,tint);
-                Color lamps=front?new Color(1,.89f,.62f,.6f):new Color(1,.11f,.03f,.2f);
-                Glow(at.x-width*.34f,at.y-height*.39f,width*.15f,lamps);
-                Glow(at.x+width*.34f,at.y-height*.39f,width*.15f,lamps);
-                if(thing.police)
-                {
-                    float flash=Mathf.Sin(animationTime*18);
-                    Glow(at.x-width*.22f,at.y-height*.87f,width*.25f,new Color(1,.02f,.02f,flash>0?.9f:.08f));
-                    Glow(at.x+width*.22f,at.y-height*.87f,width*.25f,new Color(.03f,.25f,1,flash<0?.9f:.08f));
-                }
-                if(!front && variant==11)
-                    Glow(at.x+Mathf.Sin(animationTime*12)*width*.24f,at.y-height*.87f,width*.16f,new Color(.1f,.4f,1,.8f));
+                DrawAlignedVehicle(thing,at,depth,front,variant,tint);
             }
             else if(thing.kind==ThingKind.Roadworks || thing.kind==ThingKind.Pothole || thing.kind==ThingKind.Barrier)
             {

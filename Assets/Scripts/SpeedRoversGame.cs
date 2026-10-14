@@ -24,6 +24,7 @@ namespace SpeedRovers.Reborn
             public bool police, passSound;
             public bool trafficReady;
             public float cruiseSpeed;
+            public float contactAfter;
         }
 
         static readonly string[] Cities = { "NEW YORK", "MEXICO CITY", "SHANGHAI", "LONDON", "TOKYO" };
@@ -219,9 +220,10 @@ namespace SpeedRovers.Reborn
             distance = 0;
             animationTime = 0;
             visualLean = 0;
-            speed = 170;
+            speed = easyMode ? 55 : 65;
             laneVelocity = hitPulse = 0;
-            ResetEngine(170);
+            ResetEngine(speed);
+            impactRecovery=0;
             nextWork = nextPolice = 0;
             timeLeft = 38;
             lane = targetLane = 0;
@@ -284,7 +286,7 @@ namespace SpeedRovers.Reborn
             visualLean = Mathf.Lerp(visualLean, Mathf.Clamp(laneVelocity * .28f, -1, 1), 1-Mathf.Exp(-dt*12));
             hitPulse = Mathf.Max(0,hitPulse-dt*2);
             float previousSpeed = speed;
-            speed = Mathf.MoveTowards(speed, braking ? 65 : (easyMode ? 225 : 285) + Mathf.Min(checkpoints * 2, 25), dt * (braking?150:65));
+            AdvanceDrive(dt);
             AdvanceEngine(dt, mode==ScreenMode.Running);
             wheelTurns += (previousSpeed+speed)*.5f/3.6f/2.05f*dt;
             distance += (previousSpeed + speed) * .5f / 3.6f * RoadProjection.TravelScale * dt;
@@ -304,7 +306,8 @@ namespace SpeedRovers.Reborn
                 if (thing.used || thing.distance > distance + (pickup?8:3.5f)) continue;
                 if(thing.distance<distance-8) {thing.used=true;continue;}
                 if (Mathf.Abs(lane - thing.lane - thing.lateral) > (thing.kind == ThingKind.Rival ? .38f : thing.kind==ThingKind.Traffic || thing.kind==ThingKind.Oncoming ? .63f : .42f)) continue;
-                thing.used = true;
+                if(thing.kind==ThingKind.Rival && animationTime<thing.contactAfter)continue;
+                if(thing.kind!=ThingKind.Rival)thing.used = true;
                 if (thing.kind == ThingKind.Coin)
                 {
                     runCoins++;
@@ -319,7 +322,13 @@ namespace SpeedRovers.Reborn
                 }
                 else if (thing.kind == ThingKind.Pothole || thing.kind == ThingKind.Rival)
                 {
-                    speed = Mathf.Max(130, speed - (thing.kind == ThingKind.Pothole ? 55 : 35));
+                    speed = Mathf.Max(45, speed * (thing.kind == ThingKind.Pothole ? .80f : .58f));
+                    ImpactDownshift();
+                    if(thing.kind==ThingKind.Rival)
+                    {
+                        thing.contactAfter=animationTime+1.25f;
+                        thing.lateral+=lane>=thing.lane+thing.lateral?-.18f:.18f;
+                    }
                     timeLeft -= 1.5f;
                     hitPulse = 1;
                     ShowBanner(thing.kind == ThingKind.Pothole ? "BROKEN ROAD" : "BIKE CONTACT", .6f);
