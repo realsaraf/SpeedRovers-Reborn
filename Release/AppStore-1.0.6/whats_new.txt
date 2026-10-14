@@ -1,0 +1,1 @@
+Hold and drag to steer freely between lanes, with quick swipes still supported. Expanded rider and traffic poses, improved vehicle scaling, road-contact shadows and speed-linked wheel motion. Refreshed menus and race HUD.

@@ -1,0 +1,52 @@
+{
+  "main_preview": {
+    "duration_seconds": 24,
+    "segments": [
+      {
+        "start": 0,
+        "end": 6,
+        "scene": "Downtown",
+        "message": "Race the pack"
+      },
+      {
+        "start": 6,
+        "end": 12,
+        "scene": "River bridge",
+        "message": "Find your line"
+      },
+      {
+        "start": 12,
+        "end": 18,
+        "scene": "Italy coast",
+        "message": "Ride beyond the city"
+      },
+      {
+        "start": 18,
+        "end": 24,
+        "scene": "Tokyo",
+        "message": "Own the next turn"
+      }
+    ]
+  },
+  "second_preview": {
+    "duration_seconds": 18,
+    "scene": "Continuous downtown race",
+    "purpose": "Show uninterrupted speed, rivals, traffic and steering"
+  },
+  "audio": "Actual Unity engine/music mix captured with the fixed simulation clock; no external song added. Original game music marketing rights still need confirmation.",
+  "source": "a4123656e00e3730d6e7d59b3ff5fed50c8b9cd7, version 1.0.6 build 113 gameplay source. A separate Windows-only capture harness sets initial race locations and automated steering. Physics and graphics are unchanged.",
+  "submission_status": "DRAFT: replace with device footage before submitting an App Store app preview.",
+  "poster_frame_seconds": 5,
+  "screenshot_order": [
+    "Downtown racing",
+    "Italian coast",
+    "Tokyo night",
+    "River bridge",
+    "Alps",
+    "City day",
+    "Outskirts",
+    "Choose a rider",
+    "City selection",
+    "Home screen"
+  ]
+}

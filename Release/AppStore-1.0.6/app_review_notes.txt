@@ -1,0 +1,7 @@
+Speed Rovers 2 is an offline, single-player motorcycle racing game. No login is required.
+
+Tap RACE from the home screen. The bike accelerates and changes gears automatically. Swipe left or right for a lateral step, or hold and drag below the top HUD for continuous steering. Position is bounded by the road edges. Collisions reduce speed rather than immediately ending a race. The race ends at the route finish; place is shown on the HUD and results screen.
+
+The garage/selection screens unlock additional riders and city selections using coins earned in the game. This version has no real-money in-app purchases, advertisements, subscriptions, chat or user-generated content. Settings include music, sound effects and relaxed pace.
+
+Please review version 1.0.6, build 113. Review contact details are supplied separately in App Store Connect.

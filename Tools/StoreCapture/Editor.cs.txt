@@ -1,0 +1,8 @@
+using UnityEditor;
+using UnityEditor.Build.Reporting;
+public static class StoreCaptureBuild {
+    public static void Run() {
+        var report=BuildPipeline.BuildPlayer(new[]{"Assets/Scenes/SpeedRovers.unity"},"Builds/StoreCapture/Speed Rovers Capture.exe",BuildTarget.StandaloneWindows64,BuildOptions.None);
+        if(report.summary.result!=BuildResult.Succeeded)throw new System.Exception("Capture build failed");
+    }
+}

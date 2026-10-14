@@ -1,0 +1,101 @@
+#if UNITY_STANDALONE_WIN
+using System;
+using System.IO;
+using System.Collections;
+using System.Diagnostics;
+using Unity.Collections;
+using UnityEngine;
+namespace SpeedRovers.Reborn {
+public sealed partial class SpeedRoversGame {
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    static void BeginStoreCapture() {
+        foreach(string arg in Environment.GetCommandLineArgs())
+            if(arg.StartsWith("-store-capture=")) {
+                var game=UnityEngine.Object.FindFirstObjectByType<SpeedRoversGame>();
+                game.StartCoroutine(game.StoreCapture(arg.Substring(15)));
+            }
+    }
+    void StoreScene(float start, int rider) {
+        selectedCity=0;selectedRider=rider;easyMode=false;StartRun();random=new System.Random(419);
+        distance=start;checkpoints=(int)(start/500);animationTime=start/150;speed=330;ResetEngine(speed);
+        foreach(var t in things){t.distance+=start;t.travelSpeed=speed/3.6f;}
+        spawnDistance=start+210;nextWork=Mathf.Max(0,RoadRoute.WorkIndex(start));nextPolice=(int)(start/1100);
+        bannerUntil=0;
+    }
+    void StoreDrive(int frame) {
+        float desired=.75f*Mathf.Sin(frame/85f);
+        float costBest=float.MaxValue,best=desired;
+        for(int c=-4;c<=4;c++) {
+            float candidate=c*.28f,cost=Mathf.Abs(candidate-desired)*.6f+Mathf.Abs(candidate-targetLane)*.15f;
+            int work=Mathf.Max(0,RoadRoute.WorkIndex(distance+80));
+            for(int w=work;w<=work+1;w++)
+                if(RoadRoute.WorkStart(w)-distance > -50 && RoadRoute.WorkStart(w)-distance < 260 && Mathf.Abs(candidate-RoadRoute.WorkLane(w))<.7f)cost+=100;
+            foreach(var t in things){
+                if(t.used||t.kind==ThingKind.Coin||t.kind==ThingKind.Clock)continue;
+                for(int step=1;step<12;step++) {
+                    float z=t.distance-distance+(t.travelSpeed-speed/3.6f)*RoadProjection.TravelScale*step*.1f;
+                    if(Mathf.Abs(z)<20 && Mathf.Abs(candidate-t.lane-t.lateral)<.75f)cost+=10;
+                }
+            }
+            if(cost<costBest){costBest=cost;best=candidate;}
+        }
+        targetLane=best;AdvanceElapsedTime(1f/30);
+    }
+    void StoreStill(string path) {
+        Texture2D shot=ScreenCapture.CaptureScreenshotAsTexture(2);
+        File.WriteAllBytes(path,shot.EncodeToPNG());UnityEngine.Object.Destroy(shot);
+    }
+    IEnumerator StoreCapture(string root) {
+        verificationRun=captureHold=audioReview=true;soundEnabled=musicEnabled=true;
+        Time.captureFramerate=30;
+        var config=AudioSettings.GetConfiguration();config.speakerMode=AudioSpeakerMode.Stereo;config.sampleRate=48000;AudioSettings.Reset(config);
+        bool ipad=Array.Exists(Environment.GetCommandLineArgs(),x=>x=="-store-ipad");
+        string dir=Path.Combine(root,ipad?"ipad":"iphone");Directory.CreateDirectory(dir);
+        Screen.SetResolution(ipad?1032:660,ipad?1376:1434,FullScreenMode.Windowed);
+        yield return new WaitForSeconds(1);
+        float[] positions={1600,10500,18500,27700,36500,46500,55100};
+        for(int scene=0;scene<7;scene++) {
+            StoreScene(positions[scene],scene%3);
+            for(int f=0;f<40;f++){StoreDrive(f);yield return null;}
+            bannerUntil=0;yield return new WaitForEndOfFrame();StoreStill(Path.Combine(dir,"0"+(scene+1)+"-gameplay.png"));
+        }
+        selectedRider=marketRider=0;mode=ScreenMode.Characters;
+        yield return new WaitForSecondsRealtime(1.4f);yield return new WaitForEndOfFrame();StoreStill(Path.Combine(dir,"08-riders.png"));
+        selectedCity=marketCity=0;mode=ScreenMode.Cities;
+        yield return new WaitForSecondsRealtime(1.4f);yield return new WaitForEndOfFrame();StoreStill(Path.Combine(dir,"09-cities.png"));
+        mode=ScreenMode.Title;
+        yield return new WaitForSecondsRealtime(1.4f);yield return new WaitForEndOfFrame();StoreStill(Path.Combine(dir,"10-home.png"));
+        Screen.SetResolution(ipad?600:443,ipad?800:960,FullScreenMode.Windowed);
+        yield return new WaitForSeconds(.5f);
+        string ffmpeg=@"C:\Users\reals\miniconda3\Lib\site-packages\imageio_ffmpeg\binaries\ffmpeg-win-x86_64-v7.1.exe";
+        for(int film=0;film<2;film++) {
+            string stem=film==0?"01-race-worlds-DRAFT":"02-continuous-race-DRAFT";
+            string video=Path.Combine(dir,stem+"-silent.mp4"),pcm=Path.Combine(dir,stem+".f32");
+            var info=new ProcessStartInfo(ffmpeg,"-y -loglevel error -f image2pipe -framerate 30 -vcodec mjpeg -i pipe:0 -an -c:v libx264 -preset fast -crf 18 -pix_fmt yuv420p \""+video+"\"") {UseShellExecute=false,CreateNoWindow=true,RedirectStandardInput=true};
+            var encoder=Process.Start(info);
+            StoreScene(film==0?1600:1250,0);
+            if(!AudioRenderer.Start())throw new Exception("Cannot start audio render");
+            using(var audio=new BinaryWriter(File.Create(pcm))) {
+                for(int f=0;f<(Array.Exists(Environment.GetCommandLineArgs(),x=>x=="-store-probe")?30:(film==0?720:540));f++) {
+                    if(film==0 && f%180==0)StoreScene(new float[]{1600,10500,36500,46500}[f/180],(f/180)%3);
+                    StoreDrive(f);yield return new WaitForEndOfFrame();
+                    int count=AudioSettings.outputSampleRate / 30 * 2; // Fixed 30 Hz simulation clock in standalone capture.
+                    using(var buffer=new NativeArray<float>(count,Allocator.Temp)) {
+                        if(!AudioRenderer.Render(buffer))throw new Exception("Audio render failed");
+                        for(int n=0;n<count;n++)audio.Write(buffer[n]);
+                    }
+                    Texture2D shot=ScreenCapture.CaptureScreenshotAsTexture(2);
+                    if(f%150==0)File.WriteAllBytes(Path.Combine(dir,stem+"-proof-"+f+".png"),shot.EncodeToPNG());
+                    byte[] bytes=shot.EncodeToJPG(95);UnityEngine.Object.Destroy(shot);
+                    encoder.StandardInput.BaseStream.Write(bytes,0,bytes.Length);
+                    yield return null;
+                }
+            }
+            AudioRenderer.Stop();encoder.StandardInput.Close();encoder.WaitForExit();
+            if(encoder.ExitCode!=0)throw new Exception("Encoder failed");
+            UnityEngine.Debug.Log("STORE_FILM_COMPLETE "+stem+" rate="+AudioSettings.outputSampleRate);
+        }
+        Time.captureFramerate=0;UnityEngine.Debug.Log("STORE_CAPTURE_COMPLETE "+dir);Application.Quit();
+    }
+}}
+#endif

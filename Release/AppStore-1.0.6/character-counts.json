@@ -1,0 +1,32 @@
+{
+  "name": {
+    "characters": 14,
+    "maximum": 30,
+    "pass": true
+  },
+  "subtitle": {
+    "characters": 30,
+    "maximum": 30,
+    "pass": true
+  },
+  "promotional_text": {
+    "characters": 152,
+    "maximum": 170,
+    "pass": true
+  },
+  "keywords": {
+    "characters": 93,
+    "maximum": 100,
+    "pass": true
+  },
+  "description": {
+    "characters": 1362,
+    "maximum": 4000,
+    "pass": true
+  },
+  "whats_new": {
+    "characters": 221,
+    "maximum": 4000,
+    "pass": true
+  }
+}

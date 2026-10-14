@@ -1,0 +1,20 @@
+SPEED ROVERS 2 / 1.0.6 (113)
+
+Prepared: English metadata with character validation; iPhone and iPad screenshots; two gameplay preview drafts per device size; review notes; capture provenance; privacy/support draft content.
+
+Pending before submission:
+1. Sign in to App Store Connect. No listing fields or media have been uploaded in this session.
+2. Confirm public support email and support/privacy URLs. The current Mossberry policy does not name or cover Speed Rovers 2.
+3. Supply iPhone/iPad device recordings for final App Store previews. Current draft footage is recorded from the same Unity source on Windows at mobile viewport ratios; it is not iOS device footage.
+4. Verify screenshots against build 113 on iPhone/iPad, especially safe-area layout. Current images are real Unity runtime renders at the specified ratios, not device screenshots.
+5. Confirm rights to all original game art/music for App Store marketing. Do not use competitor names in metadata.
+6. Set age-rating questionnaire accurately: vehicle impacts are present; no blood, weapons, chat, gambling, advertising or user-generated content found in current source. Apple calculates the rating. Do not select Made for Kids just because the artwork is family-friendly.
+7. Complete App Privacy. Source review found local saves, disabled Unity analytics/cloud/crash settings, no custom network calls or third-party ad/purchase packages. Data Not Collected is the proposed declaration, subject to final shipped-binary review.
+8. Confirm price, territories, copyright and release timing in the account. Keep existing commercial settings unless the owner changes them.
+9. Select 1.0.6 (113), verify export compliance and all required fields, preview media processing, then submit when the owner requests release.
+
+Apple specification sources checked 2026-10-14:
+https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications/
+https://developer.apple.com/help/app-store-connect/reference/app-information/app-preview-specifications/
+https://developer.apple.com/app-store/app-previews/
+https://developer.apple.com/app-store/product-page/

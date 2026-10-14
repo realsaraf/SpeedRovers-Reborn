@@ -1,0 +1,5 @@
+Capture tooling only. The Runtime.cs.txt and Editor.cs.txt templates are copied temporarily into Assets to produce a standalone Windows media-capture build. They are removed immediately afterward. They do not ship in iOS or modify production gameplay. The submitted source manifest remains unchanged.
+
+Capture uses deterministic scenario setup and automated steering, and records the production rendering/physics at 30 simulated frames per second. AudioRenderer receives exactly 1600 stereo frames per frame at 48kHz because the standalone automatic capture count reports zero. Verify 24/18-second sample lengths, audible signal and codec metadata before packaging. Screenshot supersampling renders at the final dimensions; it does not enlarge low-resolution files.
+
+The resulting video is a DRAFT for editorial review and marketing. Apple App Store previews require device-recorded footage. Replace the draft footage with an iPhone/iPad recording before uploading as an app preview. Screenshots also need a device-layout comparison before upload.

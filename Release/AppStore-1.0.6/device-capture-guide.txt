@@ -1,0 +1,9 @@
+FINAL APP STORE PREVIEW RECORDING
+
+Use Speed Rovers 2 1.0.6 (113) on iPhone. Enable Do Not Disturb to avoid notification banners. Use portrait orientation, game sound on, and leave the microphone off so only game audio is recorded.
+
+Record 60-90 seconds: begin in a race, steer with both a short swipe and a held thumb drag, pass rivals/traffic, and continue through another environment if available. A separate second recording can show the rider selection followed by racing. Do not speed up the recording or apply filters. Send the original screen-recording file with audio.
+
+For iPad app previews, supply an iPad recording as well. If unavailable, the iPad preview can be omitted; iPad screenshots are still needed for this universal app.
+
+Editorial plan: 24-second four-scene race overview and an 18-second continuous race. Keep each final preview between 15 and 30 seconds. Export H.264 High <=4.0 at 30fps, 10-12Mbps, AAC stereo 256kbps 48kHz, under 500MB. iPhone preview: 886x1920. iPad: 1200x1600. Choose the 5-second poster frame or another representative gameplay moment.
