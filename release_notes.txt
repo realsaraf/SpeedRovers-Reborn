@@ -1,9 +1,7 @@
-Speed Rovers 2 1.0.3
+Speed Rovers 2 1.0.4
 
-A modern motorsport presentation with a showroom home, graphite-and-lime theme, angular racing controls, and family-friendly riders in practical protective clothing: cinematic animated home, illustrated rider and city collections, clear ownership and equipped states, coin unlock confirmation, redesigned settings, pause and leave-race confirmation, victory and race results, and a cleaner racing HUD. Animated racing buttons, track accents, unlock celebrations and original menu sound effects bring the screens to life.
+Visual refinement across the entire race: continuous perspective asphalt, antialiased road markings and curbs in all seven locations, warm bridge road highlights, Tokyo neon reflections and restrained canopy shading.
 
-Your existing unlocked items, selected rider/city, coins and settings are preserved. Race physics, opponents and collision recovery are unchanged.
+Trees and shrubs now use continuous wind motion with one solid silhouette, replacing the ghosted crossfading and segmented sway. Seeded tree variation and less repetitive shrub placement improve the roadside. Soft vehicle ground shadows retain dark tire contact; rider upper-body movement is stronger while tire contact remains anchored.
 
-Please test all menus on your iPhone or iPad: select an owned rider, preview a locked rider/city, cancel an unlock, unlock with sufficient coins, change audio settings, pause/resume, and finish a race. Check that layouts fit safely around your device's notch and that touch targets and text are clear.
-
-Downtown visual preview: continuous perspective asphalt and sidewalks, smoother road markings and crossings, new detailed building facades, and vehicle body suspension with anchored tires. Please ride the opening city and its waterfront transition, checking texture shimmer, steering, vehicle contact and frame rate. Later districts retain their existing renderer.
+Please test full-route transitions, Tokyo reflections, bridge sidewalks, tree motion and vehicle contact on your iPhone. Existing rider pose atlases remain; this build does not introduce a new multi-frame rider animation set. Unlocks and settings are preserved.

@@ -15,6 +15,7 @@ Shader "SpeedRovers/CitySurface"
    struct Output { float4 vertex:SV_POSITION; float2 uv:TEXCOORD0; };
    sampler2D _MainTex;
    float _Distance, _Lane, _Horizon, _Speed;
+   float _WetRoad, _BridgeLight, _Canopy, _AnimationTime;
    float4 _Haze, _Road, _Marking;
    Output vert(Input v) { Output o; o.vertex=UnityObjectToClipPos(v.vertex); o.uv=v.uv; return o; }
    float band(float value,float center,float width,float aa) { return 1-smoothstep(width-aa,width+aa,abs(value-center)); }
@@ -30,8 +31,12 @@ Shader "SpeedRovers/CitySurface"
     float x=(pixel.x-center)/halfWidth;
     float ax=abs(x), aa=max(fwidth(x),.001);
     float dz=max(fwidth(world),.01);
+    float route=frac(world/60000)*5000;
+    float urban=route<700 || (route>=2100 && route<2800) || (route>=3500 && route<4250)?1:0;
+    float bridge=route>=700 && route<1250?1:0;
+    float shoulder=bridge>.5?1.70:urban>.5?1.38:1.075;
     float junctionOffset=abs(frac((world+70)/180)*180-90);
-    float junction=1-smoothstep(12-dz,12+dz,junctionOffset);
+    float junction=(1-smoothstep(12-dz,12+dz,junctionOffset))*urban;
     float roadMask=max(1-smoothstep(1-aa,1+aa,ax),junction);
     float2 uv=float2(x*1.5,world*.12);
     float3 grain=tex2D(_MainTex,uv).rgb;
@@ -42,6 +47,12 @@ Shader "SpeedRovers/CitySurface"
     float3 road=grain*_Road.rgb*(.88-tracks);
     // Broad grazing light and subtle worn wheel tracks give asphalt depth.
     road+=float3(.035,.027,.018)*pow(saturate(1-abs(x*.75)),4);
+    float leaves=sin(world*.23+x*7)*sin(world*.41-x*11);
+    float canopy=smoothstep(.08,.65,leaves)*smoothstep(.2,.95,ax);
+    road*=1-canopy*_Canopy*.18;
+    float shimmer=.7+.3*sin(world*.7+_AnimationTime*.8);
+    road+=_WetRoad*shimmer*(float3(.16,.025,.09)*exp(-pow((x+.75)*5,2))+float3(.025,.08,.18)*exp(-pow((x-.72)*5,2)));
+    road+=_BridgeLight*float3(.065,.037,.012)*exp(-pow((ax-.88)*12,2));
     float slab=frac(world/2.5);
     float joint=1-smoothstep(.025,.025+dz/2.5,min(slab,1-slab));
     float lateralJoint=band(frac(ax*8),.5,.012,aa*8);
@@ -50,7 +61,7 @@ Shader "SpeedRovers/CitySurface"
     float curb=band(ax,1.014,.014,aa);
     pavement=lerp(pavement,float3(.63,.60,.53),curb);
     float3 ground=grain*float3(.35,.37,.36);
-    float sidewalk=1-smoothstep(1.38-aa,1.38+aa,ax);
+    float sidewalk=1-smoothstep(shoulder-aa,shoulder+aa,ax);
     float3 col=lerp(ground,pavement,sidewalk);
     col=lerp(col,road,roadMask);
     float dash=1-smoothstep(3-dz,3+dz,frac(world/7)*7);
@@ -58,7 +69,7 @@ Shader "SpeedRovers/CitySurface"
     float edges=band(ax,.975,.006,aa);
     col=lerp(col,_Marking.rgb,saturate(lines)*(1-junction)*.9);
     col=lerp(col,float3(.82,.80,.72),edges*(1-junction)*.85);
-    float crossing=band(junctionOffset,10.25,1.25,dz);
+    float crossing=band(junctionOffset,10.25,1.25,dz)*urban;
     float zebra=1-smoothstep(.055-aa,.055+aa,abs(frac((x+.0875)/.175)*.175-.0875));
     col=lerp(col,float3(.78,.77,.71),crossing*zebra*(1-smoothstep(.94,1,ax))*.9);
     float workIndex=floor((world-420)/850);
@@ -69,7 +80,7 @@ Shader "SpeedRovers/CitySurface"
     float fog=pow(saturate(1-d),4);
     col=lerp(col,_Haze.rgb,fog*.65);
     // Fade over world distance into the existing waterfront approach.
-    float alpha=1-smoothstep(4800,5160,world);
+    float alpha=lerp(max(roadMask,sidewalk),1,1-smoothstep(4800,5160,world));
     return fixed4(col,alpha);
    }
    ENDCG

@@ -8,7 +8,7 @@ namespace SpeedRovers.Reborn
         RaceSpriteRegions cityBuildingRegions;
         bool DrawContinuousCitySurface(bool requireOpaque=false)
         {
-            if(distance>5160 || (requireOpaque && distance+RoadProjection.ViewDistance>4800)) return false;
+            if(requireOpaque && distance+RoadProjection.ViewDistance>4800) return false;
             if(citySurfaceMaterial==null)
             {
                 Shader shader=Resources.Load<Shader>("Painted/CitySurface");
@@ -24,6 +24,10 @@ namespace SpeedRovers.Reborn
             citySurfaceMaterial.SetColor("_Haze",sceneHaze);
             citySurfaceMaterial.SetColor("_Road",sceneRoad);
             citySurfaceMaterial.SetColor("_Marking",sceneMarking);
+            citySurfaceMaterial.SetFloat("_WetRoad",environmentWeights[5]);
+            citySurfaceMaterial.SetFloat("_BridgeLight",environmentWeights[1]);
+            citySurfaceMaterial.SetFloat("_Canopy",environmentWeights[2]+environmentWeights[3]+environmentWeights[4]+environmentWeights[6]);
+            citySurfaceMaterial.SetFloat("_AnimationTime",animationTime);
             Graphics.DrawTexture(new Rect(0,horizon,540,960-horizon),cityAsphalt!=null?cityAsphalt:asphalt,
                 new Rect(0,0,1,1),0,0,0,0,Color.white,citySurfaceMaterial);
             return true;

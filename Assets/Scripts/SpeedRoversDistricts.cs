@@ -191,9 +191,10 @@ namespace SpeedRovers.Reborn
             if(district>=2 && !building)
                 Disc(x+w*.35f,p.y-height*.035f,w*1.1f,height*.09f,new Color(.08f,.12f,.15f,.23f));
             GUI.color=tint;
-            float sway=isTree?Mathf.Sin(animationTime*1.2f+entry.index)*height*.008f:0;
+            
             if(district==1)Region(sheet,r,x,p.y-height,w,height,flipLamp);
-            else SkewSprite(sheet,r,x,p.y-height,w,height,sway);
+            else if(isTree) WindSprite(sheet,r,x,p.y-height,w,height,entry.index);
+            else Region(sheet,r,x,p.y-height,w,height);
             if(district==1)
                 Glow(x+w*(flipLamp?.18f:.82f),p.y-height*.83f,35*scale,new Color(1,.68f,.24f,.5f+.07f*Mathf.Sin(animationTime*2+entry.index)));
             GUI.color=tint;
@@ -268,8 +269,9 @@ namespace SpeedRovers.Reborn
             float x=entry.side==0?p.x-edge-(block?w:w*.5f):p.x+edge-(block?0:w*.5f);
             if(x>560 || x+w< -20)return;
             Color tint=GUI.color;
-            float sway=block?0:Mathf.Sin(animationTime*1.15f+entry.index)*height*.009f;
-            SkewSprite(travelProps,r,x,p.y-height,w,height,sway);
+            
+            if(block) Region(travelProps,r,x,p.y-height,w,height);
+            else WindSprite(travelProps,r,x,p.y-height,w,height,entry.index);
             if(district==5)
             {
                 Color neon=entry.index%2==0?new Color(1,.1f,.3f,.27f):new Color(.12f,.44f,1,.28f);

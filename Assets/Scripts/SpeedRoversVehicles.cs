@@ -44,8 +44,8 @@ namespace SpeedRovers.Reborn
             float width=(front && variant==5?112:!front && (variant==9||variant==10)?315:!front && variant==8?270:250)*scale;
             float height=width*reference.h/reference.w;
             // Suspension moves the body in the shader, leaving tire contacts fixed.
-            Disc(at.x-width*.49f,at.y-height*.08f,width*.98f,height*.14f,new Color(.02f,.025f,.035f,.46f));
-            Disc(at.x-width*.45f,at.y-2*scale,width*.90f,6*scale,new Color(.01f,.01f,.01f,.73f));
+            SoftGroundShadow(at.x,at.y-height*.035f,width*1.22f,height*.27f,.62f);
+            SoftGroundShadow(at.x,at.y-2*scale,width*.94f,12*scale,.9f);
             Disc(at.x-width*.43f,at.y-3*scale,width*.17f,7*scale,new Color(0,0,0,.85f));
             Disc(at.x+width*.26f,at.y-3*scale,width*.17f,7*scale,new Color(0,0,0,.85f));
             float velocity=Mathf.Abs(thing.travelSpeed)*3.6f;

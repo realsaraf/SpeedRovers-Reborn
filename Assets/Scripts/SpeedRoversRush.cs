@@ -221,10 +221,10 @@ namespace SpeedRovers.Reborn
             float width=height*region.w/region.h;
             float scale=height/165;
             Color tint=GUI.color;
-            Disc(x-26*scale,y-7*scale,52*scale,11*scale,new Color(.025f,.024f,.024f,.20f));
+            SoftGroundShadow(x-lean*6*scale,y-3*scale,80*scale,22*scale,.5f);
             Disc(x-17*scale,y-3*scale,34*scale,5*scale,new Color(.01f,.009f,.008f,.78f));
             GUI.color=tint;
-            float bounce=Mathf.Sin(animationTime*26+variant)*.7f*scale + (player?hitPulse*4:0);
+            float bounce=player?hitPulse*2:0;
             DrawBikeBody(atlas,region,x,y,width,height+bounce,lean,player?wheelTurns:animationTime*rivalVelocity/3.6f/2.05f,player?speed:rivalVelocity);
             Glow(x-lean*8*scale,y-height*.35f,13*scale,new Color(1,.07f,.025f,.33f));
             GUI.color=tint;

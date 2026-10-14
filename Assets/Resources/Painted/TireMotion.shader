@@ -25,8 +25,9 @@ Shader "SpeedRovers/TireMotion"
                 // tire contact remains fixed; no rotation or strip shearing.
                 float upper=smoothstep(.52,.92,local.y);
                 float2 animatedUV=i.uv;
-                animatedUV.x+=sin(_BodyPhase)*.003*upper*_Region.z;
-                animatedUV.y+=sin(_BodyPhase*1.3)*.002*upper*_Region.w;
+                float riding=saturate(_Velocity/80);
+                animatedUV.x+=(sin(_BodyPhase)*.004+sin(_BodyPhase*.43)*.003)*upper*_Region.z*riding;
+                animatedUV.y+=sin(_BodyPhase*1.3)*.004*upper*_Region.w*riding;
                 fixed4 original=tex2D(_MainTex,animatedUV);
                 float nx=(local.x-_Tire.x)/_Tire.y;
                 float ny=local.y/_Tire.z;

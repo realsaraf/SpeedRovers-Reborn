@@ -1,6 +1,6 @@
 """Export current Unity source, then package and fingerprint it for Mac CI."""
 from pathlib import Path
-import argparse,hashlib,json,plistlib,subprocess,sys,tarfile
+import argparse,hashlib,json,plistlib,re,subprocess,sys,tarfile
 root=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(root/'CI'))
 from verify_source import source_hashes
@@ -16,7 +16,9 @@ source=root/'Builds/iOS'
 with (source/'Info.plist').open('rb') as f:info=plistlib.load(f)
 project=(source/'Unity-iPhone.xcodeproj/project.pbxproj').read_text()
 assert 'PRODUCT_BUNDLE_IDENTIFIER = com.philino.speedrovers.reborn;' in project
-assert info['CFBundleShortVersionString']=='1.0.3'
+settings=(root/'ProjectSettings/ProjectSettings.asset').read_text()
+version=re.search(r'^  bundleVersion: (.+)$',settings,re.MULTILINE)
+assert version and info['CFBundleShortVersionString']==version.group(1).strip(), 'Export version does not match Unity settings'
 ci=root/'CI';ci.mkdir(exist_ok=True)
 archive=ci/'ios-export.tar.gz'
 with tarfile.open(archive,'w:gz',compresslevel=6) as tar:

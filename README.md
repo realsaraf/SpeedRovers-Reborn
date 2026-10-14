@@ -1,8 +1,8 @@
 # Speed Rovers Reborn
 
-The standalone Unity source is in this repository. Current iOS release **1.0.3** targets **Speed Rovers 2** (Apple ID 6822590400, bundle `com.philino.speedrovers.reborn`). The automatic build/upload procedure is in [TESTFLIGHT.md](TESTFLIGHT.md). Exported iOS source is stored through Git LFS. Historical packages below have not been rebuilt for the latest changes.
+The standalone Unity source is in this repository. Current iOS release **1.0.4** targets **Speed Rovers 2** (Apple ID 6822590400, bundle `com.philino.speedrovers.reborn`). The automatic build/upload procedure is in [TESTFLIGHT.md](TESTFLIGHT.md). Exported iOS source is stored through Git LFS. Historical packages below have not been rebuilt for the latest changes.
 
-Latest Windows build: **0.10.0**, `Builds/WindowsRush/Speed Rovers Reborn.exe`. Complete non-gameplay presentation refresh: cinematic home, rider/city galleries, unlock confirmation, settings, pause, results and race HUD. Existing race simulation and saved progression are retained. See [release details](Release/1.0.3.md).
+Latest Windows build: **0.10.0**, `Builds/WindowsRush/Speed Rovers Reborn.exe`. Complete non-gameplay presentation refresh: cinematic home, rider/city galleries, unlock confirmation, settings, pause, results and race HUD. Existing race simulation and saved progression are retained. See [release details](Release/1.0.4.md).
 
 Historical Windows build: **0.7.0 Corrections/Rush**, `Builds/WindowsRush/Speed Rovers Reborn.exe`. Faster route travel, traffic that yields to roadworks, integrated tire animation, corrected vehicle scale, continuous bridge supports, removed checkpoint gantries, and smoother surface transitions. See `CORRECTIONS-0.7.md` for evidence and limits. Hold **S / Down** to brake. See `PAINTED-GRAPHICS.md` for scope and provenance. Earlier packages below are retained for comparison.
 
@@ -61,4 +61,5 @@ The same editor command also accepts `SpeedRoversBuild.BuildAndroid`, `SpeedRove
 `Tools/xnb_to_png.py` decodes the original uncompressed XNB textures to `Assets/Resources/Original/`. `Tools/slice_sprites.py` extracts rider, traffic, and roadside frames to `Assets/Resources/Slices/`. The decoded art is included in the Unity source, so these tools are only needed when refreshing from the original files.
 
 All six version 0.2.0 Unity build targets completed in `build-fidelity-platforms.log`. Windows was rendered and captured from its native player. Linux rendered through WSLg, with identical paused captures and clean shutdown under software rendering; the GPU driver cleanup crash is documented separately. WebGL startup, steering, pause and narrow layout passed on 0.2.0. The Android APK passed signature and 16 KB ZIP alignment checks; version 0.1.0 installed in a clean API 35 emulator, but the emulator's ARM translation/graphics combination did not initialize the Unity renderer. Unity 6000.6 rejects Android x86-64 builds. Physical Android testing, Apple runtime checks and a native Linux desktop check remain necessary; see `PLATFORM-STATUS.md` for the verification record.
+
 

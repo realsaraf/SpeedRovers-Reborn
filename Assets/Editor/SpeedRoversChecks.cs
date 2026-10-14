@@ -55,7 +55,7 @@ public static class SpeedRoversChecks
             Set("verificationRun", true);
             var surfaceImporter=(TextureImporter)AssetImporter.GetAtPath("Assets/Resources/Painted/CityAsphalt.png");
             Check(surfaceImporter!=null && surfaceImporter.mipmapEnabled && surfaceImporter.wrapMode==TextureWrapMode.Repeat,"city asphalt must tile with mip filtering");
-            foreach(string shaderPath in new[]{"Painted/CitySurface","Painted/VehicleMotion"})
+            foreach(string shaderPath in new[]{"Painted/CitySurface","Painted/VehicleMotion","Painted/FoliageWind","Painted/TireMotion"})
             {
                 Shader shader=Resources.Load<Shader>(shaderPath);
                 Check(shader!=null,"missing shader "+shaderPath);

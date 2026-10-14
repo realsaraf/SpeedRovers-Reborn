@@ -124,25 +124,19 @@ namespace SpeedRovers.Reborn
 
         void DrawAnimatedPlant(int city,float x,float y,float height,int seed,Color tint)
         {
-            float phase=animationTime*.65f+seed*.39f;
-            int beat=Mathf.FloorToInt(phase)%4;
-            int current=beat==3?2:beat==1?1:0;
-            int next=(beat+1)%4==3?2:(beat+1)%4==1?1:0;
-            float mix=Mathf.SmoothStep(0,1,Mathf.Repeat(phase,1));
-            ArtRegion reference=paintedRegions.foliage[city*3];
-            float width=height*reference.w/reference.h;
-            for(int layer=0;layer<2;layer++)
+            // Seeded varieties retain a single silhouette throughout the wind cycle.
+            ArtRegion r=paintedRegions.foliage[city*3+Mathf.Abs(seed)%3];
+            height*=.88f+Mathf.Repeat(seed*.173f,.22f);
+            float width=height*r.w/r.h;
+            SoftGroundShadow(x+width*.12f,y,width*.65f,height*.075f,.38f);
+            GUI.color=tint;
+            WindSprite(foliageSheet,r,x-width*r.pivot,y-height,width,height,seed);
+            if(seed%3==0)
             {
-                ArtRegion region=paintedRegions.foliage[city*3+(layer==0?current:next)];
-                GUI.color=new Color(tint.r,tint.g,tint.b,tint.a*(layer==0?1-mix:mix));
-                Region(foliageSheet,region,x-width*region.pivot,y-height,width,height);
+                float shrub=height*.15f;
+                WindSprite(foliageSheet,r,x+width*.2f-shrub*.6f,y-shrub,shrub*1.2f,shrub,seed+13);
             }
             GUI.color=tint;
-            // Small plants at the verge share the same wind frames, at a
-            // different phase and scale so the roadside does not move in unison.
-            float shrub=height*.18f;
-            ArtRegion small=paintedRegions.foliage[city*3+current];
-            Region(foliageSheet,small,x+width*.2f-shrub*.6f,y-shrub,shrub*1.2f,shrub);
         }
 
         void DrawPropLights(int city,int kind,int seed,bool flip,float x,float y,float width,float height,float depth)
