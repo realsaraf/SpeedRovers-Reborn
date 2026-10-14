@@ -9,6 +9,8 @@ workflows:
       branch_patterns:
         - pattern: main
           include: true
+      cancel_previous_builds: false
+    when:
       changeset:
         includes:
           - 'CI/**'
@@ -16,7 +18,6 @@ workflows:
           - 'Packages/**'
           - 'ProjectSettings/**'
           - codemagic.yaml
-      cancel_previous_builds: false
     integrations:
       app_store_connect: app-store-connect
     environment:
