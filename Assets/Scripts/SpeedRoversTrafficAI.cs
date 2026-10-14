@@ -21,6 +21,7 @@ namespace SpeedRovers.Reborn
         void AdvanceTraffic(Thing t,float dt)
         {
             if(!IsVehicle(t))return;
+            if(t.kind==ThingKind.Rival && t.finishTime>=0)return;
             if(!t.trafficReady) {t.trafficReady=true;t.cruiseSpeed=t.travelSpeed;}
             float direction=t.cruiseSpeed<0?-1:1;
             float actualLane=t.lane+t.lateral;
@@ -97,6 +98,12 @@ namespace SpeedRovers.Reborn
             float next=t.distance+t.travelSpeed*RoadProjection.TravelScale*dt;
             if(direction>0 && t.distance<=stopAt && next>stopAt) {next=stopAt;t.travelSpeed=0;}
             if(direction<0 && t.distance>=stopAt && next<stopAt) {next=stopAt;t.travelSpeed=0;}
+            if(t.kind==ThingKind.Rival && next>=RoadRoute.Length)
+            {
+                t.finishTime=animationTime-dt+dt*Mathf.Clamp01((RoadRoute.Length-t.distance)/Mathf.Max(.0001f,next-t.distance));
+                next=RoadRoute.Length;
+                t.travelSpeed=0;
+            }
             t.distance=next;
         }
     }

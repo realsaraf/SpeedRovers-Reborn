@@ -26,6 +26,7 @@ namespace SpeedRovers.Reborn
             public float cruiseSpeed;
             public float contactAfter;
             public float nextRaceDecision;
+            public float finishTime = -1;
         }
 
         static readonly string[] Cities = { "NEW YORK", "MEXICO CITY", "SHANGHAI", "LONDON", "TOKYO" };
@@ -59,6 +60,8 @@ namespace SpeedRovers.Reborn
         readonly Texture2D[] cityCardArt = new Texture2D[5], riderCardArt = new Texture2D[5];
         GUIStyle titleStyle, headingStyle, bodyStyle, smallStyle, buttonStyle;
         float distance, speed, timeLeft, lane, spawnDistance, bannerUntil, animationTime;
+        float playerFinishTime = -1;
+        int finishPlace;
         int targetLane, runCoins, checkpoints, best, wallet, selectedCity, selectedRider;
         int marketCity, marketRider;
         string banner = "";
@@ -119,6 +122,8 @@ namespace SpeedRovers.Reborn
             yield return new WaitForSeconds(1f);
             ScreenCapture.CaptureScreenshot(Path.Combine(directory, "title.png"));
             yield return new WaitForSeconds(1f);
+            ScreenCapture.CaptureScreenshot(Path.Combine(directory, "title-animated.png"));
+            yield return new WaitForSeconds(.2f);
             marketCity = selectedCity;
             marketRider = selectedRider;
             mode = ScreenMode.Market;
@@ -220,6 +225,8 @@ namespace SpeedRovers.Reborn
             things.Clear();
             distance = 0;
             animationTime = 0;
+            playerFinishTime = -1;
+            finishPlace = 0;
             visualLean = 0;
             speed = easyMode ? 55 : 65;
             laneVelocity = hitPulse = 0;
@@ -287,13 +294,13 @@ namespace SpeedRovers.Reborn
             visualLean = Mathf.Lerp(visualLean, Mathf.Clamp(laneVelocity * .28f, -1, 1), 1-Mathf.Exp(-dt*12));
             hitPulse = Mathf.Max(0,hitPulse-dt*2);
             float previousSpeed = speed;
+            float previousDistance = distance;
             AdvanceDrive(dt);
             AdvanceEngine(dt, mode==ScreenMode.Running);
             wheelTurns += (previousSpeed+speed)*.5f/3.6f/2.05f*dt;
             distance += (previousSpeed + speed) * .5f / 3.6f * RoadProjection.TravelScale * dt;
             timeLeft -= dt;
             lane = Mathf.SmoothDamp(lane, targetLane, ref laneVelocity, .16f, 8, dt);
-            if (timeLeft <= 0) { Finish("TIME UP"); return; }
 
             SpawnRushTraffic();
 
@@ -307,8 +314,8 @@ namespace SpeedRovers.Reborn
                 if (thing.used || thing.distance > distance + (pickup?8:3.5f)) continue;
                 if(thing.distance<distance-8) {if(thing.kind!=ThingKind.Rival)thing.used=true;continue;}
                 if (Mathf.Abs(lane - thing.lane - thing.lateral) > (thing.kind == ThingKind.Rival ? .38f : thing.kind==ThingKind.Traffic || thing.kind==ThingKind.Oncoming ? .63f : .42f)) continue;
-                if(thing.kind==ThingKind.Rival && animationTime<thing.contactAfter)continue;
-                if(thing.kind!=ThingKind.Rival)thing.used = true;
+                if(!pickup && animationTime<thing.contactAfter)continue;
+                if(pickup)thing.used = true;
                 if (thing.kind == ThingKind.Coin)
                 {
                     runCoins++;
@@ -321,27 +328,7 @@ namespace SpeedRovers.Reborn
                     ShowBanner("+4 SECONDS", .9f);
                     Beep(620, .12f);
                 }
-                else if (thing.kind == ThingKind.Pothole || thing.kind == ThingKind.Rival)
-                {
-                    speed = Mathf.Max(45, speed * (thing.kind == ThingKind.Pothole ? .80f : .58f));
-                    ImpactDownshift();
-                    if(thing.kind==ThingKind.Rival)
-                    {
-                        thing.contactAfter=animationTime+1.25f;
-                        thing.travelSpeed*=.78f;
-                        thing.lateral+=lane>=thing.lane+thing.lateral?-.18f:.18f;
-                    }
-                    timeLeft -= 1.5f;
-                    hitPulse = 1;
-                    ShowBanner(thing.kind == ThingKind.Pothole ? "BROKEN ROAD" : "BIKE CONTACT", .6f);
-                    Beep(100, .12f);
-                }
-                else
-                {
-                    PlayCrash();
-                    Finish(thing.kind == ThingKind.Traffic || thing.kind == ThingKind.Oncoming ? "TRAFFIC COLLISION" : "ROADWORKS COLLISION");
-                    return;
-                }
+                else ApplyRaceImpact(thing);
             }
             things.RemoveAll(t => t.used && t.distance < distance - 25);
 
@@ -349,9 +336,43 @@ namespace SpeedRovers.Reborn
             {
                 checkpoints++;
                 timeLeft += 16;
-                ShowBanner("+16 SECONDS", 1f);
-                Beep(1200, .16f);
             }
+            if(distance>=RoadRoute.Length)
+            {
+                playerFinishTime=animationTime-dt+dt*Mathf.Clamp01((RoadRoute.Length-previousDistance)/Mathf.Max(.0001f,distance-previousDistance));
+                distance=RoadRoute.Length;
+                finishPlace=1;
+                foreach(Thing racer in things)
+                    if(racer.kind==ThingKind.Rival && racer.finishTime>=0 && racer.finishTime<=playerFinishTime)finishPlace++;
+                Finish(finishPlace==1?"RACE WON":"RACE FINISHED");
+            }
+        }
+
+        void ApplyRaceImpact(Thing obstacle)
+        {
+            // Closing speed matters: a head-on car hit is harder than touching
+            // a rider travelling alongside us. Large trucks absorb more speed.
+            float size=obstacle.kind==ThingKind.Rival?.55f:obstacle.kind==ThingKind.Pothole?.28f:
+                obstacle.kind==ThingKind.Roadworks?1.35f:obstacle.kind==ThingKind.Barrier?1.1f:1f;
+            if(obstacle.kind==ThingKind.Traffic)
+            {
+                int vehicle=obstacle.variant%12;
+                if(vehicle==8)size=1.25f;
+                if(vehicle==9 || vehicle==10)size=1.65f;
+            }
+            float closing=Mathf.Max(0,speed-obstacle.travelSpeed*3.6f);
+            float loss=Mathf.Clamp((.10f+.40f*Mathf.Clamp01(closing/430)+.13f*Mathf.Clamp01(speed/430))*size,.08f,.85f);
+            speed=Mathf.Max(12,speed*(1-loss));
+            ImpactDownshift();
+            obstacle.contactAfter=animationTime+1.3f;
+            if(obstacle.kind==ThingKind.Rival)
+            {
+                obstacle.travelSpeed*=.78f;
+                obstacle.lateral+=lane>=obstacle.lane+obstacle.lateral?-.12f:.12f;
+            }
+            hitPulse=1;
+            ShowBanner(obstacle.kind==ThingKind.Pothole?"BROKEN ROAD":obstacle.kind==ThingKind.Rival?"BIKE CONTACT":"IMPACT — KEEP RACING",.8f);
+            PlayCrash();
         }
 
         void ReadSwipe()

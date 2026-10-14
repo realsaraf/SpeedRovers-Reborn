@@ -16,12 +16,18 @@ Shader "SpeedRovers/TireMotion"
             struct Output { float4 vertex:SV_POSITION; float2 uv:TEXCOORD0; fixed4 color:COLOR; };
             sampler2D _MainTex;
             float4 _Region, _Tire;
-            float _Phase, _Velocity;
+            float _Phase, _Velocity, _BodyPhase;
             Output vert(Input v) { Output o; o.vertex=UnityObjectToClipPos(v.vertex);o.uv=v.uv;o.color=v.color;return o; }
             fixed4 frag(Output i):SV_Target
             {
-                fixed4 original=tex2D(_MainTex,i.uv);
                 float2 local=(i.uv-_Region.xy)/_Region.zw;
+                // Small rider articulation and suspension travel. The bottom
+                // tire contact remains fixed; no rotation or strip shearing.
+                float upper=smoothstep(.52,.92,local.y);
+                float2 animatedUV=i.uv;
+                animatedUV.x+=sin(_BodyPhase)*.003*upper*_Region.z;
+                animatedUV.y+=sin(_BodyPhase*1.3)*.002*upper*_Region.w;
+                fixed4 original=tex2D(_MainTex,animatedUV);
                 float nx=(local.x-_Tire.x)/_Tire.y;
                 float ny=local.y/_Tire.z;
                 // Affect rubber inside its painted silhouette, never draw a second tire.

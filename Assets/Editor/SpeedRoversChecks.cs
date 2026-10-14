@@ -130,21 +130,21 @@ public static class SpeedRoversChecks
             Check(Get("mode").ToString() == "Running", "traffic in another lane causes collision");
             AddThing("Traffic", 0);
             Call("AdvanceRun", .02f);
-            Check(Get("mode").ToString() == "Results", "traffic collision not detected");
+            Check(Get("mode").ToString() == "Running" && Number("hitPulse")>0, "traffic impact must slow the rider and keep the race running");
             Start();
             AddThing("Barrier", 0);
             Call("AdvanceRun", .02f);
-            Check(Get("mode").ToString() == "Results", "roadblock collision not detected");
+            Check(Get("mode").ToString() == "Running" && Number("speed")<65, "roadblock impact must slow the rider and keep the race running");
             Start();
             Set("timeLeft", .001f);
             Call("AdvanceRun", .02f);
-            Check(Get("result").ToString() == "TIME UP", "timer expiration does not end run");
+            Check(Get("mode").ToString() == "Running", "elapsed time must not end a race");
             Start();AddThing("Pothole",0);float beforeHit=Number("speed");Call("AdvanceRun",.02f);
             Check(Get("mode").ToString()=="Running" && Number("speed")<beforeHit,"broken pavement must slow the bike without ending the race");
             Start();AddThing("Rival",0);Call("AdvanceRun",.02f);
             Check(Get("mode").ToString()=="Running" && Number("hitPulse")>0,"bike contact response missing");
             Start();AddThing("Roadworks",0);Call("AdvanceRun",.02f);
-            Check(Get("mode").ToString()=="Results","construction collision missing");
+            Check(Get("mode").ToString()=="Running" && Number("hitPulse")>0,"construction must cost speed rather than end the race");
             Start();AddThing("Traffic",1);Call("AdvanceRun",.02f);
             object passing=((IList)Get("things"))[0];
             Check(!(bool)passing.GetType().GetField("used").GetValue(passing),"other-lane vehicle disappears before passing camera");
@@ -181,7 +181,21 @@ public static class SpeedRoversChecks
             object toward=((IList)Get("things"))[0];toward.GetType().GetField("travelSpeed").SetValue(toward,-25f);
             float ahead=(float)toward.GetType().GetField("distance").GetValue(toward);Call("AdvanceRun",.02f);
             Check((float)toward.GetType().GetField("distance").GetValue(toward)<ahead,"oncoming traffic moves away from player");
-            Start();AddThing("Oncoming",0);Call("AdvanceRun",.02f);Check(Get("mode").ToString()=="Results","oncoming collision missing");
+            Start();AddThing("Oncoming",0);Call("AdvanceRun",.02f);Check(Get("mode").ToString()=="Running" && Number("hitPulse")>0,"oncoming impact must preserve the race");
+            Start();Set("distance",RoadRoute.Length-.5f);Set("speed",428f);Call("ResetEngine",428f);Call("AdvanceRun",.02f);
+            Check(Get("mode").ToString()=="Results" && (int)Get("finishPlace")==1,"finish line does not determine race result");
+            Start();Set("distance",RoadRoute.Length-.5f);Set("speed",428f);Call("ResetEngine",428f);AddThing("Rival",-1);
+            object winner=((IList)Get("things"))[0];winner.GetType().GetField("finishTime").SetValue(winner,0f);winner.GetType().GetField("distance").SetValue(winner,RoadRoute.Length);
+            Call("AdvanceRun",.02f);
+            Check((int)Get("finishPlace")==2 && Get("result").ToString()=="RACE FINISHED","opponent finishing first is not counted in result");
+            Start();Set("speed",428f);Call("ResetEngine",428f);AddThing("Traffic",0);
+            object smallCar=((IList)Get("things"))[0];Call("ApplyRaceImpact",smallCar);float carAfter=Number("speed");
+            Set("speed",428f);smallCar.GetType().GetField("variant").SetValue(smallCar,9);Call("ApplyRaceImpact",smallCar);
+            Check(Number("speed")<carAfter,"truck impact is no harder than a car impact");
+            Set("speed",428f);smallCar.GetType().GetField("variant").SetValue(smallCar,0);smallCar.GetType().GetField("travelSpeed").SetValue(smallCar,100f);Call("ApplyRaceImpact",smallCar);float sameDirection=Number("speed");
+            Set("speed",428f);smallCar.GetType().GetField("travelSpeed").SetValue(smallCar,-100f);Call("ApplyRaceImpact",smallCar);
+            Check(Number("speed")<sameDirection,"oncoming closing speed does not affect impact severity");
+            Check((int)Get("gear")<6,"impact does not downshift");
             Start();Set("speed",291f);Call("ResetEngine",291f);float rpmBefore=Number("engineRpm");
             Set("speed",296f);Call("AdvanceEngine",.05f,true);
             Check((int)Get("gear")==5 && Number("engineRpm")<rpmBefore,"upshift does not drop RPM");
@@ -195,10 +209,10 @@ public static class SpeedRoversChecks
             Check(Mathf.Abs(Number("speed")-427.5f)<.1f && (int)Get("gear")==6,"cruising pace is not 50 percent above 285 km/h");
             AddThing("Rival",0);Call("AdvanceRun",1f/120);
             float bumped=Number("speed");int bumpedGear=(int)Get("gear");
-            Check(bumped<260 && bumpedGear<=4,"bike contact does not slow and downshift clearly");
+            Check(bumped<350 && bumpedGear<6,"bike contact does not slow and downshift clearly");
             Check(!((bool)((IList)Get("things"))[0].GetType().GetField("used").GetValue(((IList)Get("things"))[0])),"rival disappears when bumped");
             for(int n=0;n<120;n++) {Call("AdvanceDrive",1f/120);Call("AdvanceEngine",1f/120,true);}
-            Check(Number("speed")>bumped && Number("speed")<300,"bike contact recovery is immediate");
+            Check(Number("speed")>bumped && Number("speed")<bumped+60,"bike contact recovery is immediate");
             for(int n=0;n<960;n++) {Call("AdvanceDrive",1f/120);Call("AdvanceEngine",1f/120,true);}
             Check(Number("speed")>=427 && (int)Get("gear")==6,"bike fails to regain cruising pace through upshifts");
             foreach(string art in new[]{"TrafficAlignedA","TrafficAlignedB","TrafficAlignedC"})

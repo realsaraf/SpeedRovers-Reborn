@@ -74,6 +74,7 @@ namespace SpeedRovers.Reborn
             tireMotion.SetVector("_Tire",new Vector4(region.pivot,height*.105f/width,.49f,0));
             tireMotion.SetFloat("_Phase",turns);
             tireMotion.SetFloat("_Velocity",velocity);
+            tireMotion.SetFloat("_BodyPhase",animationTime*5+velocity*.007f);
             Graphics.DrawTexture(new Rect(x-width*region.pivot,y-height,width,height),atlas,uv,0,0,0,0,GUI.color,tireMotion);
         }
 

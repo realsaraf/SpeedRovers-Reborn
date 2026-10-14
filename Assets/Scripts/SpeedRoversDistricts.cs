@@ -104,6 +104,8 @@ namespace SpeedRovers.Reborn
                 {
                     Vector2 basePoint=BridgePoint(z,side,0,1.33f),top=BridgePoint(z,side,height,1.33f);
                     RoadLine(basePoint,top,Mathf.Max(.6f,scale*4),new Color(.25f,.24f,.23f));
+                    Disc(basePoint.x-5*scale,basePoint.y-2*scale,10*scale,4*scale,new Color(.025f,.03f,.035f,.65f));
+                    Fill(basePoint.x-3*scale,basePoint.y-3*scale,6*scale,3*scale,new Color(.38f,.39f,.39f));
                     RoadLine(top,BridgePoint(z+8,side,heightNext,1.33f),Mathf.Max(1,scale*11),new Color(.42f,.32f,.23f));
                     RoadLine(top+Vector2.up,BridgePoint(z+8,side,heightNext,1.33f)+Vector2.up,Mathf.Max(.5f,scale*2),new Color(.91f,.68f,.38f));
                     for(int rail=0;rail<3;rail++)
@@ -176,16 +178,24 @@ namespace SpeedRovers.Reborn
             float w=height*r.w/r.h;
             bool building=district==3 && entry.index%8<4;
             float x=entry.side==0?p.x-edge-(building?w:w*.5f):p.x+edge-(building?0:w*.5f);
-            if(district==1)x=p.x+(entry.side==0?-edge:edge)-w*r.pivot;
+            bool flipLamp=district==1 && entry.side==1;
+            if(district==1)x=p.x+(entry.side==0?-edge:edge)-w*(flipLamp?1-r.pivot:r.pivot);
             if(x>560 || x+w< -20)return;
             Color tint=GUI.color;
+            if(district==1)
+            {
+                float foot=p.x+(entry.side==0?-edge:edge);
+                Disc(foot-12*scale,p.y-3*scale,24*scale,8*scale,new Color(.01f,.02f,.025f,.72f));
+                RoadLine(new Vector2(foot,p.y),new Vector2(foot+48*scale,p.y-16*scale),Mathf.Max(1,8*scale),new Color(.015f,.02f,.035f,.28f));
+            }
             if(district>=2 && !building)
                 Disc(x+w*.35f,p.y-height*.035f,w*1.1f,height*.09f,new Color(.08f,.12f,.15f,.23f));
             GUI.color=tint;
             float sway=isTree?Mathf.Sin(animationTime*1.2f+entry.index)*height*.008f:0;
-            SkewSprite(sheet,r,x,p.y-height,w,height,sway);
+            if(district==1)Region(sheet,r,x,p.y-height,w,height,flipLamp);
+            else SkewSprite(sheet,r,x,p.y-height,w,height,sway);
             if(district==1)
-                Glow(x+w*.74f,p.y-height*.20f,35*scale,new Color(1,.68f,.24f,.5f+.07f*Mathf.Sin(animationTime*2+entry.index)));
+                Glow(x+w*(flipLamp?.18f:.82f),p.y-height*.83f,35*scale,new Color(1,.68f,.24f,.5f+.07f*Mathf.Sin(animationTime*2+entry.index)));
             GUI.color=tint;
         }
 

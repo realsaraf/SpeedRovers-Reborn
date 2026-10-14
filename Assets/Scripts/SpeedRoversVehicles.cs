@@ -9,12 +9,16 @@ namespace SpeedRovers.Reborn
         readonly Texture2D[] alignedTraffic=new Texture2D[3];
         AlignedRegions alignedRegions;
         Material vehicleMotion;
+        Texture2D alignedOncoming;
+        RaceSpriteRegions oncomingPoseRegions;
 
         void InitAlignedTraffic()
         {
             for(int i=0;i<3;i++)alignedTraffic[i]=Resources.Load<Texture2D>("Painted/TrafficAligned"+(char)('A'+i));
             alignedRegions=JsonUtility.FromJson<AlignedRegions>(Resources.Load<TextAsset>("Painted/AlignedTrafficRegions").text);
             vehicleMotion=new Material(Resources.Load<Shader>("Painted/VehicleMotion"));
+            alignedOncoming=Resources.Load<Texture2D>("Painted/OncomingAligned");
+            oncomingPoseRegions=JsonUtility.FromJson<RaceSpriteRegions>(Resources.Load<TextAsset>("Painted/OncomingAlignedRegions").text);
         }
 
         ArtRegion[] VehicleRegions(int set) => set==0?alignedRegions.a:set==1?alignedRegions.b:alignedRegions.c;
@@ -25,25 +29,26 @@ namespace SpeedRovers.Reborn
             Rect uv=new Rect(r.x/sheet.width,1-(r.y+r.h)/sheet.height,r.w/sheet.width,r.h/sheet.height);
             vehicleMotion.SetVector("_Region",new Vector4(uv.x,uv.y,uv.width,uv.height));
             vehicleMotion.SetFloat("_Phase",turns);vehicleMotion.SetFloat("_Velocity",velocity);
-            Graphics.DrawTexture(new Rect(x-width*r.pivot,y-height,width,height),sheet,uv,0,0,0,0,tint,vehicleMotion);
+            Graphics.DrawTexture(new Rect(x-width*.5f,y-height,width,height),sheet,uv,0,0,0,0,tint,vehicleMotion);
         }
 
         void DrawAlignedVehicle(Thing thing,Vector2 at,float depth,bool front,int variant,Color tint)
         {
             float scale=.024f+.976f*depth;
-            Texture2D sheet=front?rushOncoming:alignedTraffic[variant/4];
-            ArtRegion[] views=front?rushRegions.oncoming:VehicleRegions(variant/4);
-            int row=front?variant:(variant%4)*3;
-            ArtRegion reference=views[front?row:row+1];
+            if(front)variant%=6;
+            Texture2D sheet=front?alignedOncoming:alignedTraffic[variant/4];
+            ArtRegion[] views=front?oncomingPoseRegions.frames:VehicleRegions(variant/4);
+            int row=front?variant*3:(variant%4)*3;
+            ArtRegion reference=views[row+1];
             float width=(front && variant==5?112:!front && (variant==9||variant==10)?315:!front && variant==8?270:250)*scale;
             float height=width*reference.h/reference.w;
             float bump=Mathf.Sin(animationTime*19+thing.variant)*.5f*scale;
-            Disc(at.x-width*.48f,at.y-height*.07f,width*.96f,height*.085f,new Color(.02f,.02f,.02f,.27f));
-            Disc(at.x-width*.43f,at.y-2*scale,width*.86f,4*scale,new Color(.01f,.01f,.01f,.60f));
+            Disc(at.x-width*.49f,at.y-height*.08f,width*.98f,height*.14f,new Color(.02f,.025f,.035f,.46f));
+            Disc(at.x-width*.45f,at.y-2*scale,width*.90f,6*scale,new Color(.01f,.01f,.01f,.73f));
+            Disc(at.x-width*.43f,at.y-3*scale,width*.17f,7*scale,new Color(0,0,0,.85f));
+            Disc(at.x+width*.26f,at.y-3*scale,width*.17f,7*scale,new Color(0,0,0,.85f));
             float velocity=Mathf.Abs(thing.travelSpeed)*3.6f;
             float turns=animationTime*Mathf.Abs(thing.travelSpeed)/2.1f;
-            if(front)VehicleFrame(sheet,reference,at.x,at.y,height+bump,turns,velocity,tint);
-            else
             {
                 float view=Mathf.Clamp((270-at.x)/(140+Mathf.Max(0,thing.distance-distance)*.8f)+thing.lean*.2f,-1,1);
                 int pose=view<-.35f?0:view>.35f?2:1;

@@ -1,0 +1,21 @@
+{
+  "mode": "built-in image_gen",
+  "prompts": [
+    {
+      "asset": "icon",
+      "prompt": "Create a premium original iOS motorcycle racing game app icon, square full bleed opaque, no text, no rounded corners. Bold close-up red and black sport motorcycle with helmeted rider leaning in a turn, dramatic painted realism with readable strong silhouette, low front three quarter camera, illuminated cobalt dusk city behind, warm amber and electric teal speed trails. Polished detailed game illustration, striking at small icon size, no logos, no UI. Save as game asset."
+    },
+    {
+      "asset": "home",
+      "prompt": "Create a premium portrait painted motorcycle racing game main menu background. Deep navy and cobalt evening skyline, amber city windows, wet highway with teal and red light streaks converging toward distant city. Camera close above asphalt. Cinematic painted realism, crisp rich details. Upper third is calm dark blue sky with ample negative space for title; lower middle has empty road for separately composited animated motorcycle. No motorcycles, no people, no text, no UI buttons. Full bleed portrait."
+    },
+    {
+      "asset": "rivalNinePoses",
+      "prompt": "Production game sprite atlas with genuine transparent background. A 9 column by 3 row grid of 27 separate full rear-view sport motorcycle plus helmeted rider sprites, coherent detailed painted realistic 2.5D game style. Row 1 blue and white bike/rider, row 2 green and black, row 3 orange and charcoal. Each row same exact vehicle and person in nine gradually changing lean poses: far left lean, moderate left, small left, tiny left, upright center, tiny right, small right, moderate right, far right. Camera behind following motorcycle, not side-view, torso and chassis turn together naturally. Tire contact point stays in center bottom of every cell. All sprites same physical scale and consistent warm sunset lighting. Show full silhouettes separate with transparent padding, no grid lines, no labels, no baked shadow, no duplicates of wheels. Each column is a smooth intermediate articulation, not a sheared or rotated flat image. Wide atlas to give every sprite clean detail."
+    },
+    {
+      "asset": "oncomingAligned",
+      "prompt": "Transparent production game sprite sheet, 3 columns and 6 rows, 18 separate full vehicle sprites, detailed painted realistic 2.5D motorcycle racing art. Vehicles approaching viewer, seen from FRONT, coherent mildly elevated road camera. Columns show slight left quarter, centered straight front, slight right quarter (only 8 degree differences). Rows: red sedan; white panel van; blue hatchback; charcoal SUV; black white police sedan with red blue roof lights; police sport motorcycle with helmeted rider. Consistent warm sunset highlights. Wheels exactly touch bottom baseline, natural vehicle proportions. Same scale across poses of each vehicle. Alpha transparent background, generous transparent padding in each equal cell, no baked ground shadows, no labels or grid lines, no extra wheels."
+    }
+  ]
+}

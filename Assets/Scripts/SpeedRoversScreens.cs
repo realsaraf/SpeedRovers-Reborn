@@ -61,7 +61,7 @@ namespace SpeedRovers.Reborn
             mode = ScreenMode.Market;
         }
 
-        void DrawTitle()
+        void DrawLegacyTitle()
         {
             Image(homeBackground, 0, 0, 540, 960);
             float width = 540 * .6f;
@@ -81,10 +81,7 @@ namespace SpeedRovers.Reborn
             Text(Mathf.RoundToInt(distance) + "m", 349, 10, 167, 48, headingStyle, Color.white);
             Texture2D pause = UI("Buttons/PauseButton");
             if (ArtButton(pause, 408, 72, 108, 108f * pause.height / pause.width)) mode = ScreenMode.Paused;
-            // The timer remains visible because this Unity version still ends
-            // the run on expiry. It does not cover the original skyline.
-            Text(Mathf.CeilToInt(timeLeft) + "s", 231, 15, 78, 38, bodyStyle,
-                 timeLeft < 10 ? new Color(1f,.35f,.25f) : Color.white);
+            Text(RaceClock(animationTime), 215, 15, 112, 38, bodyStyle,Color.white);
             Fill(18,896,156,48,new Color(.035f,.05f,.07f,.80f));
             Text(Mathf.RoundToInt(speed)+" km/h",20,900,152,36,bodyStyle,Color.white);
             Text("GEAR "+gear,20,876,152,20,smallStyle,new Color(.85f,.89f,.94f));
@@ -97,7 +94,7 @@ namespace SpeedRovers.Reborn
                 Text(banner, 65, 138, 410, 42, bodyStyle, new Color(1f,.85f,.36f));
         }
 
-        void DrawMarket()
+        void DrawLegacyMarket()
         {
             Image(UI("Backgrounds/MenuBackground1"), 0, 0, 540, 960);
             if (Icon("PreviousButton", 16.2f, 16.2f, 81)) mode = ScreenMode.Title;
@@ -109,7 +106,7 @@ namespace SpeedRovers.Reborn
             if (ArtButton(cities, 54, 518.4f, 432, height)) mode = ScreenMode.Cities;
         }
 
-        void DrawSelection(bool cities)
+        void DrawLegacySelection(bool cities)
         {
             Image(UI("Backgrounds/MenuBackground1"), 0, 0, 540, 960);
             if (Icon("PreviousButton", 16.2f, 16.2f, 81)) mode = ScreenMode.Market;
@@ -148,7 +145,7 @@ namespace SpeedRovers.Reborn
             Image(Art("Game/Common/yellowcoin"), 465, 16, 43, 43);
         }
 
-        void DrawSettings()
+        void DrawLegacySettings()
         {
             Image(UI("Backgrounds/MenuBackground1"), 0, 0, 540, 960);
             if (Icon("PreviousButton", 16.2f, 16.2f, 81)) mode = ScreenMode.Title;
@@ -162,20 +159,23 @@ namespace SpeedRovers.Reborn
             { easyMode = !easyMode; PlayerPrefs.SetInt("sr_easy", easyMode ? 1 : 0); PlayerPrefs.Save(); }
         }
 
-        void DrawPause()
+        void DrawLegacyPause()
         {
             Image(UI("Backgrounds/GamePausedLayer"), .4f, 0, 539.2f, 960);
             if (Icon("PlayButton", 162, 480, 216)) mode = ScreenMode.Running;
         }
 
-        void DrawResults()
+        void DrawLegacyResults()
         {
             Image(UI("Backgrounds/GameOverLayer"), .4f, 0, 539.2f, 960);
-            Text("Coins : " + runCoins, 70, 315, 400, 50, headingStyle, Color.white);
-            Text("Distance : " + Mathf.RoundToInt(distance) + "m", 70, 379, 400, 50, headingStyle, Color.white);
-            Text("Personal Best : " + best + "m", 70, 460, 400, 42, bodyStyle, new Color(1f,.77f,.38f));
+            Fill(0,0,540,960,new Color(.025f,.04f,.07f,.96f));
+            Text(result,40,225,460,60,headingStyle,new Color(1,.72f,.31f));
+            Text("PLACE " + finishPlace + " / 4", 70, 315, 400, 50, headingStyle, Color.white);
+            Text("Race time  " + RaceClock(playerFinishTime), 70, 379, 400, 50, headingStyle, Color.white);
+            Text("Coins earned  " + runCoins, 70, 460, 400, 42, bodyStyle, new Color(1f,.77f,.38f));
             if (Icon("RestartButton", 108, 672, 135)) StartRun();
             if (Icon("HomeButton", 297, 672, 135)) mode = ScreenMode.Title;
         }
+        static string RaceClock(float seconds) => Mathf.FloorToInt(Mathf.Max(0,seconds)/60)+":"+(Mathf.FloorToInt(Mathf.Max(0,seconds))%60).ToString("00");
     }
 }

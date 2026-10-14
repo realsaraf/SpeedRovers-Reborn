@@ -10,6 +10,9 @@ namespace SpeedRovers.Reborn
         [Serializable] sealed class RushRegions { public ArtRegion[] bikes, traffic, buildings, hazards, hero, oncoming; }
         Texture2D rushOncoming, rushHero, rushBikes, rushTraffic, rushBuildings, rushHazards;
         RushRegions rushRegions;
+        [Serializable] sealed class RaceSpriteRegions { public ArtRegion[] frames; }
+        Texture2D rivalNinePoses;
+        RaceSpriteRegions rivalPoseRegions;
         float laneVelocity, hitPulse;
         int nextWork, nextPolice;
 
@@ -26,6 +29,8 @@ namespace SpeedRovers.Reborn
             InitGrounding();
             InitDistrictArt();
             InitAlignedTraffic();
+            rivalNinePoses=Resources.Load<Texture2D>("Painted/RivalNinePoses");
+            rivalPoseRegions=JsonUtility.FromJson<RaceSpriteRegions>(Resources.Load<TextAsset>("Painted/RivalNinePosesRegions").text);
         }
 
         void SpawnRushTraffic()
@@ -40,7 +45,7 @@ namespace SpeedRovers.Reborn
                     int spawnLane=(openLane+1+n+3)%3-1;
                     double roll=random.NextDouble();
                     // Competitors are persistent racers seeded at the start.
-                    ThingKind kind=roll<.36?ThingKind.Traffic:roll<.89?ThingKind.Coin:ThingKind.Clock;
+                    ThingKind kind=roll<.36?ThingKind.Traffic:ThingKind.Coin;
                     int closure=RoadRoute.WorkIndex(spawnDistance+35);
                     if(closure>=0 && spawnDistance<=RoadRoute.WorkStart(closure)+44 && spawnLane==RoadRoute.WorkLane(closure)) continue;
                     int variant=random.Next(0,60);
@@ -155,7 +160,7 @@ namespace SpeedRovers.Reborn
             Color tint=GUI.color;
             if(thing.kind==ThingKind.Rival)
             {
-                DrawRushBike(at.x,at.y,190*scale,thing.variant%5,thing.lean,false);
+                DrawRushBike(at.x,at.y,190*scale,thing.variant%5,thing.lean,false,Mathf.Abs(thing.travelSpeed)*3.6f);
             }
             else if(thing.kind==ThingKind.Traffic || thing.kind==ThingKind.Oncoming)
             {
@@ -191,12 +196,17 @@ namespace SpeedRovers.Reborn
             }
         }
 
-        void DrawRushBike(float x,float y,float height,int variant,float lean,bool player)
+        void DrawRushBike(float x,float y,float height,int variant,float lean,bool player,float rivalVelocity=160)
         {
             lean=Mathf.Clamp(lean,-1,1);
             int pose=lean<-.4f?0:lean>.4f?2:1;
             ArtRegion region=rushRegions.bikes[(variant%5)*3+pose];
             Texture2D atlas=rushBikes;
+            if(!player || variant!=0)
+            {
+                int frame=Mathf.Clamp(Mathf.RoundToInt(lean*4)+4,0,8);
+                region=rivalPoseRegions.frames[Mathf.Abs(variant-1)%3*9+frame];atlas=rivalNinePoses;
+            }
             if(player && variant==0)
             {
                 int poseFrame=Mathf.Clamp(Mathf.RoundToInt(lean*4)+4,0,8);
@@ -209,7 +219,7 @@ namespace SpeedRovers.Reborn
             Disc(x-17*scale,y-3*scale,34*scale,5*scale,new Color(.01f,.009f,.008f,.78f));
             GUI.color=tint;
             float bounce=Mathf.Sin(animationTime*26+variant)*.7f*scale + (player?hitPulse*4:0);
-            DrawBikeBody(atlas,region,x,y,width,height+bounce,lean,player?wheelTurns:animationTime*22,player?speed:160);
+            DrawBikeBody(atlas,region,x,y,width,height+bounce,lean,player?wheelTurns:animationTime*rivalVelocity/3.6f/2.05f,player?speed:rivalVelocity);
             Glow(x-lean*8*scale,y-height*.35f,13*scale,new Color(1,.07f,.025f,.33f));
             GUI.color=tint;
         }
