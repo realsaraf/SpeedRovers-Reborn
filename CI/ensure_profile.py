@@ -10,7 +10,8 @@ from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.asymmetric.utils import decode_dss_signature
 def b64(data): return base64.urlsafe_b64encode(data).rstrip(b'=')
 key_value=os.environ['APP_STORE_CONNECT_PRIVATE_KEY']
-if 'BEGIN' not in key_value:key_value=Path(key_value).read_text()
+if key_value.startswith('@file:'):key_value=Path(key_value[6:]).read_text()
+elif 'BEGIN' not in key_value:key_value=Path(key_value).read_text()
 private=serialization.load_pem_private_key(key_value.encode(),password=None)
 header=b64(json.dumps({'alg':'ES256','kid':os.environ['APP_STORE_CONNECT_KEY_IDENTIFIER'],'typ':'JWT'},separators=(',',':')).encode())
 payload=b64(json.dumps({'iss':os.environ['APP_STORE_CONNECT_ISSUER_ID'],'iat':int(time.time()),'exp':int(time.time())+600,'aud':'appstoreconnect-v1'},separators=(',',':')).encode())

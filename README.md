@@ -1,5 +1,7 @@
 # Speed Rovers Reborn
 
+The standalone Unity source is in this repository. iOS 2.0.0 targets the existing Speed Rovers App Store Connect record (916983500); the automatic build/upload procedure is in [TESTFLIGHT.md](TESTFLIGHT.md). Exported iOS source is stored through Git LFS. Desktop packages and historical validation files described below are local artifacts and are not included in Git.
+
 Latest Windows build: **0.7.0 Corrections/Rush**, `Builds/WindowsRush/Speed Rovers Reborn.exe`. Faster route travel, traffic that yields to roadworks, integrated tire animation, corrected vehicle scale, continuous bridge supports, removed checkpoint gantries, and smoother surface transitions. See `CORRECTIONS-0.7.md` for evidence and limits. Hold **S / Down** to brake. See `PAINTED-GRAPHICS.md` for scope and provenance. Earlier packages below are retained for comparison.
 
 **Earlier graphics preview:** version 0.4.0 and `Builds/WindowsPainted/` use painted sprites, new scenery for all five cities, a new red-bike rider animation, and revised 2D road perspective. See `PAINTED-GRAPHICS.md`. The previous Windows 0.3.0 build remains in `Builds/Windows/`; other platform packages remain 0.2.0.
