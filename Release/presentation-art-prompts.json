@@ -1,0 +1,14 @@
+{
+  "generator": "built-in image_gen",
+  "assets": [
+    {
+      "name": "riders",
+      "prompt": "Create a polished motorcycle racing game character gallery atlas. Wide image exactly FIVE equal vertical panels in one horizontal row, each panel portrait composition. No text, no labels, no UI, no borders. Each panel depicts a different helmeted adult racing rider from knees upward with a small portion of their sport motorcycle in front, detailed painted realistic premium video game illustration, heroic strong clear silhouette and dramatic studio rim lights, dark midnight navy background with subtle matching colored smoke. Left to right: red/black race suit and black/red helmet; white/blue race suit and blue helmet; graphite/teal race suit and teal helmet; orange/black race suit and orange helmet; violet/black race suit and violet helmet. Men and women represented with natural varied builds, all fully helmeted dark visors. Original unbranded racing equipment, no logos. Each rider centered entirely within their own panel, same scale and coherent lighting. Art fills each panel and leaves dark top 15 percent for later labels. High quality bold readable mobile game gallery."
+    },
+    {
+      "name": "routes",
+      "prompt": "Create a premium motorcycle racing game destination gallery atlas. Wide image with exactly FIVE equally wide portrait scenic panels side by side in ONE horizontal row, no borders, no lettering, no UI or numbers. Painted realistic cinematic game illustration. Each panel has open road leading into a striking skyline, no people or vehicles. Left to right: New York at blue hour with warm illuminated towers; Mexico City at golden sunset with colorful architecture and distant mountains; Shanghai at twilight with modern futuristic illuminated towers and river; London at blue hour with stately architecture and a distant clock tower; Tokyo after dark with neon streets and Tokyo tower. Camera close to road, strong perspective, detailed atmospheric city scenery, colorful but coherent palette, clean compositions, distinctive locations. Each city entirely confined to its own equally sized panel. Designed to crop one panel as a portrait destination card in a premium mobile racer."
+    }
+  ],
+  "home": "Superseded by the family-friendly daylight revision in presentation-family-prompts.json. RiderGallery was also replaced by that revision."
+}

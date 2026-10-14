@@ -73,7 +73,7 @@ namespace SpeedRovers.Reborn
             if (Icon("SettingsButton", 297, 862.8f, 81)) mode = ScreenMode.Settings;
         }
 
-        void DrawHud()
+        void DrawLegacyHud()
         {
             // Original HoodScreen: coins at top left, distance at top right.
             Text(runCoins.ToString(), 20, 14, 75, 46, headingStyle, Color.white);

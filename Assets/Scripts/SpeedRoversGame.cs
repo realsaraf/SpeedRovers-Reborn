@@ -104,6 +104,8 @@ namespace SpeedRovers.Reborn
             {
                 if (arg.StartsWith("-audio-review-dir=", StringComparison.Ordinal))
                     StartCoroutine(CaptureAudioReview(arg.Substring("-audio-review-dir=".Length)));
+                if (arg.StartsWith("-presentation-review-dir=", StringComparison.Ordinal))
+                    StartCoroutine(CapturePresentation(arg.Substring("-presentation-review-dir=".Length)));
                 if (arg.StartsWith("-capture-dir=", StringComparison.Ordinal))
                     StartCoroutine(CaptureScreens(arg.Substring("-capture-dir=".Length)));
                 if (arg.StartsWith("-rush-review-dir=", StringComparison.Ordinal))
@@ -249,6 +251,11 @@ namespace SpeedRovers.Reborn
             UpdateMusic();
             UpdateRushAudio();
             if (captureHold) return;
+            if (menuDialog != MenuDialog.None)
+            {
+                if (Input.GetKeyDown(KeyCode.Escape)) menuDialog = MenuDialog.None;
+                return;
+            }
             if (mode != ScreenMode.Running)
             {
                 bool accept = Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.JoystickButton0);
@@ -467,14 +474,16 @@ namespace SpeedRovers.Reborn
         {
             if (pixel == null) return;
             InitStyles();
+            InitPresentation();
             GUI.matrix = Matrix4x4.identity;
-            Fill(0, 0, Screen.width, Screen.height, new Color(.025f,.055f,.105f));
+            Fill(0, 0, Screen.width, Screen.height, mode==ScreenMode.Running ? new Color(.025f,.055f,.105f) : menuBase);
             Rect safe = Screen.safeArea;
             float scale = Mathf.Min(safe.width / 540f, safe.height / 960f);
             float xOffset = safe.xMin + (safe.width - 540 * scale) / 2;
             float yOffset = Screen.height - safe.yMax + (safe.height - 960 * scale) / 2;
             GUI.matrix = Matrix4x4.TRS(new Vector3(xOffset, yOffset, 0), Quaternion.identity, new Vector3(scale, scale, 1));
             GUI.BeginGroup(new Rect(0, 0, 540, 960));
+            GUI.enabled = menuDialog == MenuDialog.None;
             if (mode == ScreenMode.Running || mode == ScreenMode.Paused || mode == ScreenMode.Results) DrawWorld(selectedCity);
             if (mode == ScreenMode.Running) DrawHud();
             if (mode == ScreenMode.Title) DrawTitle();
@@ -484,6 +493,8 @@ namespace SpeedRovers.Reborn
             if (mode == ScreenMode.Settings) DrawSettings();
             if (mode == ScreenMode.Paused) DrawPause();
             if (mode == ScreenMode.Results) DrawResults();
+            GUI.enabled = true;
+            DrawPresentationOverlay();
             GUI.EndGroup();
             GUI.color = Color.white;
             GUI.matrix = Matrix4x4.identity;

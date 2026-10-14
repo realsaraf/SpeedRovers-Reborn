@@ -1,0 +1,13 @@
+{
+  "generator": "built-in image_gen",
+  "assets": [
+    {
+      "name": "riders",
+      "prompt": "A premium family-friendly motorcycle racing game character atlas. Wide landscape image exactly FIVE equal width portrait panels side by side in one horizontal row, no text, no numbers, no logos, no borders. FIVE adult riders, all wearing full-face helmets with dark visors, loose structured padded textile motorcycle jackets and practical protective trousers. Natural relaxed upright poses, shoulders square, arms at sides or holding gloves, sturdy realistic proportions. Wholesome sporty adventurers suitable for a children's racing game. Clothing must be modest and practical, NOT tight leather, not body-hugging, no pronounced chest or hip contours, no glamour poses. Each panel shows rider from knees up with a little of their matching motorcycle in front. Left to right RED and charcoal, BLUE and white, GREEN and charcoal, ORANGE and charcoal, BLUE and violet accents. Mixed men and women with similar loose protective gear. Bright beautiful daylight, airy light blue and cream backgrounds with subtle matching color accents, soft blue sky, crisp polished painted game illustration, approachable and adventurous, no dark smoke or gritty nightclub light. All five riders centered in their own panel, coherent scale, same premium art style."
+    },
+    {
+      "name": "home",
+      "prompt": "Edit this motorcycle racing game hero illustration to be bright, welcoming and family-friendly. Preserve the red motorcycle, fully helmeted rider and dynamic race composition. Change the scene to a beautiful sunny daytime city with clear blue sky, white soft clouds, warm daylight, clean buildings and a sweeping road. Raise overall brightness and use vivid natural colors, no dark night or gritty shadow mood. The adult rider wears practical padded protective gear with a modest natural silhouette. Keep original unbranded motorcycle details. Polished painted premium arcade game illustration, no text, no UI, no logos."
+    }
+  ]
+}

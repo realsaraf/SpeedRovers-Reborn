@@ -1,10 +1,10 @@
 # Speed Rovers Reborn
 
-The standalone Unity source is in this repository. Current iOS release **1.0.2** targets **Speed Rovers 2** (Apple ID 6822590400, bundle `com.philino.speedrovers.reborn`). The automatic build/upload procedure is in [TESTFLIGHT.md](TESTFLIGHT.md). Exported iOS source is stored through Git LFS. Historical packages below have not been rebuilt for the latest changes.
+The standalone Unity source is in this repository. Current iOS release **1.0.3** targets **Speed Rovers 2** (Apple ID 6822590400, bundle `com.philino.speedrovers.reborn`). The automatic build/upload procedure is in [TESTFLIGHT.md](TESTFLIGHT.md). Exported iOS source is stored through Git LFS. Historical packages below have not been rebuilt for the latest changes.
 
-Latest Windows build: **0.9.0**, `Builds/WindowsRush/Speed Rovers Reborn.exe`. Race three persistent opponents to a 60 km finish. All collisions cost speed rather than ending the race. New animated menus, app icon, nine-pose rival riders, directional oncoming traffic, grounded vehicle shadows and inward-facing bridge lamps. See [release details](Release/1.0.2.md).
+Latest Windows build: **0.10.0**, `Builds/WindowsRush/Speed Rovers Reborn.exe`. Complete non-gameplay presentation refresh: cinematic home, rider/city galleries, unlock confirmation, settings, pause, results and race HUD. Existing race simulation and saved progression are retained. See [release details](Release/1.0.3.md).
 
-Latest Windows build: **0.7.0 Corrections/Rush**, `Builds/WindowsRush/Speed Rovers Reborn.exe`. Faster route travel, traffic that yields to roadworks, integrated tire animation, corrected vehicle scale, continuous bridge supports, removed checkpoint gantries, and smoother surface transitions. See `CORRECTIONS-0.7.md` for evidence and limits. Hold **S / Down** to brake. See `PAINTED-GRAPHICS.md` for scope and provenance. Earlier packages below are retained for comparison.
+Historical Windows build: **0.7.0 Corrections/Rush**, `Builds/WindowsRush/Speed Rovers Reborn.exe`. Faster route travel, traffic that yields to roadworks, integrated tire animation, corrected vehicle scale, continuous bridge supports, removed checkpoint gantries, and smoother surface transitions. See `CORRECTIONS-0.7.md` for evidence and limits. Hold **S / Down** to brake. See `PAINTED-GRAPHICS.md` for scope and provenance. Earlier packages below are retained for comparison.
 
 **Earlier graphics preview:** version 0.4.0 and `Builds/WindowsPainted/` use painted sprites, new scenery for all five cities, a new red-bike rider animation, and revised 2D road perspective. See `PAINTED-GRAPHICS.md`. The previous Windows 0.3.0 build remains in `Builds/Windows/`; other platform packages remain 0.2.0.
 

@@ -257,6 +257,25 @@ public static class SpeedRoversChecks
             }
             Check((float)trafficType.GetField("distance").GetValue(arriving)<1235,"oncoming vehicle cannot complete safe merge");
             Check(Resources.Load<Texture2D>("Painted/BridgePortalV2")!=null,"supported bridge portal asset missing");
+            foreach(string asset in new[]{"HomeHero","RiderGallery","RouteGallery"})
+                Check(Resources.Load<Texture2D>("Interface/"+asset)!=null,"missing presentation art: "+asset);
+            Set("wallet",39);Set("selectedRider",0);
+            Call("Purchase",false,2);
+            Check((int)Get("wallet")==39 && (int)Get("selectedRider")==0,"insufficient balance must not spend or equip");
+            Call("Equip",false,2);
+            Check((int)Get("selectedRider")==0,"locked rider was equipped without purchase");
+            Set("wallet",100);Call("Purchase",false,2);
+            Check((int)Get("wallet")==60 && (int)Get("selectedRider")==2,"purchase must spend exact price and equip");
+            Call("Purchase",false,2);
+            Check((int)Get("wallet")==60,"repeat purchase charged twice");
+            Call("Purchase",true,2);
+            Check((int)Get("wallet")==60,"rider ownership must not unlock the matching city");
+            Set("wallet",100);Call("Purchase",true,2);
+            Check((int)Get("wallet")==30 && (int)Get("selectedCity")==2,"city purchase failed");
+            Call("Equip",false,0);Call("Equip",false,2);
+            Check((int)Get("wallet")==30 && (int)Get("selectedRider")==2,"owned rider re-equip must be free");
+            Call("Purchase",false,-1);Call("Purchase",true,5);
+            Check((int)Get("wallet")==30,"invalid collection index spent coins");
             Debug.Log("Speed Rovers gameplay checks passed: " + checks);
         }
         finally

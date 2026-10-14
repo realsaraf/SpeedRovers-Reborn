@@ -1,7 +1,7 @@
-Speed Rovers 2 1.0.2
+Speed Rovers 2 1.0.3
 
-Race three persistent opponents across a 60 km route. All collisions reduce speed according to obstacle size and closing speed, then the engine downshifts and gradually recovers. The race ends at the finish line instead of timer expiry.
+A bright, family-friendly presentation refresh with modest, practical rider clothing: cinematic animated home, illustrated rider and city collections, clear ownership and equipped states, coin unlock confirmation, redesigned settings, pause and leave-race confirmation, victory and race results, and a cleaner racing HUD. Animated racing buttons, track accents, unlock celebrations and original menu sound effects bring the screens to life.
 
-New app icon, animated home screen and redesigned menus. Nine lean poses for rival riders, moving wheels, directional oncoming vehicles, grounded car shadows and inward-facing bridge lamps.
+Your existing unlocked items, selected rider/city, coins and settings are preserved. Race physics, opponents and collision recovery are unchanged.
 
-Swipe left or right to steer. Please test collision recovery, race placing, rival turns, traffic grounding, bridge lamps, menu animation and frame rate on your iPhone or iPad.
+Please test all menus on your iPhone or iPad: select an owned rider, preview a locked rider/city, cancel an unlock, unlock with sufficient coins, change audio settings, pause/resume, and finish a race. Check that layouts fit safely around your device's notch and that touch targets and text are clear.
