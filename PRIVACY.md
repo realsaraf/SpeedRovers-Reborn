@@ -1,6 +1,6 @@
-# Speed Rovers Reborn beta privacy
+# Speed Rovers 2 beta privacy
 
-Effective October 13, 2026. This page applies to the Unity 2.0.0 TestFlight beta.
+Effective October 14, 2026. This page applies to Speed Rovers 2 1.0.0 and the preceding Speed Rovers Reborn Unity TestFlight betas.
 
 The game saves coins, unlocked riders and cities, preferences and best distance locally on your device. This progress is not sent to a game server or synced between devices. Removing the app may remove its saved progress.
 
