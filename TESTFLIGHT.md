@@ -3,9 +3,9 @@
 App: Speed Rovers (Apple ID 916983500). iOS bundle: `com.philino.speedrovers`.
 The revival's first iOS release is 2.0.0, independent of the Windows prototype's 0.7.0 version.
 
-`codemagic.yaml` archives and signs the Unity export on a Mac, then uploads the IPA to the existing Apple app. The existing App Store Connect Users internal group automatically receives eligible builds; realsaraf@gmail.com has been added to it. The workflow does not submit a public App Store release.
+`codemagic.yaml` archives and signs the Unity export on a Mac, then uploads the IPA to the existing Apple app. The existing App Store Connect Users internal group automatically receives eligible builds; realsaraf@gmail.com has been added to it. The existing external audience is named Speed Rovers Beta (11 testers). Codemagic submits new uploads for beta review and assigns that group after approval. The workflow does not submit a public App Store release.
 
-The workflow reuses the account's existing Apple Distribution certificate. The reference provisioning profile provides its public certificate identity; `CI/ensure_profile.py` reuses or creates a separate Speed Rovers App Store profile. No new certificate or API key is created. Signing secrets remain in Codemagic.
+The workflow reuses the account's existing Apple Distribution certificate. The dedicated `speed-rovers-appstore` provisioning profile is stored in Codemagic. `CI/ensure_profile.py` was used once to create this profile using the existing distribution certificate; the ongoing workflow uses the stored profile directly. No new certificate or API key is created. Signing secrets remain in Codemagic.
 
 For a new gameplay release:
 

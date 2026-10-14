@@ -26,8 +26,7 @@ workflows:
         certificates:
           - toatre-ios-distribution
         provisioning_profiles:
-          - profile: toatre-appstore-profile
-            environment_variable: SIGNING_REFERENCE_PROFILE
+          - speed-rovers-appstore
       vars:
         BUNDLE_ID: com.philino.speedrovers
         APP_STORE_APP_ID: '916983500'
@@ -47,7 +46,6 @@ workflows:
           set -euo pipefail
           keychain initialize
           keychain add-certificates
-          python3 CI/ensure_profile.py
           xcode-project use-profiles --project build/ios/Unity-iPhone.xcodeproj
       - name: Archive and export signed IPA
         script: |
@@ -60,6 +58,9 @@ workflows:
     publishing:
       app_store_connect:
         auth: integration
-        # The existing internal group automatically receives eligible uploads.
-        submit_to_testflight: false
+        # Internal uploads are automatic; external testers receive the build
+        # after Apple's beta review approves it.
+        submit_to_testflight: true
+        beta_groups:
+          - Speed Rovers Beta
         submit_to_app_store: false

@@ -1,0 +1,5 @@
+Speed Rovers Reborn 2.0.0
+
+Unity revival with painted sprite graphics, seven route environments, faster road movement, roadwork-aware traffic, oncoming cars and police, animated motorcycle tires, and layered engine audio with automatic gears.
+
+Swipe left or right to steer. Collect coins and clocks, avoid traffic and work zones, and use Pause to stop the race. Please test touch controls, frame rate, audio, safe-area layout, pause/resume, and local market progression on your iPhone or iPad.
