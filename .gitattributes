@@ -1,0 +1,2 @@
+* text=auto eol=lf
+CI/ios-export.tar.gz filter=lfs diff=lfs merge=lfs -text

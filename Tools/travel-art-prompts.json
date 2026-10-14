@@ -1,0 +1,12 @@
+[
+  [
+    "TravelSkies",
+    "Original painted realistic 2.5D racing-game scenery atlas. Portrait canvas1024x1536 with EXACT TWO equal height landscape panels one above other, each1024x768. TOP HALF: Mediterranean Italian coastal cliffs in warm afternoon sun, pastel villages nestled on LEFT mountainside, distant bell tower, azure sea across RIGHT side with tiny sailboats; blue sky white clouds above. BOTTOM HALF: majestic Swiss Alps sharp snow peaks, forested green foothills, turquoise lake on RIGHT and tiny distant alpine village; clear blue sunny sky. Leave upper 45 percent of EACH panel sky, all landscape lower55percent. Level horizons, expansive depth. Background landscape ONLY: NO nearby road, no bikes, no cars, no HUD/text, no foreground objects, no borders or gutters. Fill both rectangles completely.",
+    false
+  ],
+  [
+    "TravelProps",
+    "Original highly detailed painted game sprite atlas with TRUE transparent background. Portrait canvas1024x1536, EXACT TWO columns and THREE rows of six separated complete objects with generous transparent gutters. Row1: LEFT pastel-yellow three-story Italian coastal villa with terracotta roof, arched stone ground floor, balcony flowers; RIGHT tall narrow Italian cypress tree full crown and trunk. Row2: LEFT rocky grey limestone cliff outcrop with green creeping bushes and tiny flowers; RIGHT tall alpine fir tree full crown and trunk. Row3: LEFT modern Tokyo midrise shopfront building with vertically stacked glowing red blue white signboards (simple abstract glyphs), lit windows, glass recessed entry; RIGHT pink cherry blossom tree with full trunk and crown under warm night street light. Every object isolated, NO ground plane NO road NO cast floor shadow NO backdrop. Low camera rearward street perspective, buildings seen three-quarter front with right side visible. Bright daytime on first four objects, night lighting on last two. Painted realistic sprite art with consistent edges, no pixel art.",
+    true
+  ]
+]

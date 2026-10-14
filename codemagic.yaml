@@ -1,0 +1,64 @@
+workflows:
+  speed-rovers-ios:
+    name: Speed Rovers Reborn - TestFlight
+    instance_type: mac_mini_m2
+    max_build_duration: 90
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+      changeset:
+        includes:
+          - 'CI/**'
+          - 'Assets/**'
+          - 'Packages/**'
+          - 'ProjectSettings/**'
+          - codemagic.yaml
+      cancel_previous_builds: false
+    integrations:
+      app_store_connect: app-store-connect
+    environment:
+      xcode: latest
+      ios_signing:
+        certificates:
+          - toatre-ios-distribution
+        provisioning_profiles:
+          - profile: toatre-appstore-profile
+            environment_variable: SIGNING_REFERENCE_PROFILE
+      vars:
+        BUNDLE_ID: com.philino.speedrovers
+        APP_STORE_APP_ID: '916983500'
+    scripts:
+      - name: Restore verified current Unity iOS export
+        script: |
+          set -euo pipefail
+          python3 CI/verify_source.py
+          git lfs install --skip-smudge
+          git lfs pull --include="CI/ios-export.tar.gz"
+          shasum -a 256 -c CI/ios-export.sha256
+          mkdir -p build/ios
+          tar -xzf CI/ios-export.tar.gz -C build/ios
+          python3 CI/prepare_ios.py
+      - name: Apply Speed Rovers App Store signing profile
+        script: |
+          set -euo pipefail
+          keychain initialize
+          keychain add-certificates
+          python3 CI/ensure_profile.py
+          xcode-project use-profiles --project build/ios/Unity-iPhone.xcodeproj
+      - name: Archive and export signed IPA
+        script: |
+          set -euo pipefail
+          xcode-project build-ipa --project build/ios/Unity-iPhone.xcodeproj --scheme Unity-iPhone
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - build/ios/**/*.dSYM
+    publishing:
+      app_store_connect:
+        auth: integration
+        # The existing internal group automatically receives eligible uploads.
+        submit_to_testflight: false
+        submit_to_app_store: false

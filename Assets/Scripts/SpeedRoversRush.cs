@@ -1,0 +1,304 @@
+using System;
+using System.Collections;
+using System.IO;
+using UnityEngine;
+
+namespace SpeedRovers.Reborn
+{
+    public sealed partial class SpeedRoversGame
+    {
+        [Serializable] sealed class RushRegions { public ArtRegion[] bikes, traffic, buildings, hazards, hero, oncoming; }
+        Texture2D rushOncoming, rushHero, rushBikes, rushTraffic, rushBuildings, rushHazards;
+        RushRegions rushRegions;
+        float laneVelocity, hitPulse;
+        int nextWork, nextPolice;
+
+
+        void InitRushArt()
+        {
+            rushOncoming=Resources.Load<Texture2D>("Painted/RushOncoming");
+            rushHero=Resources.Load<Texture2D>("Painted/RushHero");
+            rushBikes=Resources.Load<Texture2D>("Painted/RushBikes");
+            rushTraffic=Resources.Load<Texture2D>("Painted/RushTraffic");
+            rushBuildings=Resources.Load<Texture2D>("Painted/RushBuildings");
+            rushHazards=Resources.Load<Texture2D>("Painted/RushHazards");
+            rushRegions=JsonUtility.FromJson<RushRegions>(Resources.Load<TextAsset>("Painted/RushRegions").text);
+            InitGrounding();
+            InitDistrictArt();
+        }
+
+        void SpawnRushTraffic()
+        {
+            while(spawnDistance < distance + RoadProjection.ViewDistance)
+            {
+                int district=RoadRoute.District(spawnDistance);
+                int openLane=random.Next(-1,2);
+                int count=1;
+                for(int n=0;n<count;n++)
+                {
+                    int spawnLane=(openLane+1+n+3)%3-1;
+                    double roll=random.NextDouble();
+                    ThingKind kind=roll<.36?ThingKind.Rival:roll<.72?ThingKind.Traffic:roll<.91?ThingKind.Coin:ThingKind.Clock;
+                    int closure=RoadRoute.WorkIndex(spawnDistance+35);
+                    if(closure>=0 && spawnDistance<=RoadRoute.WorkStart(closure)+44 && spawnLane==RoadRoute.WorkLane(closure)) continue;
+                    int variant=random.Next(0,60);
+                    if(spawnLane==-1 && kind==ThingKind.Traffic && variant%3!=0) kind=ThingKind.Oncoming;
+                    bool vehicle=kind==ThingKind.Rival || kind==ThingKind.Traffic || kind==ThingKind.Oncoming;
+                    int visibleVehicles=0;bool crowded=false;
+                    foreach(Thing existing in things)
+                    {
+                        if(existing.used || existing.distance<distance-8 || existing.distance>distance+470)continue;
+                        if(existing.kind!=ThingKind.Rival && existing.kind!=ThingKind.Traffic && existing.kind!=ThingKind.Oncoming)continue;
+                        visibleVehicles++;
+                        if(existing.lane==spawnLane && Mathf.Abs(existing.distance-spawnDistance)<85)crowded=true;
+                    }
+                    if(vehicle && (visibleVehicles>=(RoadRoute.Urban(spawnDistance)?4:3) || crowded))continue;
+                    things.Add(new Thing {distance=spawnDistance+n*8,lane=spawnLane,kind=kind,variant=variant,police=kind==ThingKind.Oncoming && (variant%8==4 || variant%8==5),
+                        travelSpeed=kind==ThingKind.Oncoming?-20-variant%17:kind==ThingKind.Rival?40+variant%19:kind==ThingKind.Traffic?14+variant%16:0});
+                }
+                spawnDistance += RoadRoute.Urban(spawnDistance)?125:165;
+            }
+            while(700+nextPolice*1600<distance+470)
+            {
+                things.Add(new Thing{distance=700+nextPolice*1600,lane=-1,kind=ThingKind.Oncoming,variant=nextPolice%2==0?4:5,police=true,travelSpeed=-28});
+                nextPolice++;
+            }
+            while(RoadRoute.WorkStart(nextWork)<distance+470)
+            {
+                float start=RoadRoute.WorkStart(nextWork);
+                int workLane=RoadRoute.WorkLane(nextWork);
+                things.Add(new Thing{distance=start+5,lane=workLane,kind=ThingKind.Roadworks,variant=nextWork});
+                things.Add(new Thing{distance=start+27,lane=workLane,kind=ThingKind.Roadworks,variant=nextWork});
+                things.Add(new Thing{distance=start+100,lane=-workLane,kind=ThingKind.Pothole,variant=nextWork});
+                nextWork++;
+            }
+        }
+
+        void DrawRouteSurface(float world,float center,float half,float y,float h,float depth,bool junction)
+        {
+            float junctionOffset=RoadRoute.JunctionOffset(world);
+            if(Mathf.Abs(junctionOffset)>9 && Mathf.Abs(junctionOffset)<11.5f)
+            {
+                // Zebra crossings are painted onto the road plane, so all
+                // stripes accelerate and widen with the same perspective.
+                for(int stripe=-5;stripe<=5;stripe++)
+                    Fill(center+stripe*half*.175f-half*.055f,y,half*.11f,h,new Color(.77f,.76f,.70f));
+            }
+            if(junction && Mathf.Abs(junctionOffset)<.23f)
+            {
+                Fill(0,y,Mathf.Max(0,center-half),h,new Color(.78f,.66f,.36f));
+                Fill(center+half,y,Mathf.Max(0,540-center-half),h,new Color(.78f,.66f,.36f));
+            }
+            if(RoadRoute.Work(world))
+            {
+                float x=center+RoadRoute.WorkLane(RoadRoute.WorkIndex(world))*half*RoadProjection.LaneSpacing;
+                Fill(x-half*.27f,y,half*.54f,h,new Color(.17f,.16f,.145f));
+                // Milled pavement, exposed aggregate and a ragged repair edge.
+                float rough=Mathf.PerlinNoise(world*2.7f,0)*half*.055f;
+                Fill(x-half*.27f-rough,y,rough,h,new Color(.38f,.34f,.27f));
+                if(Mathf.Repeat(world,.8f)<.16f)
+                    Fill(x-half*.23f,y,half*.46f,h,new Color(.23f,.21f,.185f));
+            }
+            if(RoadRoute.District(world)==2)
+            {
+                // Continuous guardrails provide a near-camera speed reference.
+                Fill(center-half*1.18f,y,Mathf.Max(1,half*.027f),h,new Color(.51f,.57f,.6f));
+                Fill(center+half*1.16f,y,Mathf.Max(1,half*.027f),h,new Color(.51f,.57f,.6f));
+            }
+        }
+
+        void DrawStreetBlock(int city,RoadSprite entry,float depth,int district)
+        {
+            int variant=district==0?(entry.index+city+entry.side*3)%4:4+(entry.index+city+entry.side)%4;
+            ArtRegion region=rushRegions.buildings[variant];
+            float scale=.022f+depth*.978f;
+            float height=(variant<4?1500:660)*scale;
+            float width=height*region.w/region.h;
+            Vector2 at=RoadProjection.Project(distance,entry.z,0,lane);
+            float edge=RoadProjection.HalfWidth(depth)*1.24f;
+            float x=entry.side==0?at.x-edge-width:at.x+edge;
+            if(x>550 || x+width< -10) return;
+            Color tint=GUI.color;
+            Region(rushBuildings,region,x,at.y-height,width,height,entry.side==1);
+            // Illuminated storefronts pulse very slowly, independent of travel.
+            Glow(x+width*.52f,at.y-height*.12f,width*.25f,
+                new Color(1,.66f,.30f,.10f+.03f*Mathf.Sin(animationTime*.9f+entry.index)));
+            GUI.color=tint;
+        }
+
+        void DrawConstruction(RoadSprite entry,float depth)
+        {
+            float workLane=RoadRoute.WorkLane(entry.index);
+            float laneEdge=workLane*.52f;
+            Vector2 at=RoadProjection.Project(distance,entry.z,laneEdge,lane);
+            float scale=.025f+.975f*depth;
+            Color tint=GUI.color;
+            ArtRegion cone=rushRegions.hazards[0];
+            float h=64*scale,w=h*cone.w/cone.h;
+            Region(rushHazards,cone,at.x-w/2,at.y-h,w,h);
+            if(entry.side==7)
+            {
+                at=RoadProjection.Project(distance,entry.z,workLane*1.95f,lane);
+                ArtRegion excavator=rushRegions.hazards[2];
+                h=300*scale;w=h*excavator.w/excavator.h;
+                Region(rushHazards,excavator,at.x-w/2,at.y-h,w,h);
+                Glow(at.x,at.y-h*.8f,24*scale,new Color(1,.5f,.08f,.5f+.4f*Mathf.Sin(animationTime*9)));
+            }
+            GUI.color=tint;
+        }
+
+        void DrawRushThing(Thing thing,Vector2 at,float depth)
+        {
+            float scale=.024f+.976f*depth;
+            Color tint=GUI.color;
+            if(thing.kind==ThingKind.Rival)
+            {
+                DrawRushBike(at.x,at.y,190*scale,thing.variant%5,thing.lean,false);
+            }
+            else if(thing.kind==ThingKind.Traffic || thing.kind==ThingKind.Oncoming)
+            {
+                bool front=thing.kind==ThingKind.Oncoming;
+                int variant=thing.variant%(front?8:12);
+                ArtRegion car=front?rushRegions.oncoming[variant]:rushRegions.traffic[variant];
+                Texture2D sheet=front?rushOncoming:rushTraffic;
+                float width=(front && variant==5?112:!front && (variant==6||variant==8)?325:250)*scale;
+                float height=width*car.h/car.w;
+                float bump=Mathf.Sin(animationTime*19+thing.variant)*.8f*scale;
+                Disc(at.x-width*.49f,at.y-height*.09f,width*.98f,height*.12f,new Color(.025f,.023f,.022f,.36f));
+                Disc(at.x-width*.46f,at.y-4*scale,width*.92f,7*scale,new Color(.015f,.014f,.014f,.60f));
+                GUI.color=tint;
+                // Continuous suspension motion and steering-dependent flank
+                // shear keep the tire contact fixed rather than bobbing the car.
+                SkewSprite(sheet,car,at.x-width/2,at.y-height-bump,width,height+bump,thing.lean*width*.025f);
+                if(front && variant==5)DrawRollingRear(at.x,at.y,height*.6f,thing.lean,animationTime*Mathf.Abs(thing.travelSpeed)/2.1f,Mathf.Abs(thing.travelSpeed)*3.6f,tint);
+                else DrawCarWheels(at.x,at.y,width,height,variant,front,animationTime*Mathf.Abs(thing.travelSpeed)/2.1f,tint);
+                Color lamps=front?new Color(1,.89f,.62f,.6f):new Color(1,.11f,.03f,.2f);
+                Glow(at.x-width*.34f,at.y-height*.39f,width*.15f,lamps);
+                Glow(at.x+width*.34f,at.y-height*.39f,width*.15f,lamps);
+                if(thing.police)
+                {
+                    float flash=Mathf.Sin(animationTime*18);
+                    Glow(at.x-width*.22f,at.y-height*.87f,width*.25f,new Color(1,.02f,.02f,flash>0?.9f:.08f));
+                    Glow(at.x+width*.22f,at.y-height*.87f,width*.25f,new Color(.03f,.25f,1,flash<0?.9f:.08f));
+                }
+                if(!front && variant==11)
+                    Glow(at.x+Mathf.Sin(animationTime*12)*width*.24f,at.y-height*.87f,width*.16f,new Color(.1f,.4f,1,.8f));
+            }
+            else if(thing.kind==ThingKind.Roadworks || thing.kind==ThingKind.Pothole || thing.kind==ThingKind.Barrier)
+            {
+                int index=thing.kind==ThingKind.Pothole?3:thing.variant%2==0?1:5;
+                ArtRegion region=rushRegions.hazards[index];
+                float width=(index==3?155:172)*scale;
+                float height=width*region.h/region.w;
+                Region(rushHazards,region,at.x-width/2,at.y-height,width,height);
+                if(index==1) Glow(at.x,at.y-height,27*scale,new Color(1,.5f,.04f,.5f+.4f*Mathf.Sin(animationTime*10)));
+            }
+            else DrawPaintedThing(thing.kind,at,depth,thing.variant);
+            GUI.color=tint;
+        }
+
+        // Sprite strips provide a continuous lean between directional poses.
+        // Unlike rotating the whole scene, this cannot distort road geometry.
+        void SkewSprite(Texture2D atlas,ArtRegion region,float x,float y,float w,float h,float lean)
+        {
+            if(Mathf.Abs(lean)<.35f) {Region(atlas,region,x,y,w,h);return;}
+            const int strips=8;
+            for(int row=0;row<strips;row++)
+            {
+                float t=row/(float)strips;
+                Rect uv=new Rect(region.x/atlas.width,1-(region.y+region.h*(t+1f/strips))/atlas.height,
+                    region.w/atlas.width,region.h/strips/atlas.height);
+                GUI.DrawTextureWithTexCoords(new Rect(x+lean*(1-t)*(1-t),y+h*t,w,h/strips+.5f),atlas,uv,true);
+            }
+        }
+
+        void DrawRushBike(float x,float y,float height,int variant,float lean,bool player)
+        {
+            lean=Mathf.Clamp(lean,-1,1);
+            int pose=lean<-.4f?0:lean>.4f?2:1;
+            ArtRegion region=rushRegions.bikes[(variant%5)*3+pose];
+            Texture2D atlas=rushBikes;
+            if(player && variant==0)
+            {
+                int poseFrame=Mathf.Clamp(Mathf.RoundToInt(lean*4)+4,0,8);
+                region=rushRegions.hero[poseFrame];atlas=rushHero;
+            }
+            float width=height*region.w/region.h;
+            float scale=height/165;
+            Color tint=GUI.color;
+            Disc(x-26*scale,y-7*scale,52*scale,11*scale,new Color(.025f,.024f,.024f,.20f));
+            Disc(x-17*scale,y-3*scale,34*scale,5*scale,new Color(.01f,.009f,.008f,.78f));
+            GUI.color=tint;
+            float bounce=Mathf.Sin(animationTime*26+variant)*.7f*scale + (player?hitPulse*4:0);
+            DrawBikeBody(atlas,region,x,y,width,height+bounce,lean,player?wheelTurns:animationTime*22,player?speed:160);
+            Glow(x-lean*8*scale,y-height*.35f,13*scale,new Color(1,.07f,.025f,.33f));
+            GUI.color=tint;
+        }
+
+        IEnumerator CaptureRushReview(string directory)
+        {
+            verificationRun=captureHold=true;
+            Directory.CreateDirectory(directory);
+            yield return new WaitForSeconds(1);
+            StartRun();selectedCity=selectedRider=0;bannerUntil=0;
+            float[] scenes={100,350,390,580,650,687,735,780,980,1188,1250,1320,1460,2280,3020,3710,4480};
+            foreach(float location in scenes)
+            {
+                distance=location;animationTime=location/75;speed=285;ResetEngine(285);lane=visualLean=0;
+                things.Clear();spawnDistance=distance+25;nextWork=Mathf.Max(0,RoadRoute.WorkIndex(distance));
+                SpawnRushTraffic();
+                things.Add(new Thing{kind=ThingKind.Rival,distance=distance+45,lane=-1,variant=1});
+                yield return new WaitForSeconds(.15f);
+                ScreenCapture.CaptureScreenshot(Path.Combine(directory,"route-"+location+".png"));
+                yield return new WaitForSeconds(.15f);
+            }
+            Directory.CreateDirectory(Path.Combine(directory,"motion"));
+            StartRun();random=new System.Random(904);bannerUntil=0;speed=285;
+            // The production simulation, 30 fps. Automated lane selection is
+            // confined to this review mode; collisions and traffic remain live.
+            for(int frame=0;frame<540;frame++)
+            {
+                float bestCost=float.MaxValue;
+                int bestLane=targetLane;
+                for(int candidate=-1;candidate<=1;candidate++)
+                {
+                    float cost=.08f*Mathf.Abs(candidate-targetLane);
+                    int work=Mathf.Max(0,RoadRoute.WorkIndex(distance+35));
+                    for(int closure=work;closure<=work+1;closure++)
+                    {
+                        float ahead=RoadRoute.WorkStart(closure)-distance;
+                        if(ahead> -50 && ahead<260 && candidate==RoadRoute.WorkLane(closure))cost+=1000;
+                    }
+                    float predictedLane=lane, velocity=laneVelocity;
+                    for(int step=1;step<=20;step++)
+                    {
+                        float t=step*.08f;
+                        predictedLane=Mathf.SmoothDamp(predictedLane,candidate,ref velocity,.16f,8,.08f);
+                        foreach(Thing obstacle in things)
+                        {
+                            if(obstacle.used || obstacle.kind==ThingKind.Coin || obstacle.kind==ThingKind.Clock)continue;
+                            float z=obstacle.distance-distance+(obstacle.travelSpeed-speed/3.6f)*RoadProjection.TravelScale*t;
+                            float separation=Mathf.Abs(predictedLane-obstacle.lane-obstacle.lateral);
+                            if(Mathf.Abs(z)<14 && separation<.85f) cost+=(.85f-separation)*25/(t+.1f);
+                        }
+                    }
+                    if(cost<bestCost) {bestCost=cost;bestLane=candidate;}
+                }
+                targetLane=bestLane;
+                AdvanceElapsedTime(1f/30);
+                yield return new WaitForEndOfFrame();
+                ScreenCapture.CaptureScreenshot(Path.Combine(directory,"motion",frame.ToString("D3")+".png"));
+                yield return null;
+                if(mode!=ScreenMode.Running) {Debug.LogError("Rush review collision at frame "+frame+" result="+result+" lane="+lane);break;}
+            }
+            mode=ScreenMode.Paused;
+            yield return new WaitForSeconds(.2f);
+            ScreenCapture.CaptureScreenshot(Path.Combine(directory,"paused.png"));
+            yield return new WaitForSeconds(.5f);
+            ScreenCapture.CaptureScreenshot(Path.Combine(directory,"paused-later.png"));
+            yield return new WaitForSeconds(.3f);
+            Debug.Log("Rush review completed at "+distance+" metres. No preferences saved.");
+            Application.Quit(0);
+        }
+    }
+}

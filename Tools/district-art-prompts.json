@@ -1,0 +1,22 @@
+[
+  [
+    "DistrictSkies",
+    "Create original detailed painted panoramic BACKGROUND atlas for a 2.5D sprite racing game. EXACT three horizontal strips of equal height, full width, no gutters; wide sheet width1536 height1536, each panorama1536x512. Row1: river at golden sunset, glowing peach clouds blue sky, sun low LEFT, distant elegant metropolitan skyline silhouetted across river, warm rippled reflections. Row2: bright blue sunny sky white clouds over expansive green wooded hills and river valley with distant modern city far right, no nearby road. Row3: clear blue midday sky and scattered soft clouds over distant modern glass skyscraper skyline with city roofline lower edge. All skylines / hills stay in bottom35 percent of each strip leaving sky clear above. Scene fragments ONLY sky and far terrain/water, NO foreground buildings NO roads NO bikes NO cars NO bridge NO UI NO text. Detailed cohesive painterly realistic game art, convincing atmospheric perspective, no pixel art, not cartoon. Each row continuous landscape panorama, top and bottom rows strictly separated, level horizons.",
+    false
+  ],
+  [
+    "BridgeStructures",
+    "Original detailed painted 2.5D racing sprite asset atlas, actual transparent background. Exact 2x2 grid, FOUR fully separated assets generous transparent margins. TOP LEFT: huge monumental gray stone suspension bridge tower portal viewed straight on from low roadway height, two vertical tapered stone piers and high arched crossbeam spanning a completely transparent open roadway opening, complete tower from foundation to top. Piers far apart, opening width60 percent of total, flat base level. TOP RIGHT: same tower viewed very slightly from right side showing subtle depth, still large open arch and both piers complete. BOTTOM LEFT: weathered stone bridge anchorage column with metal cable saddle, isolated narrow tall prop. BOTTOM RIGHT: slim elegant dark bronze streetlamp with single curved arm and glowing warm amber head, full height. Warm golden sunset lighting from left, realistic textured stone, detailed metal joints, painted PC racing game quality. NO ROAD surface no skyline no vehicles no text, everything outside solid structures including arch opening truly transparent.",
+    true
+  ],
+  [
+    "DayStreetProps",
+    "Original detailed painted sprite atlas for sunny 2.5D motorcycle road racing. Actual transparent background. EXACT 4 columns x 2 rows, eight isolated full objects with generous blank gutters, uniform cell sizes. Row1: elegant six-story pale sandstone apartment block with shop awnings; seven-story blue-glass office building pale stone frame; low cream modern shopping frontage with cafe umbrellas; green leafy mature urban plane tree showing complete trunk and crown. Row2: rectangular street planter overflowing with pink and yellow flowers and dense foliage; rounded clipped green shrub in square stone planter; slender decorative black street lantern full height; green directional highway sign with white right-curving arrow on single silver post, no text. Buildings from low street-level 3/4 perspective facade facing camera with right side visible, depth in window recesses and ground floor. Trees realistic natural scale. Bright sunny daylight from upper left, realistic painted textures, warm facade highlights cool shadows. No roads no people no vehicles no background no gridlines no labels.",
+    true
+  ],
+  [
+    "DistrictSkiesV2",
+    "Create a tall portrait-format atlas, canvas 1024 wide by 1536 high. Exactly THREE equally tall horizontal landscape panels stacked vertically. Each panel is 1024x512. TOP THIRD: golden sunset river with sun at left, peach clouds, distant metropolitan skyline low across river, shimmering gold water. MIDDLE THIRD: sunny blue sky white clouds above rolling lush green forest hills, river valley and tiny modern city at far right. BOTTOM THIRD: clear bright blue midday sky above an elegant modern glass skyscraper skyline. Within EACH panel sky occupies upper two thirds, skyline/hills/water occupy bottom third. Every panel fills its entire rectangular area, no white borders no blank space. Painted realistic game backdrop art. Backgrounds only: no road, no bridge, no vehicles, no interface, no lettering. Three distinctly different lighting environments with horizontal horizons. IMPORTANT output is PORTRAIT canvas with THREE rows, NOT an ultra wide strip.",
+    false
+  ]
+]
