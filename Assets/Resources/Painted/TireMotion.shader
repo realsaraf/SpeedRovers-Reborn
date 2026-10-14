@@ -29,7 +29,7 @@ Shader "SpeedRovers/TireMotion"
                 animatedUV.x+=(sin(_BodyPhase)*.004+sin(_BodyPhase*.43)*.003)*upper*_Region.z*riding;
                 animatedUV.y+=sin(_BodyPhase*1.3)*.004*upper*_Region.w*riding;
                 fixed4 original=tex2D(_MainTex,animatedUV);
-                float nx=(local.x-_Tire.x)/_Tire.y;
+                float nx=(local.x-(_Tire.x+local.y*_Tire.w))/_Tire.y;
                 float ny=local.y/_Tire.z;
                 // Affect rubber inside its painted silhouette, never draw a second tire.
                 float mask=smoothstep(1,.72,abs(nx))*smoothstep(0,.10,ny)*smoothstep(1,.86,ny);
@@ -37,7 +37,7 @@ Shader "SpeedRovers/TireMotion"
                 for(int tap=-4;tap<=4;tap++)
                 {
                     float sampleY=clamp(local.y+tap*.012,.035,_Tire.z-.035);
-                    rubber+=tex2D(_MainTex,float2(i.uv.x,_Region.y+sampleY*_Region.w)).rgb/9;
+                    rubber+=tex2D(_MainTex,float2(i.uv.x+(sampleY-local.y)*_Tire.w*_Region.z,_Region.y+sampleY*_Region.w)).rgb/9;
                 }
                 float blur=smoothstep(70,180,_Velocity);
                 float groove=pow(saturate(cos(ny*55+abs(nx)*4-_Phase*6.283)),18);

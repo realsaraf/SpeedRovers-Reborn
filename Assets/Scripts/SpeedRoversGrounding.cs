@@ -71,10 +71,10 @@ namespace SpeedRovers.Reborn
             if(Event.current.type!=EventType.Repaint)return;
             Rect uv=new Rect(region.x/atlas.width,1-(region.y+region.h)/atlas.height,region.w/atlas.width,region.h/atlas.height);
             tireMotion.SetVector("_Region",new Vector4(uv.x,uv.y,uv.width,uv.height));
-            tireMotion.SetVector("_Tire",new Vector4(region.pivot,height*.105f/width,.49f,0));
+            tireMotion.SetVector("_Tire",new Vector4(region.pivot,height*.105f/width,.44f,region.tireSlope));
             tireMotion.SetFloat("_Phase",turns);
             tireMotion.SetFloat("_Velocity",velocity);
-            tireMotion.SetFloat("_BodyPhase",animationTime*5+velocity*.007f);
+            tireMotion.SetFloat("_BodyPhase",animationTime*5+region.x*.017f);
             Graphics.DrawTexture(new Rect(x-width*region.pivot,y-height,width,height),atlas,uv,0,0,0,0,GUI.color,tireMotion);
         }
 

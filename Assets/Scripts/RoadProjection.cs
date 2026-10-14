@@ -11,6 +11,10 @@ namespace SpeedRovers.Reborn
         public const float ViewDistance = 470f;
         public const float LaneSpacing = .63f;
         public const float TravelScale = 1.65f;
+        // Every object uses the same lane-relative scale at its contact depth.
+        public const float LaneWidthMetres = 3.4f;
+        public static float MetresToPixels(float metres,float depth) => metres*HalfWidth(depth)*LaneSpacing/LaneWidthMetres;
+        public static float ObjectScale(float depth) => HalfWidth(depth)/HalfWidth(1);
 
         public static float Depth(float relativeDistance)
         {

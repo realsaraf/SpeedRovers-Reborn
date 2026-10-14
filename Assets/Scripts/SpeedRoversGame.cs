@@ -21,6 +21,7 @@ namespace SpeedRovers.Reborn
             public float travelSpeed;
             public int variant;
             public float lateral, lean;
+            public float rollingPhase;
             public bool police, passSound;
             public bool trafficReady;
             public float cruiseSpeed;

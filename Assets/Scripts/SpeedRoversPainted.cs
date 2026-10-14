@@ -8,7 +8,7 @@ namespace SpeedRovers.Reborn
 {
     public sealed partial class SpeedRoversGame
     {
-        [Serializable] sealed class ArtRegion { public float x, y, w, h, pivot = .5f; }
+        [Serializable] sealed class ArtRegion { public float x, y, w, h, pivot = .5f; public float wheelL=.12f, wheelR=.88f, wheelWidth=.08f, tireSlope; }
         [Serializable] sealed class PaintedRegions
         {
             public ArtRegion[] rider, scenery, traffic, worlds, foliage, water;
@@ -131,7 +131,7 @@ namespace SpeedRovers.Reborn
                 GUI.color = Color.white;
             }
             DrawRushEffects();
-            DrawRushBike(270 + Mathf.Sin(animationTime*45)*hitPulse*5, 885, 190, selectedRider, visualLean, true);
+            DrawRushBike(270 + Mathf.Sin(animationTime*45)*hitPulse*5, 885, RoadProjection.MetresToPixels(2.05f,1), selectedRider, visualLean, true);
         }
 
         void DrawSurface(int city)
@@ -218,7 +218,7 @@ namespace SpeedRovers.Reborn
             }
             ArtRegion region = paintedRegions.scenery[city * 4 + kind];
             float scale = .035f + depth * .965f;
-            float height = (kind < 2 ? 1200 : kind == 2 ? (district==2?440:680) : 620) * scale;
+            float height = RoadProjection.MetresToPixels(kind<2?16:kind==2?(district==2?5.8f:7.5f):7.5f,depth);
             float width = height * region.w / region.h;
             Vector2 at = RoadProjection.Project(distance, entry.z, 0, lane);
             float shoulder = RoadProjection.HalfWidth(depth) * (district==2?1.7f:kind == 3 ? 1.18f : 1.32f);

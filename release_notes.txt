@@ -1,7 +1,9 @@
-Speed Rovers 2 1.0.4
+Speed Rovers 2 1.0.5
 
-Visual refinement across the entire race: continuous perspective asphalt, antialiased road markings and curbs in all seven locations, warm bridge road highlights, Tokyo neon reflections and restrained canopy shading.
+Shared lane-relative scaling corrects oversized cars/buses and undersized oncoming bikes.
 
-Trees and shrubs now use continuous wind motion with one solid silhouette, replacing the ghosted crossfading and segmented sway. Seeded tree variation and less repetitive shrub placement improve the roadside. Soft vehicle ground shadows retain dark tire contact; rider upper-body movement is stronger while tire contact remains anchored.
+Expanded directional artwork for the player, all rival rider styles and all traffic identities. Rear and oncoming traffic now have five viewing angles. Riders use denser bank/posture sheets with tire-aligned motion. One inconsistent red-bike extreme pose was excluded.
 
-Please test full-route transitions, Tokyo reflections, bridge sidewalks, tree motion and vehicle contact on your iPhone. Existing rider pose atlases remain; this build does not introduce a new multi-frame rider animation set. Unlocks and settings are preserved.
+Wheels follow distance travelled rather than elapsed time times current speed, preventing phase jumps during slowing. Wheel masks and contact shadows follow each vehicle frame. Oncoming traffic uses new transparent artwork.
+
+Please test rider turns, traffic passing, deceleration, stopped vehicle wheels and all rider selections. This remains a visual iteration; iPhone performance and final animation quality need device feedback.

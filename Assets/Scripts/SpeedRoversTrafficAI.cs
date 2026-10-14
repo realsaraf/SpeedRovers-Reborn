@@ -104,6 +104,7 @@ namespace SpeedRovers.Reborn
                 next=RoadRoute.Length;
                 t.travelSpeed=0;
             }
+            t.rollingPhase+=Mathf.Abs(next-t.distance)/RoadProjection.TravelScale/2.05f;
             t.distance=next;
         }
     }

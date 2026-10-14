@@ -285,6 +285,29 @@ public static class SpeedRoversChecks
             Check((int)Get("wallet")==30 && (int)Get("selectedRider")==2,"owned rider re-equip must be free");
             Call("Purchase",false,-1);Call("Purchase",true,5);
             Check((int)Get("wallet")==30,"invalid collection index spent coins");
+            foreach(float depth in new[]{0f,.1f,.4f,1f})
+            {
+                float lanePixels=RoadProjection.HalfWidth(depth)*RoadProjection.LaneSpacing;
+                Check(RoadProjection.MetresToPixels(2.55f,depth)<lanePixels,"bus exceeds lane width");
+                Check(Mathf.Abs(RoadProjection.MetresToPixels(1.85f,depth)/lanePixels-1.85f/3.4f)<.0001f,"vehicle scale drifts with distance");
+            }
+            // Wheel rotation integrates actual travel and stops with a blocked vehicle.
+            Start();AddThing("Traffic",0);
+            object rolling=((IList)Get("things"))[0];
+            trafficType.GetField("travelSpeed").SetValue(rolling,40f);
+            trafficType.GetField("distance").SetValue(rolling,1000f);
+            Call("AdvanceTraffic",rolling,.1f);
+            Check((float)trafficType.GetField("rollingPhase").GetValue(rolling)>0,"traffic wheel phase did not advance");
+            Start();AddThing("Traffic",0);
+            object stopped=((IList)Get("things"))[0];
+            trafficType.GetField("distance").SetValue(stopped,2000f);
+            Call("AdvanceTraffic",stopped,.25f);
+            Check((float)trafficType.GetField("rollingPhase").GetValue(stopped)==0,"stationary vehicle wheels rotate");
+            foreach(string name in new[]{"TrafficMotionA","TrafficMotionB","TrafficMotionC","OncomingMotion","RiderMotionRed","RiderMotionBlue","RiderMotionGreen","RiderMotionOrange"})
+            {
+                Check(Resources.Load<Texture2D>("Painted/"+name)!=null,"missing motion atlas "+name);
+                Check(Resources.Load<TextAsset>("Painted/"+name+"Regions")!=null,"missing motion anchors "+name);
+            }
             Debug.Log("Speed Rovers gameplay checks passed: " + checks);
         }
         finally
