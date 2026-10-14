@@ -1,2 +1,2 @@
-Speed Rovers 2 1.0.6
-Hold and drag your thumb to steer freely between lanes. Release to keep your position, or make a quick swipe to step sideways. Steering is bounded by the road edges. Includes the expanded rider and traffic poses and corrected vehicle-to-city scale from 1.0.5.
+Speed Rovers 2 1.0.8
+Fuel drains while racing: collect green fuel cans to refill. Nitro recharges and activates at 50% or more; tap to boost, with blue exhaust effects. Tap Jump to collect elevated spinning gold coins and clear potholes. Rider moved forward for thumb visibility. Distinct sound and soft haptic feedback for boost, jump and pickups. Keyboard: Shift for nitro, Space to jump. Speed and gear now appear in the redesigned top racing dashboard.

@@ -7,7 +7,7 @@ namespace SpeedRovers.Reborn
     public static class RoadProjection
     {
         public const float Horizon = 410f;
-        public const float Height = 475f;
+        public const float Height = 375f;
         public const float ViewDistance = 470f;
         public const float LaneSpacing = .63f;
         public const float TravelScale = 1.65f;

@@ -16,7 +16,9 @@ namespace SpeedRovers.Reborn
         {
             impactRecovery=Mathf.Max(0,impactRecovery-dt);
             float target=braking?45:(easyMode?337.5f:427.5f)+Mathf.Min(checkpoints*3,37.5f);
-            float acceleration=braking?180:GearAcceleration[gear]*(shiftRemaining>0?.18f:1)*(impactRecovery>0?.28f:1);
+            if(nitroActive && !braking)target+=145;
+            if(fuel<=0)target=0;
+            float acceleration=fuel<=0?38:nitroActive&&!braking?100:braking?180:GearAcceleration[gear]*(shiftRemaining>0?.18f:1)*(impactRecovery>0?.28f:1);
             speed=Mathf.MoveTowards(speed,target,dt*acceleration);
         }
 

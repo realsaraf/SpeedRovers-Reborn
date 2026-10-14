@@ -10,7 +10,7 @@ namespace SpeedRovers.Reborn
     public sealed partial class SpeedRoversGame : MonoBehaviour
     {
         enum ScreenMode { Title, Market, Cities, Characters, Settings, Running, Paused, Results }
-        enum ThingKind { Coin, Clock, Traffic, Barrier, Rival, Pothole, Roadworks, Oncoming }
+        enum ThingKind { Coin, Clock, Traffic, Barrier, Rival, Pothole, Roadworks, Oncoming, Fuel }
 
         sealed class Thing
         {
@@ -106,6 +106,8 @@ namespace SpeedRovers.Reborn
             InitRushAudio();
             foreach (string arg in Environment.GetCommandLineArgs())
             {
+                if (arg.StartsWith("-ability-review-dir=", StringComparison.Ordinal))
+                    StartCoroutine(CaptureAbilities(arg.Substring("-ability-review-dir=".Length)));
                 if (arg.StartsWith("-audio-review-dir=", StringComparison.Ordinal))
                     StartCoroutine(CaptureAudioReview(arg.Substring("-audio-review-dir=".Length)));
                 if (arg.StartsWith("-presentation-review-dir=", StringComparison.Ordinal))
@@ -239,6 +241,7 @@ namespace SpeedRovers.Reborn
             ResetEngine(speed);
             impactRecovery=0;
             nextWork = nextPolice = 0;
+            ResetRaceAbilities();
             timeLeft = 38;
             lane = targetLane = 0;
             touchStarted = false; steeringFinger = -1;
@@ -283,6 +286,8 @@ namespace SpeedRovers.Reborn
             previousHorizontalAxis = horizontalAxis;
             if (Input.GetKeyDown(KeyCode.Escape)) { mode = ScreenMode.Paused; return; }
             braking=Input.GetKey(KeyCode.DownArrow)||Input.GetKey(KeyCode.S);
+            if(Input.GetKeyDown(KeyCode.Space)) TryJump();
+            if(Input.GetKeyDown(KeyCode.LeftShift)||Input.GetKeyDown(KeyCode.RightShift)) TryNitro();
             ReadSwipe();
 
             // Consume elapsed time in collision-safe steps. Rendering below
@@ -308,6 +313,8 @@ namespace SpeedRovers.Reborn
             hitPulse = Mathf.Max(0,hitPulse-dt*2);
             float previousSpeed = speed;
             float previousDistance = distance;
+            AdvanceAbilities(dt);
+            if(mode!=ScreenMode.Running)return;
             AdvanceDrive(dt);
             AdvanceEngine(dt, mode==ScreenMode.Running);
             wheelTurns += (previousSpeed+speed)*.5f/3.6f/2.05f*dt;
@@ -316,6 +323,7 @@ namespace SpeedRovers.Reborn
             lane = Mathf.SmoothDamp(lane, targetLane, ref laneVelocity, .16f, 8, dt);
 
             SpawnRushTraffic();
+            SpawnFuel();
 
             for (int i = 0; i < things.Count; i++)
             {
@@ -323,23 +331,33 @@ namespace SpeedRovers.Reborn
                 AdvanceTraffic(thing,dt);
                 if(!thing.passSound && thing.distance<distance+9 && (thing.kind==ThingKind.Traffic || thing.kind==ThingKind.Oncoming || thing.kind==ThingKind.Rival))
                 {thing.passSound=true;PlayPass(thing);}
-                bool pickup=thing.kind==ThingKind.Coin || thing.kind==ThingKind.Clock;
+                bool pickup=thing.kind==ThingKind.Coin || thing.kind==ThingKind.Clock || thing.kind==ThingKind.Fuel;
                 if (thing.used || thing.distance > distance + (pickup?8:3.5f)) continue;
                 if(thing.distance<distance-8) {if(thing.kind!=ThingKind.Rival)thing.used=true;continue;}
                 if (Mathf.Abs(lane - thing.lane - thing.lateral) > (thing.kind == ThingKind.Rival ? .38f : thing.kind==ThingKind.Traffic || thing.kind==ThingKind.Oncoming ? .63f : .42f)) continue;
                 if(!pickup && animationTime<thing.contactAfter)continue;
+                if(thing.kind==ThingKind.Coin && jumpHeight<.45f) continue;
+                if(thing.kind==ThingKind.Pothole && jumpHeight>.45f) continue;
+                if(thing.kind==ThingKind.Fuel && jumpHeight>.35f) continue;
                 if(pickup)thing.used = true;
                 if (thing.kind == ThingKind.Coin)
                 {
                     runCoins++;
                     ShowBanner("+1 COIN", .65f);
-                    Beep(880, .07f);
+                    AbilityCue(2);
+                    SoftImpactFeedback();
+                }
+                else if (thing.kind == ThingKind.Fuel)
+                {
+                    fuel=Mathf.Min(1,fuel+.32f);
+                    ShowBanner("FUEL +32%",1f);
+                    AbilityCue(3); SoftImpactFeedback();
                 }
                 else if (thing.kind == ThingKind.Clock)
                 {
                     timeLeft += 4;
                     ShowBanner("+4 SECONDS", .9f);
-                    Beep(620, .12f);
+                    AbilityCue(3); SoftImpactFeedback();
                 }
                 else ApplyRaceImpact(thing);
             }
@@ -385,6 +403,7 @@ namespace SpeedRovers.Reborn
             }
             hitPulse=1;
             ShowBanner(obstacle.kind==ThingKind.Pothole?"BROKEN ROAD":obstacle.kind==ThingKind.Rival?"BIKE CONTACT":"IMPACT — KEEP RACING",.8f);
+            nitroActive=false;
             PlayCrash();
             SoftImpactFeedback();
         }
@@ -393,16 +412,15 @@ namespace SpeedRovers.Reborn
         Vector2 SteeringPointer(Vector2 point)
         {
             Rect safe = Screen.safeArea;
-            float scale = Mathf.Min(safe.width / 540f, safe.height / 960f);
-            Vector2 origin = new Vector2(safe.xMin + (safe.width - 540 * scale) / 2,
-                safe.yMin + (safe.height - 960 * scale) / 2);
+            float scale = HudScale;
+            Vector2 origin = new Vector2(safe.xMin + (safe.width - 540 * scale) / 2,safe.yMin);
             return (point - origin) / Mathf.Max(.001f, scale);
         }
 
         void BeginSteering(Vector2 point, float now)
         {
             // Reserve the top HUD, including Pause, and ignore letterbox areas.
-            if (point.x < 0 || point.x > 540 || point.y < 0 || point.y > 860) return;
+            if (point.x < 0 || point.x > 540 || point.y < 0 || point.y > HudHeight-180 || AbilityButtonAt(point)!=0) return;
             touchStartX = point.x; touchStartY = point.y;
             touchStartLane = targetLane; touchStartTime = now; touchStarted = true;
         }
@@ -431,6 +449,7 @@ namespace SpeedRovers.Reborn
                 for (int i = 0; i < Input.touchCount; i++)
                 {
                     Touch touch = Input.GetTouch(i);
+                    if(touch.phase==TouchPhase.Began && HandleAbilityTap(SteeringPointer(touch.position))) continue;
                     if (steeringFinger < 0 && touch.phase == TouchPhase.Began)
                     {
                         BeginSteering(SteeringPointer(touch.position), Time.unscaledTime);
@@ -446,7 +465,7 @@ namespace SpeedRovers.Reborn
                 return;
             }
             if (steeringFinger >= 0) { touchStarted = false; steeringFinger = -1; return; }
-            if (Input.GetMouseButtonDown(0)) BeginSteering(SteeringPointer(Input.mousePosition), Time.unscaledTime);
+            if (Input.GetMouseButtonDown(0) && !HandleAbilityTap(SteeringPointer(Input.mousePosition))) BeginSteering(SteeringPointer(Input.mousePosition), Time.unscaledTime);
             if (Input.GetMouseButton(0) || Input.GetMouseButtonUp(0))
                 MoveSteering(SteeringPointer(Input.mousePosition), Time.unscaledTime, Input.GetMouseButtonUp(0));
         }
@@ -525,15 +544,22 @@ namespace SpeedRovers.Reborn
             InitPresentation();
             GUI.matrix = Matrix4x4.identity;
             Fill(0, 0, Screen.width, Screen.height, mode==ScreenMode.Running ? new Color(.025f,.055f,.105f) : menuBase);
+            // Cover the physical display with the world using uniform scaling; no stretched sprites or black bars.
+            bool raceView=mode==ScreenMode.Running || mode==ScreenMode.Paused || mode==ScreenMode.Results;
+            float cover=Mathf.Max(Screen.width/540f,Screen.height/960f);
+            GUI.matrix=Matrix4x4.TRS(new Vector3((Screen.width-540*cover)/2,(Screen.height-960*cover)/2,0),Quaternion.identity,new Vector3(cover,cover,1));
+            GUI.BeginGroup(new Rect(0,0,540,960));
+            if(raceView)DrawWorld(selectedCity); else ArcadeCanvas();
+            GUI.EndGroup();
             Rect safe = Screen.safeArea;
-            float scale = Mathf.Min(safe.width / 540f, safe.height / 960f);
-            float xOffset = safe.xMin + (safe.width - 540 * scale) / 2;
-            float yOffset = Screen.height - safe.yMax + (safe.height - 960 * scale) / 2;
-            GUI.matrix = Matrix4x4.TRS(new Vector3(xOffset, yOffset, 0), Quaternion.identity, new Vector3(scale, scale, 1));
-            GUI.BeginGroup(new Rect(0, 0, 540, 960));
-            GUI.enabled = menuDialog == MenuDialog.None;
-            if (mode == ScreenMode.Running || mode == ScreenMode.Paused || mode == ScreenMode.Results) DrawWorld(selectedCity);
-            if (mode == ScreenMode.Running) DrawHud();
+            float scale=HudScale;
+            float xOffset=safe.xMin+(safe.width-540*scale)/2;
+            float yOffset=Screen.height-safe.yMax;
+            if(mode!=ScreenMode.Running)yOffset+=(safe.height-960*scale)/2;
+            GUI.matrix=Matrix4x4.TRS(new Vector3(xOffset,yOffset,0),Quaternion.identity,new Vector3(scale,scale,1));
+            GUI.BeginGroup(new Rect(0,0,540,mode==ScreenMode.Running?HudHeight:960));
+            GUI.enabled=menuDialog==MenuDialog.None;
+            if(mode==ScreenMode.Running)DrawHud();
             if (mode == ScreenMode.Title) DrawTitle();
             if (mode == ScreenMode.Market) DrawMarket();
             if (mode == ScreenMode.Cities) DrawSelection(true);

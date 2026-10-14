@@ -359,24 +359,34 @@ namespace SpeedRovers.Reborn
         }
         void DrawHud()
         {
-            Panel(18,18,430,66,new Color(.025f,.035f,.055f,.82f));
-            Label("COINS",32,25,104,17,10,new Color(.74f,.81f,.86f),true);
-            Label(runCoins.ToString(),32,43,104,31,23,new Color(1,.78f,.37f),true);
-            Label("RACE TIME",157,25,132,17,10,new Color(.74f,.81f,.86f),true);
-            Label(RaceClock(animationTime),157,43,132,31,23,Color.white,true);
-            Label("DISTANCE",310,25,120,17,10,new Color(.74f,.81f,.86f),true);
-            Label((distance/1000f).ToString("0.0")+" km",310,43,120,31,23,Color.white,true);
-            if(Action("II",460,18,62,66))mode=ScreenMode.Paused;
-            Fill(18,91,504,3,new Color(1,1,1,.15f));Fill(18,91,504*Mathf.Clamp01(distance/RoadRoute.Length),3,menuAccent);
-            Panel(18,851,156,91,new Color(.025f,.035f,.055f,.86f));
-            Label(Mathf.RoundToInt(speed).ToString(),32,858,116,46,35,Color.white,true);
-            Label("KM/H   /   GEAR "+gear,32,908,136,22,11,new Color(.74f,.81f,.86f),true);
+            Color muted=new Color(.65f,.73f,.80f);
+            Panel(18,18,504,148,new Color(.025f,.035f,.055f,.94f));
+            Fill(30,28,3,38,menuAccent);
+            Label("COINS",44,27,92,17,10,muted,true);
+            Label(runCoins.ToString(),44,44,92,31,23,menuGold,true);
+            Label("RACE TIME",158,27,132,17,10,muted,true);
+            Label(RaceClock(animationTime),158,44,132,31,23,Color.white,true);
+            Label("DISTANCE",310,27,120,17,10,muted,true);
+            Label((distance/1000f).ToString("0.0")+" km",310,44,120,31,23,Color.white,true);
+            if(Action("II",460,28,48,48))mode=ScreenMode.Paused;
+            Fill(32,84,476,1,new Color(1,1,1,.12f));
+            Label("SPEED",32,93,100,15,9,muted,true);
+            Label(Mathf.RoundToInt(speed).ToString(),30,105,116,45,36,nitroActive?new Color(.2f,.86f,1):Color.white,true);
+            Label("KM/H",142,113,65,17,11,muted,true);
+            Label("GEAR "+gear,142,133,65,17,11,Color.white,true);
+            Label("FUEL  "+Mathf.CeilToInt(fuel*100)+"%",222,98,150,22,11,fuel<.2f?new Color(1,.48f,.18f):muted,true);
+            Fill(222,125,150,7,new Color(1,1,1,.12f));
+            Fill(222,125,150*fuel,7,fuel<.2f?new Color(1,.48f,.18f):menuAccent);
+            Label(RoadRoute.Name(distance),222,139,166,17,9,muted,true);
             int place=1,racers=1;
             foreach(Thing racer in things)if(racer.kind==ThingKind.Rival&&!racer.used){racers++;if(racer.distance>distance)place++;}
-            Label(place+" / "+racers,319,858,193,42,28,Color.white,true,TextAnchor.MiddleRight);
-            Label(RoadRoute.Name(distance),252,907,260,24,12,Color.white,true,TextAnchor.MiddleRight);
+            Label("POSITION",403,98,105,17,9,muted,true,TextAnchor.MiddleRight);
+            Label(place+" / "+racers,398,119,110,34,25,Color.white,true,TextAnchor.MiddleRight);
+            Fill(18,171,504,3,new Color(1,1,1,.15f));
+            Fill(18,171,504*Mathf.Clamp01(distance/RoadRoute.Length),3,menuAccent);
+            DrawAbilityHud();
             if(Time.time<bannerUntil&&distance>70)
-            {Panel(90,113,360,43,new Color(.025f,.035f,.055f,.80f));Label(banner,100,113,340,43,14,new Color(1,.78f,.37f),true,TextAnchor.MiddleCenter);}
+            {Panel(90,188,360,36,new Color(.025f,.035f,.055f,.84f));Label(banner,100,188,340,36,13,menuGold,true,TextAnchor.MiddleCenter);}
         }
         void DrawPresentationOverlay()
         {

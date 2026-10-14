@@ -64,6 +64,9 @@ namespace SpeedRovers.Reborn
                     things.Add(new Thing {distance=spawnDistance+n*8,lane=spawnLane,kind=kind,variant=variant,police=kind==ThingKind.Oncoming && (variant%8==4 || variant%8==5),
                         travelSpeed=kind==ThingKind.Oncoming?-20-variant%17:kind==ThingKind.Rival?40+variant%19:kind==ThingKind.Traffic?14+variant%16:0});
                 }
+                Thing last=things.Count>0?things[things.Count-1]:null;
+                if(last!=null && last.kind==ThingKind.Coin && Mathf.Abs(last.distance-spawnDistance)<1)
+                    for(int c=1;c<=2;c++) things.Add(new Thing{kind=ThingKind.Coin,lane=last.lane,distance=spawnDistance+c*24,variant=last.variant+c});
                 spawnDistance += RoadRoute.Urban(spawnDistance)?125:165;
             }
             while(700+nextPolice*1600<distance+470)
@@ -195,6 +198,8 @@ namespace SpeedRovers.Reborn
                 Region(rushHazards,region,at.x-width/2,at.y-height,width,height);
                 if(index==1) Glow(at.x,at.y-height,27*scale,new Color(1,.5f,.04f,.5f+.4f*Mathf.Sin(animationTime*10)));
             }
+            else if(thing.kind==ThingKind.Coin) DrawSpinningCoin(at,depth,thing.variant);
+            else if(thing.kind==ThingKind.Fuel) DrawFuelPickup(at,depth);
             else DrawPaintedThing(thing.kind,at,depth,thing.variant);
             GUI.color=tint;
         }
@@ -230,8 +235,12 @@ namespace SpeedRovers.Reborn
             float scale=height/165;
             Color tint=GUI.color;
             SoftGroundShadow(x-lean*6*scale,y-3*scale,80*scale,22*scale,.5f);
-            Disc(x-17*scale,y-3*scale,34*scale,5*scale,new Color(.01f,.009f,.008f,.78f));
+            if(!player || jumpHeight<.05f) Disc(x-17*scale,y-3*scale,34*scale,5*scale,new Color(.01f,.009f,.008f,.78f));
             GUI.color=tint;
+            if(player) {
+                y-=RoadProjection.MetresToPixels(jumpHeight,1);
+                DrawNitroExhaust(x,y,height,lean);
+            }
             float bounce=player?hitPulse*2:0;
             DrawBikeBody(atlas,region,x,y,width,height+bounce,lean,player?wheelTurns:rollingPhase,player?speed:rivalVelocity);
             Glow(x-lean*8*scale,y-height*.35f,13*scale,new Color(1,.07f,.025f,.33f));

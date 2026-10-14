@@ -55,7 +55,7 @@ public static class SpeedRoversChecks
             Set("verificationRun", true);
             var surfaceImporter=(TextureImporter)AssetImporter.GetAtPath("Assets/Resources/Painted/CityAsphalt.png");
             Check(surfaceImporter!=null && surfaceImporter.mipmapEnabled && surfaceImporter.wrapMode==TextureWrapMode.Repeat,"city asphalt must tile with mip filtering");
-            foreach(string shaderPath in new[]{"Painted/CitySurface","Painted/VehicleMotion","Painted/FoliageWind","Painted/TireMotion"})
+            foreach(string shaderPath in new[]{"Painted/CitySurface","Painted/VehicleMotion","Painted/FoliageWind","Painted/TireMotion","Painted/GoldCoin"})
             {
                 Shader shader=Resources.Load<Shader>(shaderPath);
                 Check(shader!=null,"missing shader "+shaderPath);
@@ -102,6 +102,32 @@ public static class SpeedRoversChecks
             Check(Mathf.Abs(Number("distance")-fineDistance)<.2f,"10 fps rendering loses simulation time");
 
             Start();
+            Call("AdvanceAbilities",10f);
+            Check(Number("fuel")<.85f && Number("fuel")>.84f,"fuel must drain over riding time");
+            Set("nitro",.49f);Call("TryNitro");Check(!(bool)Get("nitroActive"),"nitro activated below half charge");
+            Set("nitro",.5f);Call("TryNitro");Check((bool)Get("nitroActive"),"half-full nitro must activate");
+            float boosted=Number("nitro");Call("TryNitro");Check(Number("nitro")==boosted,"repeated boost press changed charge");
+            Call("AdvanceAbilities",1f);Check(Number("nitro")<.31f,"boost must consume charge");
+            Call("AdvanceAbilities",2f);Check(!(bool)Get("nitroActive"),"empty nitro did not stop boost");
+            Call("AdvanceAbilities",10f);Check(Number("nitro")>=.249f,"nitro must recharge");
+            Set("nitro",1f);Call("TryNitro");Set("speed",460f);Call("AdvanceDrive",1f);
+            Check(Number("speed")>500,"nitro must increase actual travel speed");
+            Start();Call("TryJump");Call("AdvanceAbilities",.1f);
+            Check(Number("jumpHeight")>.4f,"jump must lift rider");
+            float jumpV=Number("jumpVelocity");Call("TryJump");Check(Number("jumpVelocity")==jumpV,"air jump must not stack");
+            for(int n=0;n<120;n++)Call("AdvanceAbilities",.01f);
+            Check(Number("jumpHeight")==0 && Number("jumpVelocity")==0,"jump must land");
+            Start();Set("fuel",.2f);AddThing("Fuel",0);Call("AdvanceRun",.02f);
+            Check(Number("fuel")>.51f && Number("fuel")<.53f,"fuel pickup must refill tank");
+            float fuelAfter=Number("fuel");Call("AdvanceRun",.02f);Check(Number("fuel")<fuelAfter,"fuel pickup counted twice");
+            Start();Set("fuel",0f);Set("speed",40f);Call("AdvanceRun",.1f);
+            Check(Number("speed")<40 && Get("mode").ToString()=="Running","empty fuel should coast before ending");
+            Set("speed",1f);Call("AdvanceRun",.01f);Check(Get("mode").ToString()=="Results","empty stopped bike should finish");
+            Start();Set("nitro",.8f);Call("TryNitro");Mode("Paused");float pausedFuel=Number("fuel"),pausedNitro=Number("nitro");
+            Call("AdvanceRun",1f);Check(Number("fuel")==pausedFuel && Number("nitro")==pausedNitro,"pause must freeze abilities");
+            Start();Call("BeginSteering",new Vector2(440,130),0f);
+            Check(!(bool)Get("touchStarted"),"nitro control must not start steering");
+            Start();
             Call("BeginSteering", new Vector2(270, 200), 0f);
             Call("MoveSteering", new Vector2(315, 200), .4f, false);
             Check(Mathf.Abs(Number("targetLane") - .25f) < .001f, "held thumb must steer between lanes");
@@ -134,6 +160,9 @@ public static class SpeedRoversChecks
 
             Start();
             AddThing("Coin", 0);
+            Call("AdvanceRun", .02f);
+            Check((int)Get("runCoins")==0,"grounded rider must not collect elevated coin");
+            Set("jumpHeight",.8f);
             Call("AdvanceRun", .02f);
             Check((int)Get("runCoins") == 1, "coin pickup missing");
             Call("AdvanceRun", .02f);

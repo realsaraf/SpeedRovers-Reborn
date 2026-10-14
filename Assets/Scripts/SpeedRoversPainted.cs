@@ -131,14 +131,14 @@ namespace SpeedRovers.Reborn
                 GUI.color = Color.white;
             }
             DrawRushEffects();
-            DrawRushBike(270 + Mathf.Sin(animationTime*45)*hitPulse*5, 885, RoadProjection.MetresToPixels(2.05f,1), selectedRider, visualLean, true);
+            DrawRushBike(270 + Mathf.Sin(animationTime*45)*hitPulse*5, 785, RoadProjection.MetresToPixels(2.05f,1), selectedRider, visualLean, true);
         }
 
         void DrawSurface(int city)
         {
             const int strips = 220;
             float previousY = RoadProjection.ScreenY(distance, 0);
-            float endDepth = (960 - previousY) / (885 - previousY);
+            float endDepth = (960 - previousY) / (785 - previousY);
             Color ground = GroundColors[city];
             Texture2D roadGrain=speed>130?fastAsphalt:asphalt;
             for (int row = 0; row < strips; row++)

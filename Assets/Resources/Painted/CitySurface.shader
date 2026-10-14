@@ -21,7 +21,7 @@ Shader "SpeedRovers/CitySurface"
    float band(float value,float center,float width,float aa) { return 1-smoothstep(width-aa,width+aa,abs(value-center)); }
    fixed4 frag(Output i):SV_Target {
     float2 pixel=float2(i.uv.x*540,_Horizon+(1-i.uv.y)*(960-_Horizon));
-    float d=max(.0001,(pixel.y-_Horizon)/(885-_Horizon));
+    float d=max(.0001,(pixel.y-_Horizon)/(785-_Horizon));
     float farScale=27.0/497.0;
     float z=27/lerp(farScale,1,d)-27;
     float world=_Distance+z;
