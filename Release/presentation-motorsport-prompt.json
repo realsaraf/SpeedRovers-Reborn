@@ -1,0 +1,10 @@
+{
+  "generator": "built-in image_gen",
+  "asset": "Assets/Resources/Interface/HomeHero.png",
+  "prompt": "Create a premium modern motorcycle racing game garage hero background, portrait composition 9:16. Original detailed painted realistic game art, cinematic 2.5D style. A red and black unbranded sport motorcycle in dramatic front three-quarter view is the main focal point, large across the middle and lower-middle of the image. A fully helmeted adult rider stands relaxed beside it in modest loose structured padded motorcycle jacket and trousers, no tight clothing or glamour pose. High-end motorsport pit garage with a large open window, daylight sky and distant city visible, cool graphite concrete floor with subtle reflections, elegant cyan and warm amber LED strips, technical racing workshop equipment softly out of focus. Balanced midtone exposure: bright bike and readable environment, not white washed-out and not nearly black. Dynamic but sophisticated, vivid red fairings. Plenty of uncluttered dark slate space in top 20 percent for a game title and bottom 15 percent for menu overlays. No text, no logos, no UI, no watermarks. Family-friendly adventurous racing mood.",
+  "references": [
+    "https://asphaltlegends.com/news/asphalt-legends-unite-is-coming",
+    "https://prattatatat.com/need-for-speed"
+  ],
+  "note": "Original artwork. References informed UI hierarchy and racing atmosphere only; no third-party game assets copied."
+}

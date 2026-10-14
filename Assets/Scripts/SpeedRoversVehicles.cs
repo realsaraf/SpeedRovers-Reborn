@@ -28,6 +28,7 @@ namespace SpeedRovers.Reborn
             float width=height*r.w/r.h;
             Rect uv=new Rect(r.x/sheet.width,1-(r.y+r.h)/sheet.height,r.w/sheet.width,r.h/sheet.height);
             vehicleMotion.SetVector("_Region",new Vector4(uv.x,uv.y,uv.width,uv.height));
+            vehicleMotion.SetFloat("_BodyPhase",animationTime*13);
             vehicleMotion.SetFloat("_Phase",turns);vehicleMotion.SetFloat("_Velocity",velocity);
             Graphics.DrawTexture(new Rect(x-width*.5f,y-height,width,height),sheet,uv,0,0,0,0,tint,vehicleMotion);
         }
@@ -42,7 +43,7 @@ namespace SpeedRovers.Reborn
             ArtRegion reference=views[row+1];
             float width=(front && variant==5?112:!front && (variant==9||variant==10)?315:!front && variant==8?270:250)*scale;
             float height=width*reference.h/reference.w;
-            float bump=Mathf.Sin(animationTime*19+thing.variant)*.5f*scale;
+            // Suspension moves the body in the shader, leaving tire contacts fixed.
             Disc(at.x-width*.49f,at.y-height*.08f,width*.98f,height*.14f,new Color(.02f,.025f,.035f,.46f));
             Disc(at.x-width*.45f,at.y-2*scale,width*.90f,6*scale,new Color(.01f,.01f,.01f,.73f));
             Disc(at.x-width*.43f,at.y-3*scale,width*.17f,7*scale,new Color(0,0,0,.85f));
@@ -54,7 +55,7 @@ namespace SpeedRovers.Reborn
                 int pose=view<-.35f?0:view>.35f?2:1;
                 // One complete silhouette per car. Crossfading poses would
                 // draw ghost tires at their different contact positions.
-                VehicleFrame(sheet,views[row+pose],at.x,at.y,height+bump,turns,velocity,tint);
+                VehicleFrame(sheet,views[row+pose],at.x,at.y,height,turns,velocity,tint);
             }
             GUI.color=tint;
             Color lamps=front?new Color(1,.89f,.62f,.45f):new Color(1,.11f,.03f,.16f);
@@ -69,3 +70,4 @@ namespace SpeedRovers.Reborn
         }
     }
 }
+

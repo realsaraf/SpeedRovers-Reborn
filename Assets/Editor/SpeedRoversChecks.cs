@@ -53,6 +53,15 @@ public static class SpeedRoversChecks
             game = root.AddComponent<SpeedRoversGame>();
             if (Get("pixel") == null) Call("Awake");
             Set("verificationRun", true);
+            var surfaceImporter=(TextureImporter)AssetImporter.GetAtPath("Assets/Resources/Painted/CityAsphalt.png");
+            Check(surfaceImporter!=null && surfaceImporter.mipmapEnabled && surfaceImporter.wrapMode==TextureWrapMode.Repeat,"city asphalt must tile with mip filtering");
+            foreach(string shaderPath in new[]{"Painted/CitySurface","Painted/VehicleMotion"})
+            {
+                Shader shader=Resources.Load<Shader>(shaderPath);
+                Check(shader!=null,"missing shader "+shaderPath);
+                foreach(var message in ShaderUtil.GetShaderMessages(shader))
+                    Check(message.severity!=UnityEditor.Rendering.ShaderCompilerMessageSeverity.Error,"shader compile: "+message.message);
+            }
             Check(root.GetComponentInChildren<AudioListener>()!=null,"no audio listener: mixer would be silent");
             foreach (string name in new[] { "districtSkies", "bridgeStructures", "dayStreetProps", "fastAsphalt", "rollingTire", "spinningRim", "rushOncoming", "rushHero", "rushBikes", "rushTraffic", "rushBuildings", "rushHazards", "paintedRider", "paintedWorlds", "paintedScenery", "paintedTraffic", "asphalt", "foliageSheet", "waterSheet", "glowSheet", "cloudSheet", "tireSheet" })
                 Check(Get(name) != null, "missing painted art: " + name);
@@ -287,4 +296,5 @@ public static class SpeedRoversChecks
         }
     }
 }
+
 

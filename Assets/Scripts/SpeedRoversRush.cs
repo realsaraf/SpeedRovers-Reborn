@@ -118,6 +118,12 @@ namespace SpeedRovers.Reborn
         {
             int variant=district==0?(entry.index+city+entry.side*3)%4:4+(entry.index+city+entry.side)%4;
             ArtRegion region=rushRegions.buildings[variant];
+            Texture2D buildingAtlas=rushBuildings;
+            if(district==0)
+            {
+                if(cityBuildings==null) { cityBuildings=Resources.Load<Texture2D>("Painted/CityBuildingsV2"); cityBuildingRegions=JsonUtility.FromJson<RaceSpriteRegions>(Resources.Load<TextAsset>("Painted/CityBuildingsV2Regions").text); }
+                region=cityBuildingRegions.frames[variant%4]; buildingAtlas=cityBuildings;
+            }
             float scale=.022f+depth*.978f;
             float height=(variant<4?1500:660)*scale;
             float width=height*region.w/region.h;
@@ -126,7 +132,7 @@ namespace SpeedRovers.Reborn
             float x=entry.side==0?at.x-edge-width:at.x+edge;
             if(x>550 || x+width< -10) return;
             Color tint=GUI.color;
-            Region(rushBuildings,region,x,at.y-height,width,height,entry.side==1);
+            Region(buildingAtlas,region,x,at.y-height,width,height,entry.side==1);
             // Illuminated storefronts pulse very slowly, independent of travel.
             Glow(x+width*.52f,at.y-height*.12f,width*.25f,
                 new Color(1,.66f,.30f,.10f+.03f*Mathf.Sin(animationTime*.9f+entry.index)));
@@ -291,3 +297,4 @@ namespace SpeedRovers.Reborn
         }
     }
 }
+

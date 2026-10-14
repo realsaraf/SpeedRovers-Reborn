@@ -17,5 +17,13 @@ public sealed class PaintedArtImporter : AssetPostprocessor
         importer.mipmapEnabled = false;
         importer.filterMode = FilterMode.Bilinear;
         importer.wrapMode = TextureWrapMode.Clamp;
+        if(assetPath.EndsWith("/CityAsphalt.png"))
+        {
+            importer.mipmapEnabled=true;
+            importer.wrapMode=TextureWrapMode.Repeat;
+            importer.filterMode=FilterMode.Trilinear;
+            importer.anisoLevel=8;
+        }
     }
 }
+

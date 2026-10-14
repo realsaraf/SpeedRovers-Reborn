@@ -79,7 +79,7 @@ namespace SpeedRovers.Reborn
             UpdateEnvironment();
             float horizon = RoadProjection.ScreenY(distance, 0);
             DrawDistrictSky(city,horizon);
-            DrawSurface(city);
+            if(!DrawContinuousCitySurface(true)) { DrawSurface(city); DrawContinuousCitySurface(); }
             DrawRoadLightPools();
             DrawBridgeCables();
             DrawOpenRails();
@@ -357,3 +357,5 @@ namespace SpeedRovers.Reborn
         }
     }
 }
+
+
