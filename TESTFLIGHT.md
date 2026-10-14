@@ -1,7 +1,7 @@
 # TestFlight release workflow
 
 App: Speed Rovers 2 (Apple ID 6822590400). iOS bundle: `com.philino.speedrovers.reborn`.
-The new app's first iOS release is 1.0.0, independent of the Windows prototype's version.
+The user installed the new app's first release, 1.0.0 (104), successfully. Current release source is 1.0.2. Device testing of each update remains separate from Apple's Testing status.
 
 `codemagic.yaml` archives and signs the Unity export on a Mac, then uploads the IPA to Speed Rovers 2. The new internal group automatically receives eligible builds for realsaraf@gmail.com. External beta review is deferred until the new app installs on a device. The workflow does not submit a public App Store release.
 

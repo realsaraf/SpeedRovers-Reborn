@@ -1,5 +1,7 @@
-Speed Rovers 2 1.0.1
+Speed Rovers 2 1.0.2
 
-Fixed displaced bridge cables and guardrails in the scaled portrait view. Scenery sections now last at least 30 seconds at full cruising speed. Three persistent competitors accelerate to racing speed, overtake slower traffic, and continue racing after you pass them. The HUD now shows your position in the pack.
+Race three persistent opponents across a 60 km route. All collisions reduce speed according to obstacle size and closing speed, then the engine downshifts and gradually recovers. The race ends at the finish line instead of timer expiry.
 
-Swipe left or right to steer. Please test acceleration, bike contact recovery, traffic grounding, engine gear changes, frame rate, and installation on your iPhone or iPad.
+New app icon, animated home screen and redesigned menus. Nine lean poses for rival riders, moving wheels, directional oncoming vehicles, grounded car shadows and inward-facing bridge lamps.
+
+Swipe left or right to steer. Please test collision recovery, race placing, rival turns, traffic grounding, bridge lamps, menu animation and frame rate on your iPhone or iPad.

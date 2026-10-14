@@ -1,6 +1,8 @@
 # Speed Rovers Reborn
 
-The standalone Unity source is in this repository. iOS 2.0.0 targets the existing Speed Rovers App Store Connect record (916983500); the automatic build/upload procedure is in [TESTFLIGHT.md](TESTFLIGHT.md). Exported iOS source is stored through Git LFS. Desktop packages and historical validation files described below are local artifacts and are not included in Git.
+The standalone Unity source is in this repository. Current iOS release **1.0.2** targets **Speed Rovers 2** (Apple ID 6822590400, bundle `com.philino.speedrovers.reborn`). The automatic build/upload procedure is in [TESTFLIGHT.md](TESTFLIGHT.md). Exported iOS source is stored through Git LFS. Historical packages below have not been rebuilt for the latest changes.
+
+Latest Windows build: **0.9.0**, `Builds/WindowsRush/Speed Rovers Reborn.exe`. Race three persistent opponents to a 60 km finish. All collisions cost speed rather than ending the race. New animated menus, app icon, nine-pose rival riders, directional oncoming traffic, grounded vehicle shadows and inward-facing bridge lamps. See [release details](Release/1.0.2.md).
 
 Latest Windows build: **0.7.0 Corrections/Rush**, `Builds/WindowsRush/Speed Rovers Reborn.exe`. Faster route travel, traffic that yields to roadworks, integrated tire animation, corrected vehicle scale, continuous bridge supports, removed checkpoint gantries, and smoother surface transitions. See `CORRECTIONS-0.7.md` for evidence and limits. Hold **S / Down** to brake. See `PAINTED-GRAPHICS.md` for scope and provenance. Earlier packages below are retained for comparison.
 
@@ -33,8 +35,9 @@ The app identifier is `com.philino.speedrovers.reborn`. The original Windows pac
 
 - Press **A/D** or **Left/Right**, or swipe, to move between three lanes.
 - The rider remains centered while the camera follows the lane change, matching the original presentation.
-- Avoid traffic and roadblocks. Collect coins and clock pickups.
-- Reach each 500 m checkpoint for 16 extra seconds.
+- Avoid traffic and roadworks. Collect coins.
+- Collisions reduce speed, downshift and recover gradually; keep racing to the finish.
+- Beat three competitors over the full 60 km route. The HUD shows elapsed time and position.
 - Spend coins earned in runs on riders and cities through Market → Characters / Cities. Progress is local to each installation.
 - Press **Esc** to pause or resume.
 - Press **Enter** or controller button A to start from the title/results screen. Escape/controller B returns from menu screens.
