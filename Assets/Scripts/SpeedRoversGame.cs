@@ -63,11 +63,14 @@ namespace SpeedRovers.Reborn
         float distance, speed, timeLeft, lane, spawnDistance, bannerUntil, animationTime;
         float playerFinishTime = -1;
         int finishPlace;
-        int targetLane, runCoins, checkpoints, best, wallet, selectedCity, selectedRider;
+        float targetLane;
+        int runCoins, checkpoints, best, wallet, selectedCity, selectedRider;
         int marketCity, marketRider;
         string banner = "";
         string result = "";
-        float touchStartX, touchStartY;
+        float touchStartX, touchStartY, touchStartLane, touchStartTime;
+        int steeringFinger = -1;
+        const float SteeringLimit = 1.32f;
         float previousHorizontalAxis;
         bool touchStarted;
         // Editor regression checks exercise the real run loop without saving a
@@ -238,6 +241,7 @@ namespace SpeedRovers.Reborn
             nextWork = nextPolice = 0;
             timeLeft = 38;
             lane = targetLane = 0;
+            touchStarted = false; steeringFinger = -1;
             runCoins = checkpoints = 0;
             spawnDistance = 230;
             for (int i=0;i<3;i++)
@@ -259,6 +263,7 @@ namespace SpeedRovers.Reborn
             }
             if (mode != ScreenMode.Running)
             {
+                touchStarted = false; steeringFinger = -1;
                 bool accept = Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.JoystickButton0);
                 bool back = Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.JoystickButton1);
                 if (mode == ScreenMode.Paused && (back || accept)) mode = ScreenMode.Running;
@@ -383,39 +388,80 @@ namespace SpeedRovers.Reborn
             PlayCrash();
         }
 
+        // Coordinates are relative to the rendered safe-area viewport, not the device pixels.
+        Vector2 SteeringPointer(Vector2 point)
+        {
+            Rect safe = Screen.safeArea;
+            float scale = Mathf.Min(safe.width / 540f, safe.height / 960f);
+            Vector2 origin = new Vector2(safe.xMin + (safe.width - 540 * scale) / 2,
+                safe.yMin + (safe.height - 960 * scale) / 2);
+            return (point - origin) / Mathf.Max(.001f, scale);
+        }
+
+        void BeginSteering(Vector2 point, float now)
+        {
+            // Reserve the top HUD, including Pause, and ignore letterbox areas.
+            if (point.x < 0 || point.x > 540 || point.y < 0 || point.y > 860) return;
+            touchStartX = point.x; touchStartY = point.y;
+            touchStartLane = targetLane; touchStartTime = now; touchStarted = true;
+        }
+
+        void MoveSteering(Vector2 point, float now, bool released)
+        {
+            if (!touchStarted) return;
+            float dx = point.x - touchStartX;
+            float desired = touchStartLane + dx / 180f;
+            // A short horizontal flick still steps one lane. A held drag remains analog.
+            if (released && now - touchStartTime < .22f && Mathf.Abs(dx) > 40
+                && Mathf.Abs(dx) > Mathf.Abs(point.y - touchStartY))
+                desired = touchStartLane + Mathf.Sign(dx);
+            targetLane = Mathf.Clamp(desired, -SteeringLimit, SteeringLimit);
+            // Re-anchor at the boundary so reversing the thumb responds immediately.
+            if (!released && desired != targetLane)
+            { touchStartX = point.x; touchStartLane = targetLane; touchStartTime = now - 1f; }
+            if (released) touchStarted = false;
+        }
+
         void ReadSwipe()
         {
             if (Input.touchCount > 0)
             {
-                Touch touch = Input.GetTouch(0);
-                if (touch.phase == TouchPhase.Began) { touchStartX = touch.position.x; touchStartY = touch.position.y; touchStarted = true; }
-                if (touch.phase == TouchPhase.Canceled) touchStarted = false;
-                if (touchStarted && touch.phase == TouchPhase.Ended)
+                bool found = false;
+                for (int i = 0; i < Input.touchCount; i++)
                 {
-                    float dx = touch.position.x - touchStartX;
-                    if (Mathf.Abs(dx) > 40 && Mathf.Abs(dx) > Mathf.Abs(touch.position.y - touchStartY)) Steer(dx < 0 ? -1 : 1);
-                    touchStarted = false;
+                    Touch touch = Input.GetTouch(i);
+                    if (steeringFinger < 0 && touch.phase == TouchPhase.Began)
+                    {
+                        BeginSteering(SteeringPointer(touch.position), Time.unscaledTime);
+                        if (touchStarted) steeringFinger = touch.fingerId;
+                    }
+                    if (touch.fingerId != steeringFinger) continue;
+                    found = true;
+                    if (touch.phase == TouchPhase.Canceled) { touchStarted = false; steeringFinger = -1; break; }
+                    MoveSteering(SteeringPointer(touch.position), Time.unscaledTime, touch.phase == TouchPhase.Ended);
+                    if (touch.phase == TouchPhase.Ended) { steeringFinger = -1; break; }
                 }
+                if (!found) { touchStarted = false; steeringFinger = -1; }
+                return;
             }
-            else if (Input.GetMouseButtonDown(0)) { touchStartX = Input.mousePosition.x; touchStarted = true; }
-            else if (touchStarted && Input.GetMouseButtonUp(0))
-            {
-                float dx = Input.mousePosition.x - touchStartX;
-                if (Mathf.Abs(dx) > 40) Steer(dx < 0 ? -1 : 1);
-                touchStarted = false;
-            }
+            if (steeringFinger >= 0) { touchStarted = false; steeringFinger = -1; return; }
+            if (Input.GetMouseButtonDown(0)) BeginSteering(SteeringPointer(Input.mousePosition), Time.unscaledTime);
+            if (Input.GetMouseButton(0) || Input.GetMouseButtonUp(0))
+                MoveSteering(SteeringPointer(Input.mousePosition), Time.unscaledTime, Input.GetMouseButtonUp(0));
         }
 
-        void Steer(int direction) { targetLane = Mathf.Clamp(targetLane + direction, -1, 1); }
+        void Steer(int direction) { targetLane = Mathf.Clamp(targetLane + direction, -SteeringLimit, SteeringLimit); }
         void ShowBanner(string message, float duration) { banner = message; bannerUntil = Time.time + duration; }
 
         void OnApplicationPause(bool paused)
         {
+            if (paused) { touchStarted = false; steeringFinger = -1; }
             if (paused && mode == ScreenMode.Running && !captureHold) mode = ScreenMode.Paused;
         }
 
         void OnApplicationFocus(bool focused)
         {
+            if (!focused) { touchStarted = false; steeringFinger = -1; }
             if (!focused && mode == ScreenMode.Running && !captureHold) mode = ScreenMode.Paused;
         }
 

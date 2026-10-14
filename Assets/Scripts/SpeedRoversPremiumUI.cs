@@ -300,8 +300,8 @@ namespace SpeedRovers.Reborn
             ToggleRow("Relaxed pace","A gentler ride through traffic",easyMode,447,()=>{easyMode=!easyMode;SaveSetting("sr_easy",easyMode);});
             Panel(28,585,484,235,menuPanel);
             Label("ON THE ROAD",48,607,444,28,12,menuGold,true);
-            Label("SWIPE",48,651,120,30,18,menuText,true);
-            Label("Left or right to change lanes",180,651,310,30,16,menuMuted);
+            Label("STEER",48,651,120,30,18,menuText,true);
+            Label("Hold + drag freely. Swipe to step.",180,651,310,30,15,menuMuted);
             Fill(48,696,444,1,new Color(.1f,.25f,.35f,.10f));
             Label("KEYBOARD",48,712,130,30,15,menuText,true);
             Label("A / D or arrows  /  Down to brake",180,712,310,42,15,menuMuted);

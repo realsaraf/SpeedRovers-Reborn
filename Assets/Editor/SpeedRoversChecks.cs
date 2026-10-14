@@ -95,9 +95,27 @@ public static class SpeedRoversChecks
             for(int n=0;n<20;n++)Call("AdvanceElapsedTime",.1f);
             Check(Mathf.Abs(Number("distance")-fineDistance)<.2f,"10 fps rendering loses simulation time");
 
+            Start();
+            Call("BeginSteering", new Vector2(270, 200), 0f);
+            Call("MoveSteering", new Vector2(315, 200), .4f, false);
+            Check(Mathf.Abs(Number("targetLane") - .25f) < .001f, "held thumb must steer between lanes");
+            Call("MoveSteering", new Vector2(360, 200), .8f, true);
+            Check(Mathf.Abs(Number("targetLane") - .5f) < .001f, "release must retain fractional position");
+            Call("BeginSteering", new Vector2(270, 200), 1f);
+            Call("MoveSteering", new Vector2(900, 200), 2f, false);
+            Check(Number("targetLane") == 1.32f, "drag must stop before road edge");
+            Call("MoveSteering", new Vector2(-900, 200), 3f, true);
+            Check(Number("targetLane") == -1.32f, "left edge must bound dragging");
+            Start();
+            Call("BeginSteering", new Vector2(270, 200), 0f);
+            Call("MoveSteering", new Vector2(320, 200), .1f, true);
+            Check(Number("targetLane") == 1f, "quick swipe must step once");
+            Call("BeginSteering", new Vector2(490, 920), 1f);
+            Check(!(bool)Get("touchStarted"), "pause HUD must not begin steering");
+
             Set("distance", 420f);
             Set("lane", .3f);
-            Set("targetLane", 1);
+            Set("targetLane", 1f);
             Mode("Paused");
             float pausedDistance = Number("distance"), pausedTime = Number("timeLeft"), pausedAnimation = Number("animationTime");
             Call("AdvanceRun", 1f);

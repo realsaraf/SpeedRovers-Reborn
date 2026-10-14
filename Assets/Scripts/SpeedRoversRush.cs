@@ -274,7 +274,7 @@ namespace SpeedRovers.Reborn
             for(int frame=0;frame<540;frame++)
             {
                 float bestCost=float.MaxValue;
-                int bestLane=targetLane;
+                int bestLane=Mathf.RoundToInt(targetLane);
                 for(int candidate=-1;candidate<=1;candidate++)
                 {
                     float cost=.08f*Mathf.Abs(candidate-targetLane);
