@@ -1,6 +1,6 @@
 workflows:
   speed-rovers-ios:
-    name: Speed Rovers Reborn - TestFlight
+    name: Speed Rovers 2 - TestFlight
     instance_type: mac_mini_m2
     max_build_duration: 90
     triggering:
@@ -28,8 +28,8 @@ workflows:
         provisioning_profiles:
           - speed-rovers-appstore
       vars:
-        BUNDLE_ID: com.philino.speedrovers
-        APP_STORE_APP_ID: '916983500'
+        BUNDLE_ID: com.philino.speedrovers.reborn
+        APP_STORE_APP_ID: '6822590400'
     scripts:
       - name: Restore verified current Unity iOS export
         script: |
@@ -41,11 +41,12 @@ workflows:
           mkdir -p build/ios
           tar -xzf CI/ios-export.tar.gz -C build/ios
           python3 CI/prepare_ios.py
-      - name: Apply Speed Rovers App Store signing profile
+      - name: Apply Speed Rovers 2 App Store signing profile
         script: |
           set -euo pipefail
           keychain initialize
           keychain add-certificates
+          python3 CI/ensure_profile.py
           xcode-project use-profiles --project build/ios/Unity-iPhone.xcodeproj
       - name: Archive and export signed IPA
         script: |
@@ -58,9 +59,7 @@ workflows:
     publishing:
       app_store_connect:
         auth: integration
-        # Internal uploads are automatic; external testers receive the build
-        # after Apple's beta review approves it.
-        submit_to_testflight: true
-        beta_groups:
-          - Speed Rovers Beta
+        # Internal groups automatically receive uploaded builds. Validate
+        # device installation before submitting this new app for external review.
+        submit_to_testflight: false
         submit_to_app_store: false

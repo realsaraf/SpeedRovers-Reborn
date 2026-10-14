@@ -25,7 +25,17 @@ def api(path,body=None):
     except urllib.error.HTTPError as error:
         details=json.loads(error.read()).get('errors',[])
         raise RuntimeError('; '.join(e.get('detail',e.get('title','Apple API error')) for e in details)) from None
-reference=plistlib.loads(subprocess.check_output(['security','cms','-D','-i',os.environ['SIGNING_REFERENCE_PROFILE']]))
+reference_path=os.environ.get('SIGNING_REFERENCE_PROFILE')
+if reference_path:
+    reference=plistlib.loads(subprocess.check_output(['security','cms','-D','-i',reference_path]))
+else:
+    candidates=[]
+    for path in (Path.home()/'Library/MobileDevice/Provisioning Profiles').glob('*.mobileprovision'):
+        decoded=plistlib.loads(subprocess.check_output(['security','cms','-D','-i',str(path)],stderr=subprocess.DEVNULL))
+        if decoded.get('Entitlements',{}).get('application-identifier','').endswith('.com.philino.speedrovers'):
+            candidates.append(decoded)
+    assert len(candidates)==1,'Expected one installed legacy profile to identify the existing distribution certificate'
+    reference=candidates[0]
 fingerprints={hashlib.sha256(c).hexdigest() for c in reference['DeveloperCertificates']}
 certificates=api('/v1/certificates?limit=200')['data']
 matching=[c for c in certificates if hashlib.sha256(base64.b64decode(c['attributes']['certificateContent'])).hexdigest() in fingerprints]
@@ -43,7 +53,7 @@ for profile in profiles:
     ids={c['id'] for c in api('/v1/profiles/'+profile['id']+'/certificates')['data']}
     if certificate['id'] in ids:chosen=profile;break
 if chosen is None:
-    chosen=api('/v1/profiles',{'data':{'type':'profiles','attributes':{'name':'Speed Rovers Reborn App Store','profileType':'IOS_APP_STORE'},'relationships':{'bundleId':{'data':{'type':'bundleIds','id':bundle_id}},'certificates':{'data':[{'type':'certificates','id':certificate['id']}]}}}})['data']
+    chosen=api('/v1/profiles',{'data':{'type':'profiles','attributes':{'name':'Speed Rovers 2 App Store','profileType':'IOS_APP_STORE'},'relationships':{'bundleId':{'data':{'type':'bundleIds','id':bundle_id}},'certificates':{'data':[{'type':'certificates','id':certificate['id']}]}}}})['data']
 directory=Path.home()/'Library/MobileDevice/Provisioning Profiles';directory.mkdir(parents=True,exist_ok=True)
-(directory/'speed-rovers-appstore.mobileprovision').write_bytes(base64.b64decode(chosen['attributes']['profileContent']))
+(directory/'speed-rovers-2-appstore.mobileprovision').write_bytes(base64.b64decode(chosen['attributes']['profileContent']))
 print('Ready: '+chosen['attributes']['name']+' for '+bundle+'; reused existing distribution certificate.')

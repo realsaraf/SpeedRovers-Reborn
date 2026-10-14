@@ -15,14 +15,14 @@ if not args.package_only:
 source=root/'Builds/iOS'
 with (source/'Info.plist').open('rb') as f:info=plistlib.load(f)
 project=(source/'Unity-iPhone.xcodeproj/project.pbxproj').read_text()
-assert 'PRODUCT_BUNDLE_IDENTIFIER = com.philino.speedrovers;' in project
-assert info['CFBundleShortVersionString'] in ['2.0.0','2.0.1']
+assert 'PRODUCT_BUNDLE_IDENTIFIER = com.philino.speedrovers.reborn;' in project
+assert info['CFBundleShortVersionString']=='1.0.0'
 ci=root/'CI';ci.mkdir(exist_ok=True)
 archive=ci/'ios-export.tar.gz'
 with tarfile.open(archive,'w:gz',compresslevel=6) as tar:
     for file in sorted(source.iterdir()):tar.add(file,arcname=file.name)
 digest=hashlib.sha256(archive.read_bytes()).hexdigest()
 (ci/'ios-export.sha256').write_text(digest+'  CI/ios-export.tar.gz\n')
-manifest=dict(unity='6000.6.0f1',bundleId='com.philino.speedrovers',version=info['CFBundleShortVersionString'],exportSha256=digest,files=source_hashes())
+manifest=dict(unity='6000.6.0f1',bundleId='com.philino.speedrovers.reborn',version=info['CFBundleShortVersionString'],exportSha256=digest,files=source_hashes())
 (ci/'source-manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
 print(f'Packaged {archive.stat().st_size/1024/1024:.1f} MiB; {len(manifest["files"])} source files; SHA-256 {digest}')

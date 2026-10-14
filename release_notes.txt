@@ -1,4 +1,4 @@
-Speed Rovers Reborn 2.0.1
+Speed Rovers 2 1.0.0
 
 Traffic now uses complete rear-view sprites with matched vehicle proportions and integrated wheel motion. Motorcycle acceleration builds through six gears toward a 50% faster cruising speed. Bike contact reduces speed, drops gears, and requires gradual recovery.
 

@@ -121,8 +121,9 @@ public static class SpeedRoversBuild
         Prepare();
         if(target==BuildTarget.iOS)
         {
-            PlayerSettings.SetApplicationIdentifier(UnityEditor.Build.NamedBuildTarget.iOS,"com.philino.speedrovers");
-            PlayerSettings.bundleVersion=Environment.GetEnvironmentVariable("SPEED_ROVERS_IOS_VERSION") ?? "2.0.1";
+            PlayerSettings.SetApplicationIdentifier(UnityEditor.Build.NamedBuildTarget.iOS,"com.philino.speedrovers.reborn");
+            PlayerSettings.productName="Speed Rovers 2";
+            PlayerSettings.bundleVersion=Environment.GetEnvironmentVariable("SPEED_ROVERS_IOS_VERSION") ?? "1.0.0";
             PlayerSettings.iOS.buildNumber="100";
             PlayerSettings.iOS.targetOSVersionString="15.0";
             PlayerSettings.iOS.appleEnableAutomaticSigning=false;

@@ -11,10 +11,10 @@ for path in root.rglob('*'):
         path.chmod(path.stat().st_mode|0o111)
 info_path=root/'Info.plist'
 with info_path.open('rb') as f: info=plistlib.load(f)
-assert 'PRODUCT_BUNDLE_IDENTIFIER = com.philino.speedrovers;' in text
-info['CFBundleIdentifier']='com.philino.speedrovers'
-info['CFBundleDisplayName']='Speed Rovers Reborn'
-info['CFBundleName']='Speed Rovers Reborn'
+assert 'PRODUCT_BUNDLE_IDENTIFIER = com.philino.speedrovers.reborn;' in text
+info['CFBundleIdentifier']='com.philino.speedrovers.reborn'
+info['CFBundleDisplayName']='Speed Rovers 2'
+info['CFBundleName']='Speed Rovers 2'
 info['CFBundleVersion']=str(100+int(os.environ.get('BUILD_NUMBER','1')))
 info['ITSAppUsesNonExemptEncryption']=False
 with info_path.open('wb') as f: plistlib.dump(info,f)
