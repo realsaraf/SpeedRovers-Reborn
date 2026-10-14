@@ -151,7 +151,7 @@ namespace SpeedRovers.Reborn
             float scale=.022f+depth*.978f;
             Vector2 p=RoadProjection.Project(distance,entry.z,0,lane);
             float half=RoadProjection.HalfWidth(depth);
-            int variant;float height,edge;bool isTree=false;
+            int variant;float height,edge;bool isTree=false,building=false;
             Texture2D sheet=dayStreetProps;ArtRegion r;
             if(district==1)
             {
@@ -167,8 +167,9 @@ namespace SpeedRovers.Reborn
                 }
                 else
                 {
-                    int slot=entry.index%8;
-                    variant=slot<4?entry.index%2:slot==4?3:slot==5?6:slot==6?4:5;
+                    int slot=Mathf.Min(7,(int)(StreetVariation(entry.index,entry.side,53)*8));
+                    building=slot<4;
+                    variant=building?(StreetVariation(entry.index,entry.side,59)<.5f?0:1):slot==4?3:slot==5?6:slot==6?4:5;
                     height=(variant<2?1250:variant==3?620:variant==6?360:90)*scale;
                     edge=half*(variant<2?1.36f:variant==3?1.36f:1.18f);
                 }
@@ -176,7 +177,11 @@ namespace SpeedRovers.Reborn
                 if(variant==3) {sheet=dayTree;r=districtRegions.tree[0];isTree=true;}
             }
             float w=height*r.w/r.h;
-            bool building=district==3 && entry.index%8<4;
+            if(building) {
+                height*=Mathf.Lerp(.88f,1.12f,StreetVariation(entry.index,entry.side,61));
+                w=height*r.w/r.h;
+                edge*=Mathf.Lerp(1,1.16f,StreetVariation(entry.index/7,entry.side,67));
+            }
             float x=entry.side==0?p.x-edge-(building?w:w*.5f):p.x+edge-(building?0:w*.5f);
             bool flipLamp=district==1 && entry.side==1;
             if(district==1)x=p.x+(entry.side==0?-edge:edge)-w*(flipLamp?1-r.pivot:r.pivot);

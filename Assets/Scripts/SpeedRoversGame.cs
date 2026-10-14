@@ -386,6 +386,7 @@ namespace SpeedRovers.Reborn
             hitPulse=1;
             ShowBanner(obstacle.kind==ThingKind.Pothole?"BROKEN ROAD":obstacle.kind==ThingKind.Rival?"BIKE CONTACT":"IMPACT — KEEP RACING",.8f);
             PlayCrash();
+            SoftImpactFeedback();
         }
 
         // Coordinates are relative to the rendered safe-area viewport, not the device pixels.

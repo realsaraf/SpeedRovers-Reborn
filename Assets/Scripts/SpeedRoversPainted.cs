@@ -203,8 +203,12 @@ namespace SpeedRovers.Reborn
             int kind = (entry.index + entry.side * 2) % 7;
             if (district == 0 || district == 3)
             {
-                if (entry.index%4!=0) { DrawStreetBlock(city,entry,depth,district); return; }
-                kind = entry.index%8==0 ? 2 : 3;
+                // Several blocks form a neighbourhood: planted pockets alternate with dense streets.
+                float layout=StreetVariation(entry.index/9,entry.side,31);
+                bool planted=layout<.23f && entry.index%9>=3 && entry.index%9<=6;
+                if (!planted && StreetVariation(entry.index,entry.side,37)>.24f)
+                { DrawStreetBlock(city,entry,depth,district); return; }
+                kind = planted || StreetVariation(entry.index,entry.side,41)<.55f ? 2 : 3;
             }
             else if(district==1)
             {

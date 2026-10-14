@@ -62,6 +62,12 @@ public static class SpeedRoversChecks
                 foreach(var message in ShaderUtil.GetShaderMessages(shader))
                     Check(message.severity!=UnityEditor.Rendering.ShaderCompilerMessageSeverity.Error,"shader compile: "+message.message);
             }
+            foreach(string clipName in new[]{"menuMusic","gameMusic"}) {
+                var clip=(AudioClip)Get(clipName);
+                Check(clip!=null && clip.length>10,"soundtrack missing or truncated: "+clipName);
+                Check(clip.loadState==AudioDataLoadState.Loaded,"soundtrack not preloaded: "+clipName);
+            }
+            Check(((AudioSource)Get("music")).priority<128,"soundtrack should not be virtualized behind effects");
             Check(root.GetComponentInChildren<AudioListener>()!=null,"no audio listener: mixer would be silent");
             foreach (string name in new[] { "districtSkies", "bridgeStructures", "dayStreetProps", "fastAsphalt", "rollingTire", "spinningRim", "rushOncoming", "rushHero", "rushBikes", "rushTraffic", "rushBuildings", "rushHazards", "paintedRider", "paintedWorlds", "paintedScenery", "paintedTraffic", "asphalt", "foliageSheet", "waterSheet", "glowSheet", "cloudSheet", "tireSheet" })
                 Check(Get(name) != null, "missing painted art: " + name);

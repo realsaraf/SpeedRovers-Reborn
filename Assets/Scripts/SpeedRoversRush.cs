@@ -115,9 +115,18 @@ namespace SpeedRovers.Reborn
             }
         }
 
+        static float StreetVariation(int index,int side,int salt)
+        {
+            unchecked {
+                uint h=(uint)(index*374761393+side*668265263+salt*1274126177);
+                h=(h^(h>>13))*1274126177u;
+                return (h^(h>>16))/4294967295f;
+            }
+        }
+
         void DrawStreetBlock(int city,RoadSprite entry,float depth,int district)
         {
-            int variant=district==0?(entry.index+city+entry.side*3)%4:4+(entry.index+city+entry.side)%4;
+            int variant=(district==0?0:4)+Mathf.Min(3,(int)(StreetVariation(entry.index,entry.side,7)*4));
             ArtRegion region=rushRegions.buildings[variant];
             Texture2D buildingAtlas=rushBuildings;
             if(district==0)
@@ -126,14 +135,16 @@ namespace SpeedRovers.Reborn
                 region=cityBuildingRegions.frames[variant%4]; buildingAtlas=cityBuildings;
             }
             float scale=.022f+depth*.978f;
-            float height=RoadProjection.MetresToPixels(variant<4?20:8.7f,depth);
+            float height=RoadProjection.MetresToPixels((variant<4?20:8.7f)*Mathf.Lerp(.82f,1.15f,StreetVariation(entry.index,entry.side,11)),depth);
             float width=height*region.w/region.h;
             Vector2 at=RoadProjection.Project(distance,entry.z,0,lane);
-            float edge=RoadProjection.HalfWidth(depth)*1.24f;
+            float edge=RoadProjection.HalfWidth(depth)*Mathf.Lerp(1.24f,1.48f,StreetVariation(entry.index/5,entry.side,19));
             float x=entry.side==0?at.x-edge-width:at.x+edge;
             if(x>550 || x+width< -10) return;
             Color tint=GUI.color;
+            GUI.color=tint*Color.Lerp(new Color(.90f,.94f,1),new Color(1,.96f,.90f),StreetVariation(entry.index,entry.side,23));
             Region(buildingAtlas,region,x,at.y-height,width,height,entry.side==1);
+            GUI.color=tint;
             // Illuminated storefronts pulse very slowly, independent of travel.
             Glow(x+width*.52f,at.y-height*.12f,width*.25f,
                 new Color(1,.66f,.30f,.10f+.03f*Mathf.Sin(animationTime*.9f+entry.index)));

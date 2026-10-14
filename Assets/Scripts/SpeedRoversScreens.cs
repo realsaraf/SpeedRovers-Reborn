@@ -30,21 +30,31 @@ namespace SpeedRovers.Reborn
             music = gameObject.AddComponent<AudioSource>();
             music.loop = true;
             music.playOnAwake = false;
-            music.volume = .3f;
+            music.volume = .36f;
+            music.spatialBlend = 0;
+            music.priority = 16;
             menuMusic = Resources.Load<AudioClip>("Original/Audio/MenuSound");
             gameMusic = Resources.Load<AudioClip>("Original/Audio/JungleBeat");
+            if(menuMusic != null) menuMusic.LoadAudioData();
+            if(gameMusic != null) gameMusic.LoadAudioData();
         }
 
         void UpdateMusic()
         {
             if (music == null) return;
             bool race = mode == ScreenMode.Running;
-            if (!musicEnabled || (verificationRun && !audioReview) || mode == ScreenMode.Paused || mode == ScreenMode.Results)
+            if (!musicEnabled || (verificationRun && !audioReview) || mode == ScreenMode.Paused)
             {
                 if (music.isPlaying) music.Pause();
                 return;
             }
             AudioClip wanted = race ? gameMusic : menuMusic;
+            float duck = 0;
+            if(race) foreach(Thing t in things)
+                if(t.police) duck = Mathf.Max(duck, Mathf.Pow(Mathf.Clamp01(1-Mathf.Abs(t.distance-distance)/180),2));
+            music.volume = Mathf.MoveTowards(music.volume, race ? Mathf.Lerp(.40f,.30f,duck) : .36f, Time.unscaledDeltaTime*.6f);
+            if(wanted != null && wanted.loadState == AudioDataLoadState.Unloaded) wanted.LoadAudioData();
+            if(wanted != null && wanted.loadState != AudioDataLoadState.Loaded) return;
             if (music.clip != wanted) { music.Stop(); music.clip = wanted; }
             if (wanted != null && !music.isPlaying) { music.UnPause(); if(!music.isPlaying)music.Play(); }
         }

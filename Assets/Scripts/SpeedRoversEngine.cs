@@ -96,7 +96,6 @@ namespace SpeedRovers.Reborn
                 sirenAudio.panStereo=Mathf.Clamp((nearest.lane-lane)*.7f,-.85f,.85f);
                 sirenAudio.pitch=nearest.distance>distance?1.13f:.80f;
             }
-            if(music!=null)music.volume=Mathf.Lerp(music.volume,loud>.15f?.12f:.20f,1-Mathf.Exp(-Time.deltaTime*3));
         }
         void PlayPass(Thing vehicle)
         {
