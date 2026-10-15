@@ -1,0 +1,12 @@
+{
+  "identity_name": "",
+  "publisher": "",
+  "publisher_display_name": "",
+  "display_name": "Speed Rovers 2",
+  "description": "A first-person motorcycle race through cities, coastlines, and mountain roads.",
+  "version": "2.1.2.0",
+  "executable": "Speed Rovers 2.exe",
+  "architecture": "x64",
+  "minimum_windows_version": "10.0.17763.0",
+  "maximum_windows_version_tested": "10.0.26100.0"
+}

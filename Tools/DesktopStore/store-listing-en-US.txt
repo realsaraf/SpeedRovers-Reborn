@@ -1,0 +1,80 @@
+SPEED ROVERS 2 - DESKTOP STORE LISTING (en-US)
+
+COMMERCIAL METADATA
+Title: Speed Rovers 2: Highway Racing
+US price: USD 5.99, one-time purchase
+Category: Games / Racing
+Mode: Single player
+Desktop input: Keyboard and mouse
+
+MAC APP STORE SUBTITLE
+First-person traffic racing
+
+MICROSOFT SHORT DESCRIPTION / APP STORE PROMOTIONAL TEXT
+Race three rivals through traffic from the rider's seat. Master three long routes, time your nitro, collect fuel and earn faster bike upgrades.
+
+SHARED DESCRIPTION
+Take the rider's seat in Speed Rovers 2: Highway Racing, a first-person arcade motorcycle racer for desktop.
+
+Accelerate, brake and steer freely across the road as you chase three computer-controlled rivals through moving traffic. Time a nitro boost to make your pass, watch your fuel and follow the roadside pickup beacons to keep the race alive.
+
+Choose Grand Tour, Coast to Summit or Storm Chaser: three predefined routes spanning 28, 32 and 36 kilometres. Travel through city streets, a suspension crossing, coastal roads, stormy mountain passes, tunnels and wooded valleys, with changing light and weather along the course.
+
+Collisions slow the bike and damage its condition. Ride clean to recover; repeated heavy impacts can end your race. Earn in-game credits from race finishes and close passes, then unlock the Vector R and Phantom RS performance upgrades. Save your best time on each route and try again.
+
+Play fullscreen or in a resizable window. Use keyboard controls or the onscreen throttle, brake, jump and nitro controls, with separate music and sound-effects settings.
+
+KEY FEATURES
+- First-person cockpit racing against three computer-controlled riders.
+- Three long, predefined routes: 28 km, 32 km and 36 km.
+- City, bridge, coast, mountain, tunnel and forest scenery.
+- Continuous steering, progressive acceleration and automatic gear changes.
+- Recharging nitro boosts, a jump ability and marked fuel pickups.
+- Collision damage with recovery during clean riding.
+- Earned credits, three bike performance options and saved route records.
+- Fullscreen/windowed switching and keyboard controls for desktop play.
+
+KEYBOARD CONTROLS
+W or Up Arrow: accelerate
+S or Down Arrow: brake
+A/D or Left/Right Arrows: steer
+Space: jump
+Left Shift or N: nitro
+Escape or P: pause/resume
+
+WINDOWS DISPLAY CONTROL
+F11 or Alt+Enter: switch fullscreen/windowed
+The same switch is available in Settings. Display choice is saved.
+
+MAC DISPLAY CONTROL
+F11 or Control+Command+F: switch fullscreen/windowed
+The same switch is available in Settings. Display choice is saved.
+
+APP STORE KEYWORDS
+motorcycle,bike,traffic,arcade,nitro,city,driving,singleplayer,road
+
+INITIAL RELEASE NOTES
+First desktop release with fullscreen and windowed play, keyboard controls, three long racing routes, nitro, fuel pickups, bike upgrades and in-game credits and licenses.
+
+SCREENSHOT CANDIDATES - INTERNAL PUBLISHING NOTES
+Source folder: C:\SpeedRoversCapture\desktop-store-qa
+Recommended display order and optional captions:
+1. 11-fuel-marker-close.png - "Chase the lead through city traffic"
+2. tour-2.png - "Race across the suspension crossing"
+3. tour-6.png - "Ride from the city into the mountains"
+4. 08-new-controls.png - "Time your nitro to make the pass"
+5. 03-routes.png - "Choose three long racing routes"
+6. 02-garage.png - "Earn credits and unlock more speed"
+
+These are reviewed composition candidates, not a claim that all six are ready for every store. The tour-* frames were captured after QA moved directly between course sections; their visible distance/time combinations are not from a continuous race. Recapture the same scenes during a normal race before publishing those frames. Do not paint over the HUD to conceal the QA state.
+
+Current Windows QA captures are 1600 x 900. Mac App Store screenshots must use one of Apple's accepted 16:10 sizes: 1280 x 800, 1440 x 900, 2560 x 1600, or 2880 x 1800. Capture the Mac app at an accepted size, including its actual platform-specific UI; do not stretch the Windows images.
+Apple screenshot reference: https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications/
+
+PUBLICATION EVIDENCE - INTERNAL ONLY
+Reviewed Windows QA log: C:\SpeedRoversCapture\desktop-store-qa.log
+Result: 65 checks passed, 0 failed, including fullscreen round trip, exact capture-size restoration, unchanged QA display preference, unlocked visible cursor, notices availability, race mechanics and measured engine/audio playback.
+Credits screen: opening and final license text are readable; no layout overlap found in the reviewed captures.
+This Windows run does not verify macOS installation, App Store receipts, macOS keyboard shortcuts, or Mac hardware performance.
+Store price, availability and certification must be checked in each store; this document does not establish that either version is published.
+Do not market this build as photorealistic, an open world, online multiplayer, controller-certified, or guaranteed 60 fps on all devices. Those claims are not supported by the current implementation and QA evidence.

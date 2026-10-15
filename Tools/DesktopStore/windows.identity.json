@@ -1,0 +1,14 @@
+{
+  "identity_name": "28414RealSaraf.SpeedRovers2HighwayRacing",
+  "publisher": "CN=5FF55C5D-624E-4D1B-B48C-D6F9F8D34FDA",
+  "publisher_display_name": "Mossberry Studio",
+  "display_name": "Speed Rovers 2: Highway Racing",
+  "description": "A first-person motorcycle race through cities, coastlines, and mountain roads.",
+  "version": "2.1.2.0",
+  "executable": "Speed Rovers 2.exe",
+  "architecture": "x64",
+  "minimum_windows_version": "10.0.17763.0",
+  "maximum_windows_version_tested": "10.0.26100.0",
+  "store_id": "9P008HLDT3CF",
+  "package_family_name": "28414RealSaraf.SpeedRovers2HighwayRacing_gzfedrj7fw0ry"
+}

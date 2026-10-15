@@ -1,0 +1,32 @@
+# Review and merge this workflow into the root codemagic.yaml only when the
+# verified player archive and the encrypted signing group are actually ready.
+# No push trigger, Apple certificate creation, upload, or publication is configured.
+workflows:
+  speed-rovers-macos-package:
+    name: Speed Rovers 2 - Mac App Store package
+    instance_type: mac_mini_m2
+    max_build_duration: 30
+    environment:
+      xcode: latest
+      python: "3.12" # Resolve the latest 3.12 patch; the script rejects <3.12.11.
+      groups:
+        - speed_rovers_macos_distribution
+      vars:
+        MAC_BUILD_NUMBER: "1"
+    scripts:
+      - name: Fetch the reviewed universal player export
+        script: |
+          set -euo pipefail
+          git lfs install --skip-smudge
+          git lfs pull --include="CI/macos-player.tar.gz"
+          test -f CI/macos-player.json
+      - name: Verify archive, sign the app, and create a Mac App Store installer
+        script: |
+          set -euo pipefail
+          python3 Tools/DesktopStore/run_macos_ci.py \
+            --archive CI/macos-player.tar.gz \
+            --inspection-report CI/macos-player.json \
+            --output-dir build/macos-store
+    artifacts:
+      - build/macos-store/*.pkg
+      - build/macos-store/*-packaging.json

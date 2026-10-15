@@ -2,11 +2,26 @@
   "asset": "Car Concept",
   "source": "https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/CarConcept",
   "download": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CarConcept/glTF-Binary/CarConcept.glb",
-  "purpose": "Temporary local driving prototype",
+  "purpose": "Traffic vehicle used in the active Speed Rovers 2 landscape game",
   "originalCreator": "Unity Fan",
-  "adaptation": "Khronos glTF Sample Assets contributors",
+  "adaptation": "Model and textures by Eric Chadwick",
   "licenseFile": "Models/LICENSE.md",
   "triangles": 213347,
   "mobilePerformanceVerified": false,
-  "notes": "One model with three paint colors. Authored city, cockpit, LODs and production optimization still needed."
+  "notes": "One imported car model with game paint variants. Rider and scenery meshes are authored in code. Attribution verified against upstream metadata and the copyright stored in the GLB JSON chunk.",
+  "originalSource": "https://sketchfab.com/3d-models/free-concept-car-004-public-domain-cc0-4cba124633eb494eadc3bb0c4660ad7e",
+  "originalLicense": "CC0-1.0",
+  "copyrightOwner": "Darmstadt Graphics Group GmbH",
+  "copyrightYear": 2024,
+  "license": "CC-BY-4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+  "upstreamMetadata": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CarConcept/metadata.json",
+  "gameChanges": [
+    "Uniform scale and world placement",
+    "Paint color variants",
+    "Wheel pivot reparenting and wheel animation"
+  ],
+  "attributionAsset": "Assets/Resources/GrandTour/ThirdPartyNotices.txt",
+  "trademarkNotice": "Model license excludes logos and associated trademarks; the upstream Khronos mark notice is retained in ThirdPartyNotices.txt.",
+  "verifiedDate": "2026-10-15"
 }

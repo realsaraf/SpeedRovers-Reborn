@@ -1,0 +1,92 @@
+{
+  "state": "mac_player_structure_verified",
+  "app": "D:\\SpeedRoversBuildCache\\DesktopStore\\macOS\\Speed Rovers 2.app",
+  "app_name": "Speed Rovers 2.app",
+  "checked_at_utc": "2026-10-15T06:05:49.199547+00:00",
+  "bundle_id": "com.philino.speedrovers.reborn.desktop",
+  "version": "2.1.2",
+  "build": "0",
+  "minimum_macos": "12.0",
+  "main_executable": "Speed Rovers 2",
+  "main_architectures": [
+    "arm64",
+    "x86_64"
+  ],
+  "main_sha256": "1b0b06db1dcd1e2f533d8928c3df53958c221bd465782d57260aec23f25a85e4",
+  "native_code": {
+    "Contents/Frameworks/libmono-native.dylib": [
+      {
+        "architecture": "x86_64",
+        "file_type": 6
+      },
+      {
+        "architecture": "arm64",
+        "file_type": 6
+      }
+    ],
+    "Contents/Frameworks/libmonobdwgc-2.0.dylib": [
+      {
+        "architecture": "x86_64",
+        "file_type": 6
+      },
+      {
+        "architecture": "arm64",
+        "file_type": 6
+      }
+    ],
+    "Contents/Frameworks/libMonoPosixHelper.dylib": [
+      {
+        "architecture": "x86_64",
+        "file_type": 6
+      },
+      {
+        "architecture": "arm64",
+        "file_type": 6
+      }
+    ],
+    "Contents/Frameworks/UnityPlayer.dylib": [
+      {
+        "architecture": "x86_64",
+        "file_type": 6
+      },
+      {
+        "architecture": "arm64",
+        "file_type": 6
+      }
+    ],
+    "Contents/MacOS/Speed Rovers 2": [
+      {
+        "architecture": "x86_64",
+        "file_type": 2
+      },
+      {
+        "architecture": "arm64",
+        "file_type": 2
+      }
+    ],
+    "Contents/PlugIns/lib_burst_generated.bundle": [
+      {
+        "architecture": "x86_64",
+        "file_type": 6
+      },
+      {
+        "architecture": "arm64",
+        "file_type": 6
+      }
+    ]
+  },
+  "mono_native_files": [
+    "Contents/Frameworks/libmono-native.dylib",
+    "Contents/Frameworks/libmonobdwgc-2.0.dylib",
+    "Contents/Frameworks/libMonoPosixHelper.dylib"
+  ],
+  "scripting_backend_evidence": "Mono native runtime present",
+  "file_count": 172,
+  "uncompressed_bytes": 500017388,
+  "receipt_validation_verified": false,
+  "signature_verified": false,
+  "mac_runtime_verified": false,
+  "archive": "D:\\SpeedRoversBuildCache\\DesktopStore\\Packages\\macOS\\macos-player.tar.gz",
+  "archive_sha256": "cdc7c7a0bd7b6fa9e3b682fc12f53224e1af29008e2431601db977e963ad619a",
+  "archive_bytes": 199375857
+}

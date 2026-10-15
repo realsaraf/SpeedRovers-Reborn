@@ -6,7 +6,7 @@ using UnityEngine;
 
 public partial class TrafficRidePrototype
 {
-    enum Page { Home, Routes, Garage, Settings, Riding, Pause, Results }
+    enum Page { Home, Routes, Garage, Settings, Riding, Pause, Results, Credits }
     sealed class Competitor { public Transform root, body; public readonly List<Transform> tires=new List<Transform>(); public float progress, velocity, x, target, decision, finish; }
     readonly List<Competitor> racers=new List<Competitor>();
     readonly List<Transform> hazards=new List<Transform>();
@@ -36,6 +36,7 @@ public partial class TrafficRidePrototype
         qaMode=capture;
         foreach(var a in Environment.GetCommandLineArgs()) if(a.StartsWith("-race-qa=")){captureDir=a.Substring(9);qaMode=true;capture=true;}
         foreach(var a in Environment.GetCommandLineArgs())if(a.StartsWith("-race-soak=")){captureDir=a.Substring(11);qaMode=true;capture=true;soakMode=true;}
+        InitializeDesktopDisplay();
         Screen.orientation=ScreenOrientation.AutoRotation;
         Screen.autorotateToLandscapeLeft=true;Screen.autorotateToLandscapeRight=true;
         Screen.autorotateToPortrait=false;Screen.autorotateToPortraitUpsideDown=false;
@@ -157,10 +158,12 @@ public partial class TrafficRidePrototype
     void Update()
     {
         if(view==null)return;
+        TickDesktopDisplay();
+        TickCreditsScroll();
         float dt=Mathf.Min(Time.deltaTime,.05f);animationTime+=dt;TickMotionControls();
         TickRideAudio(dt);
         if(Input.GetKeyDown(KeyCode.Escape)||Input.GetKeyDown(KeyCode.P)){
-            if(page==Page.Riding)SetPage(Page.Pause);else if(page==Page.Pause)SetPage(Page.Riding);else SetPage(Page.Home);}
+            if(page==Page.Riding)SetPage(Page.Pause);else if(page==Page.Pause)SetPage(Page.Riding);else SetPage(page==Page.Credits?Page.Settings:Page.Home);}
         if(page!=Page.Riding){if(page!=Page.Pause&&page!=Page.Results){view.transform.position=menuCameraPosition;view.transform.rotation=Quaternion.Euler(0,menuYaw+Mathf.Sin(Time.time*.12f)*4,0);}return;}
         ReadControls();if(page!=Page.Riding)return;
         if(countdown>0){countdown=Mathf.Max(0,countdown-dt);if(countdown==0){Feedback(coinSound);Announce("GO / RACE TO THE FINISH");}return;}

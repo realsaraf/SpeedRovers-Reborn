@@ -4,6 +4,13 @@ using UnityEngine;
 
 public partial class TrafficRidePrototype
 {
+    static readonly Rect CreditsViewport=new Rect(40,224,1200,375);
+    Vector2 creditsScroll;
+    int creditsDragFinger=-1;
+    GUIStyle creditsTextStyle;
+    TextAsset thirdPartyNotices;
+    string creditsText;
+    float creditsContentHeight;
     void Styles()
     {
         if(titleStyle!=null)return;
@@ -116,9 +123,10 @@ public partial class TrafficRidePrototype
         Fill(new Rect(0,0,1280,720),new Color(.01f,.025f,.045f,.42f));
         for(int i=0;i<5;i++){float x=(animationTime*30+i*300)%1550-150;Fill(new Rect(x,110,2,500),new Color(.15f,.8f,.9f,.06f));}
         Text("SPEED ROVERS 2",38,24,550,50,subStyle);Text("STREET RACING / FIRST PERSON",40,72,500,25,tinyStyle,accent);
-        Fill(new Rect(1010,24,230,58),ink);Text(credits+"  CREDITS",1028,34,200,42,bodyStyle,new Color(1,.77f,.3f));
-        if(page!=Page.Home&&Button("‹ BACK",40,623,170,60))SetPage(Page.Home);
+        if(page!=Page.Credits){Fill(new Rect(1010,24,230,58),ink);Text(credits+"  CREDITS",1028,34,200,42,bodyStyle,new Color(1,.77f,.3f));}
+        if(page!=Page.Home&&Button("‹ BACK",40,623,170,60))SetPage(page==Page.Credits?Page.Settings:Page.Home);
         if(page==Page.Home){
+            if(IsDesktopPlayer&&Button("QUIT GAME",1020,100,220,42))QuitDesktopGame();
             Fill(new Rect(26,139,610,430),new Color(.02f,.04f,.065f,.88f));
             Text("OWN THE\nOPEN ROAD.",50,155,590,192,titleStyle);
             Text("THREAD THE TRAFFIC. CHASE THE LEAD.",54,357,550,40,bodyStyle,accent);
@@ -130,7 +138,10 @@ public partial class TrafficRidePrototype
             if(Button("ROUTES",40,620,280,64))SetPage(Page.Routes);
             if(Button("GARAGE",340,620,280,64))SetPage(Page.Garage);
             if(Button("SETTINGS",640,620,280,64))SetPage(Page.Settings);
-            if(Button("HOW TO RIDE",940,620,300,64))Announce(tiltControl?"HOLD RIGHT + TILT • LEFT BRAKES • FOLLOW FUEL BEACONS":"HOLD RIGHT + DRAG • LEFT BRAKES • FOLLOW FUEL BEACONS");
+            if(Button("HOW TO RIDE",940,620,300,64)){
+                if(IsDesktopPlayer)SetPage(Page.Settings);
+                else Announce(tiltControl?"HOLD RIGHT + TILT • LEFT BRAKES • FOLLOW FUEL BEACONS":"HOLD RIGHT + DRAG • LEFT BRAKES • FOLLOW FUEL BEACONS");
+            }
         }else if(page==Page.Routes){
             Text("CHOOSE YOUR ROUTE",40,124,1000,90,titleStyle);
             for(int i=0;i<3;i++){float x=40+i*407;Fill(new Rect(x,240,385,330),ink);Fill(new Rect(x,240,385,5),i==route?accent:muted);
@@ -156,12 +167,63 @@ public partial class TrafficRidePrototype
             Text("TUNE YOUR RIDE",40,124,1100,90,titleStyle);
             if(Button("ENGINE & EFFECTS   /   "+(soundOn?"ON":"OFF"),40,250,580,78)){soundOn=!soundOn;SaveOption("sound",soundOn);}
             if(Button("MUSIC   /   "+(musicOn?"ON":"OFF"),660,250,580,78)){musicOn=!musicOn;SaveOption("music",musicOn);}
-            if(Button("SOFT HAPTICS   /   "+(hapticsOn?"ON":"OFF"),40,350,580,78)){hapticsOn=!hapticsOn;SaveOption("haptics",hapticsOn);}
-            if(Button("STEERING   /   "+(tiltControl?"TILT":"THUMB DRAG"),660,350,580,78)){SetTiltControl(!tiltControl);}
-            if(Button("RECENTER TILT",40,447,580,52,false,TiltAvailable)){RecenterTilt();Announce("HOLD PHONE COMFORTABLY / CALIBRATING TILT");}
-            if(Button("TEST IMPACT VIBRATION",660,447,580,52)){TestHaptics();}
-            Text(tiltControl?"HOLD THROTTLE AND TILT YOUR PHONE TO STEER.":"HOLD THROTTLE AND DRAG YOUR THUMB TO STEER.",44,515,1100,35,bodyStyle,accent);
-            Text("Hold left to brake. Tap jump or nitro with your other thumb while accelerating.\nNitro activates at 50%. Collect fuel cans. Ride clean to repair collision damage.",44,560,1100,60,new GUIStyle(bodyStyle){wordWrap=true},muted);
+            if(IsDesktopPlayer){
+                if(Button("DISPLAY   /   "+(DesktopFullscreen?"FULLSCREEN":"WINDOWED"),40,350,580,78))ToggleDesktopFullscreen();
+                if(Button("QUIT GAME",660,350,580,78))QuitDesktopGame();
+                Text(DesktopFullscreenShortcut+"  /  TOGGLE FULLSCREEN",44,451,1150,36,bodyStyle,accent);
+                Text("W / UP: THROTTLE     S / DOWN: BRAKE     A / D / ARROWS: STEER",44,500,1150,36,bodyStyle);
+                Text("SPACE: JUMP     SHIFT / N: NITRO     ESC / P: PAUSE\nNitro activates at 50%. Follow fuel beacons. Ride clean to repair the bike.",44,548,1150,65,new GUIStyle(bodyStyle){wordWrap=true},muted);
+            }else{
+                if(Button("SOFT HAPTICS   /   "+(hapticsOn?"ON":"OFF"),40,350,580,78)){hapticsOn=!hapticsOn;SaveOption("haptics",hapticsOn);}
+                if(Button("STEERING   /   "+(tiltControl?"TILT":"THUMB DRAG"),660,350,580,78)){SetTiltControl(!tiltControl);}
+                if(Button("RECENTER TILT",40,447,580,52,false,TiltAvailable)){RecenterTilt();Announce("HOLD PHONE COMFORTABLY / CALIBRATING TILT");}
+                if(Button("TEST IMPACT VIBRATION",660,447,580,52)){TestHaptics();}
+                Text(tiltControl?"HOLD THROTTLE AND TILT YOUR PHONE TO STEER.":"HOLD THROTTLE AND DRAG YOUR THUMB TO STEER.",44,515,1100,35,bodyStyle,accent);
+                Text("Hold left to brake. Tap jump or nitro with your other thumb while accelerating.\nNitro activates at 50%. Collect fuel cans. Ride clean to repair collision damage.",44,560,1100,60,new GUIStyle(bodyStyle){wordWrap=true},muted);
+            }
+            if(Button("CREDITS & LICENSES",660,623,580,60)){creditsScroll=Vector2.zero;SetPage(Page.Credits);}
+        }else if(page==Page.Credits){
+            DrawCredits();
+        }
+    }
+    void DrawCredits()
+    {
+        if(creditsText==null){
+            thirdPartyNotices=Resources.Load<TextAsset>("GrandTour/ThirdPartyNotices");
+            creditsText=thirdPartyNotices!=null?thirdPartyNotices.text:"Third-party notices are unavailable in this build.";
+            creditsTextStyle=new GUIStyle(bodyStyle){fontSize=22,fontStyle=FontStyle.Normal,wordWrap=true,richText=false};
+            creditsTextStyle.normal.textColor=new Color(.88f,.93f,.96f);
+            creditsContentHeight=Mathf.Max(CreditsViewport.height,creditsTextStyle.CalcHeight(new GUIContent(creditsText),1148)+32);
+        }
+        Text("CREDITS & LICENSES",40,126,1200,58,RideHudStyle(52,TextAnchor.UpperLeft));
+        Text("Attributions for the music, sound, art and software in this game.",44,184,1150,30,bodyStyle,muted);
+        Fill(CreditsViewport,new Color(.025f,.045f,.07f,.96f));
+        Fill(new Rect(40,224,1200,3),accent);
+        var evt=Event.current;
+        // Scroll-wheel and scrollbar work on desktop; dragging text also works without a wheel.
+        if(Input.touchCount==0&&evt.type==EventType.MouseDrag&&CreditsViewport.Contains(evt.mousePosition)&&GUIUtility.hotControl==0){
+            creditsScroll.y=Mathf.Clamp(creditsScroll.y-evt.delta.y,0,creditsContentHeight-CreditsViewport.height);evt.Use();
+        }
+        creditsScroll=GUI.BeginScrollView(CreditsViewport,creditsScroll,new Rect(0,0,1180,creditsContentHeight));
+        GUI.Label(new Rect(20,16,1148,creditsContentHeight-32),creditsText,creditsTextStyle);
+        GUI.EndScrollView();
+        Text(Application.isMobilePlatform?"SWIPE TO READ":"SCROLL TO READ",238,644,550,30,tinyStyle,muted);
+        if(Button("↑",1020,623,100,60))creditsScroll.y=Mathf.Max(0,creditsScroll.y-300);
+        if(Button("↓",1140,623,100,60))creditsScroll.y=Mathf.Min(creditsContentHeight-CreditsViewport.height,creditsScroll.y+300);
+    }
+    void TickCreditsScroll()
+    {
+        if(page!=Page.Credits){creditsDragFinger=-1;return;}
+        var safe=Screen.safeArea;float scale=Mathf.Min(safe.width/1280f,safe.height/720f);
+        if(scale<=0)return;
+        float left=safe.x+(safe.width-1280*scale)*.5f,top=Screen.height-safe.yMax+(safe.height-720*scale)*.5f;
+        for(int i=0;i<Input.touchCount;i++){
+            var touch=Input.GetTouch(i);
+            var point=new Vector2((touch.position.x-left)/scale,(Screen.height-touch.position.y-top)/scale);
+            if(touch.phase==TouchPhase.Began&&creditsDragFinger<0&&CreditsViewport.Contains(point))creditsDragFinger=touch.fingerId;
+            if(touch.fingerId!=creditsDragFinger)continue;
+            if(touch.phase==TouchPhase.Moved)creditsScroll.y=Mathf.Clamp(creditsScroll.y+touch.deltaPosition.y/scale,0,Mathf.Max(0,creditsContentHeight-CreditsViewport.height));
+            if(touch.phase==TouchPhase.Ended||touch.phase==TouchPhase.Canceled)creditsDragFinger=-1;
         }
     }
     void SaveOption(string name,bool value){if(qaMode)return;PlayerPrefs.SetInt("sr2_"+name,value?1:0);PlayerPrefs.Save();}
@@ -171,6 +233,10 @@ public partial class TrafficRidePrototype
         if(Button("RESUME  ›",390,325,500,70,true))SetPage(Page.Riding);
         if(Button("RESTART RACE",390,415,500,64))StartRace();
         if(Button("BACK TO GARAGE",390,500,500,64))SetPage(Page.Home);
+        if(IsDesktopPlayer){
+            if(Button("QUIT GAME",390,585,500,58))QuitDesktopGame();
+            Text(DesktopFullscreenShortcut+"  /  FULLSCREEN",340,670,650,25,tinyStyle,muted);
+        }
     }
     void DrawResults()
     {
@@ -190,9 +256,13 @@ public partial class TrafficRidePrototype
     IEnumerator FullGameQA()
     {
         System.IO.Directory.CreateDirectory(captureDir);
+        yield return DesktopDisplayQA();
         var audioReview=view.gameObject.AddComponent<SpeedRovers.Reborn.RaceAudioCapture>();audioReview.Begin(45);
         yield return new WaitForSeconds(2);yield return Shot("01-home");
         SetPage(Page.Garage);yield return Shot("02-garage");SetPage(Page.Routes);yield return Shot("03-routes");
+        SetPage(Page.Credits);yield return Shot("03a-credits");
+        Check(thirdPartyNotices!=null&&!string.IsNullOrWhiteSpace(creditsText)&&creditsContentHeight>CreditsViewport.height,"third-party notices are bundled and readable in the scrollable credits screen");
+        creditsScroll.y=Mathf.Max(0,creditsContentHeight-CreditsViewport.height);yield return Shot("03b-credits-end");creditsScroll=Vector2.zero;
         var safe=Screen.safeArea;float sc=Mathf.Min(safe.width/1280f,safe.height/720f);float lf=safe.x+(safe.width-1280*sc)*.5f,tp=Screen.height-safe.yMax+(safe.height-720*sc)*.5f;
         Check(ControlAt(new Vector2(lf+1100*sc,Screen.height-(tp+600*sc)))==1,"throttle aligns with wide-screen HUD");
         Check(ControlAt(new Vector2(lf+890*sc,Screen.height-(tp+600*sc)))==0,"nitro touch cannot trigger throttle");
