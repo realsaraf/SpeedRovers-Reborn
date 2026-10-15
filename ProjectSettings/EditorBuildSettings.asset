@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/SpeedRovers.unity
-    guid: be2cbe03a38e8cf48bf450f34c66b07f
+    path: Assets/Prototype3D/TrafficRide.unity
+    guid: 0b6edbf9d4de1c44d9ac7936c69327a2
   m_configObjects: {}

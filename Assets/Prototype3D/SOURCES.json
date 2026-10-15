@@ -1,0 +1,12 @@
+{
+  "asset": "Car Concept",
+  "source": "https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/CarConcept",
+  "download": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CarConcept/glTF-Binary/CarConcept.glb",
+  "purpose": "Temporary local driving prototype",
+  "originalCreator": "Unity Fan",
+  "adaptation": "Khronos glTF Sample Assets contributors",
+  "licenseFile": "Models/LICENSE.md",
+  "triangles": 213347,
+  "mobilePerformanceVerified": false,
+  "notes": "One model with three paint colors. Authored city, cockpit, LODs and production optimization still needed."
+}

@@ -11,31 +11,12 @@ public static class SpeedRoversBuild
 {
     public static void Prepare()
     {
-        Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-        var root = new GameObject("Speed Rovers");
-        root.AddComponent<SpeedRoversGame>();
-        Directory.CreateDirectory("Assets/Scenes");
-        EditorSceneManager.SaveScene(scene, "Assets/Scenes/SpeedRovers.unity");
-        EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene("Assets/Scenes/SpeedRovers.unity", true) };
-        PlayerSettings.companyName = "Speed Rovers";
-        PlayerSettings.productName = "Speed Rovers Reborn";
-        PlayerSettings.bundleVersion = "0.10.0";
-        foreach (var target in new[] { UnityEditor.Build.NamedBuildTarget.Standalone,
-                     UnityEditor.Build.NamedBuildTarget.Android, UnityEditor.Build.NamedBuildTarget.iOS,
-                     UnityEditor.Build.NamedBuildTarget.WebGL })
-            PlayerSettings.SetApplicationIdentifier(target, "com.philino.speedrovers.reborn");
-        Texture2D icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Brand/AppIcon.png");
-        if (icon != null) PlayerSettings.SetIconsForTargetGroup(BuildTargetGroup.Unknown, new[] { icon });
-        PlayerSettings.defaultScreenWidth = 540;
-        PlayerSettings.defaultScreenHeight = 960;
-        PlayerSettings.defaultIsNativeResolution = false;
-        PlayerSettings.fullScreenMode = FullScreenMode.Windowed;
-        PlayerSettings.resizableWindow = true;
-        PlayerSettings.runInBackground = true;
-        PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
-        PlayerSettings.SetScriptingBackend(UnityEditor.Build.NamedBuildTarget.Standalone, ScriptingImplementation.Mono2x);
+        TrafficRideBuild.Prepare();
+        PlayerSettings.companyName="Speed Rovers";
+        PlayerSettings.SetApplicationIdentifier(UnityEditor.Build.NamedBuildTarget.iOS,"com.philino.speedrovers.reborn");
+        PlayerSettings.SetApplicationIdentifier(UnityEditor.Build.NamedBuildTarget.Android,"com.philino.speedrovers.reborn");
+        PlayerSettings.SetScriptingBackend(UnityEditor.Build.NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);
         AssetDatabase.SaveAssets();
-        Debug.Log("Speed Rovers scene prepared successfully.");
     }
 
     public static void BuildWindows()
@@ -123,7 +104,7 @@ public static class SpeedRoversBuild
         {
             PlayerSettings.SetApplicationIdentifier(UnityEditor.Build.NamedBuildTarget.iOS,"com.philino.speedrovers.reborn");
             PlayerSettings.productName="Speed Rovers 2";
-            PlayerSettings.bundleVersion=Environment.GetEnvironmentVariable("SPEED_ROVERS_IOS_VERSION") ?? "1.0.8";
+            PlayerSettings.bundleVersion=Environment.GetEnvironmentVariable("SPEED_ROVERS_IOS_VERSION") ?? "2.0.0";
             PlayerSettings.iOS.buildNumber="100";
             PlayerSettings.iOS.targetOSVersionString="15.0";
             PlayerSettings.iOS.appleEnableAutomaticSigning=false;
@@ -131,7 +112,7 @@ public static class SpeedRoversBuild
         }
         Directory.CreateDirectory(Path.GetDirectoryName(output));
         BuildReport report = BuildPipeline.BuildPlayer(new BuildPlayerOptions {
-            scenes = new[] { "Assets/Scenes/SpeedRovers.unity" },
+            scenes = new[] { "Assets/Prototype3D/TrafficRide.unity" },
             locationPathName = output,
             target = target,
             options = BuildOptions.None
