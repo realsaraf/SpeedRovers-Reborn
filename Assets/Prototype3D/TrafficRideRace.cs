@@ -14,8 +14,8 @@ public partial class TrafficRidePrototype
     readonly List<Competitor> racers=new List<Competitor>();
     readonly List<Transform> hazards=new List<Transform>();
     readonly Dictionary<int,Vector2> touchStarts=new Dictionary<int,Vector2>();
-    readonly string[] routeNames={"METRO RUN","COASTAL EXPRESS","SKYLINE GRAND PRIX"};
-    readonly string[] routeDescriptions={"6 KM / DOWNTOWN → RIVERSIDE → GARDENS","8 KM / COAST → MARINA → CITY","10 KM / CITY LIGHTS → BRIDGE → SKYLINE"};
+    readonly string[] routeNames={"GRAND TOUR","COAST TO SUMMIT","STORM CHASER"};
+    readonly string[] routeDescriptions={"28 KM / CITY - RIVER - MOUNTAIN - FOREST","32 KM / COAST - SUMMIT - GOLDEN MILE","36 KM / EIGHT DISTRICTS - CHANGING WEATHER"};
     readonly string[] bikeNames={"APEX 600","VECTOR R","PHANTOM RS"};
     readonly Color[] liveries={new Color(.1f,.8f,.91f),new Color(1,.32f,.12f),new Color(.7f,.48f,1)};
     Page page=Page.Home;
@@ -52,11 +52,12 @@ public partial class TrafficRidePrototype
         grassMaterial=Mat("Park lawn",new Color(.25f,.38f,.2f));
         effects=gameObject.AddComponent<AudioSource>();effects.volume=.5f;
         music=gameObject.AddComponent<AudioSource>();music.loop=true;music.volume=.18f;
-        music.clip=Resources.Load<AudioClip>("Original/Audio/MenuSound");if(music.clip!=null)music.Play();
-        wind=gameObject.AddComponent<AudioSource>();wind.loop=true;wind.clip=Resources.Load<AudioClip>("Audio/Rush/wind");if(wind.clip!=null)wind.Play();
-        hitSound=Resources.Load<AudioClip>("Audio/Rush/impact");passSound=Resources.Load<AudioClip>("Audio/Rush/pass-by");
-        clickSound=Tone("UI",660,.07f);coinSound=Tone("Coin",1100,.15f);fuelSound=Tone("Fuel",440,.3f);
-        boostSound=Tone("Nitro",150,.55f);jumpSound=Tone("Jump",800,.2f);
+        music.clip=Resources.Load<AudioClip>("GrandTour/Audio/MenuScore");if(music.clip!=null)music.Play();
+        wind=gameObject.AddComponent<AudioSource>();wind.loop=true;wind.clip=Resources.Load<AudioClip>("GrandTour/Audio/Wind");if(wind.clip!=null)wind.Play();
+        hitSound=Resources.Load<AudioClip>("GrandTour/Audio/Impact");passSound=Resources.Load<AudioClip>("GrandTour/Audio/Pass");
+        clickSound=Resources.Load<AudioClip>("GrandTour/Audio/UI");coinSound=Resources.Load<AudioClip>("GrandTour/Audio/Coin");fuelSound=Resources.Load<AudioClip>("GrandTour/Audio/Fuel");
+        boostSound=Resources.Load<AudioClip>("GrandTour/Audio/Boost");jumpSound=Resources.Load<AudioClip>("GrandTour/Audio/Jump");
+        InitGrandTour();foreach(var b in blocks)ConfigureDistrict(b,b.position.z);
         for(int i=0;i<3;i++)CreateCompetitor(i);
         for(int i=0;i<24;i++)CreatePickup(i);
         for(int i=0;i<5;i++){
@@ -88,24 +89,25 @@ public partial class TrafficRidePrototype
 #endif
     }
     void Announce(string message){notice=message;noticeUntil=Time.unscaledTime+2.8f;}
-    float TopSpeed=>255+bike*12;
+    float TopSpeed=>510+bike*24;
     float PlayerX=>1.85f+lateral;
     bool OwnBike(int n)=>n==0||(!qaMode&&PlayerPrefs.GetInt("sr2_bike_owned_"+n,0)==1);
     void SetPage(Page next)
     {
         page=next;paused=next!=Page.Riding;engineVolume=0;
-        if(music!=null){var desired=Resources.Load<AudioClip>(next==Page.Riding||next==Page.Pause?"Original/Audio/JungleBeat":"Original/Audio/MenuSound");
+        if(music!=null){var desired=Resources.Load<AudioClip>(next==Page.Riding||next==Page.Pause?"GrandTour/Audio/RaceScore":"GrandTour/Audio/MenuScore");
             if(desired!=music.clip){music.clip=desired;if(desired!=null)music.Play();}}
         Feedback(clickSound,false);
     }
     void StartRace()
     {
+        RestoreLogicalWorld();health=1;cleanTime=0;crashResult=false;
         distance=0;speed=0;lateral=0;lean=0;impact=0;hitCooldown=0;fuel=1;nitro=.5f;boosting=false;jump=jumpVelocity=0;
         jumpCooldown=0;elapsed=0;countdown=3;raceCoins=0;nearMisses=0;gear=1;shiftDelay=0;place=4;earned=false;finishTime=0;
-        finishDistance=6000+route*2000;nextPickup=150;nextHazard=400;noticeUntil=0;
-        for(int i=0;i<blocks.Count;i++){blocks[i].position=new Vector3(0,0,i*80-80);ConfigureDistrict(blocks[i],i*80);}
+        finishDistance=CourseNow.length;nextPickup=150;nextHazard=400;noticeUntil=0;
+        for(int i=0;i<blocks.Count;i++){blocks[i].position=new Vector3(0,0,i*80-80);ConfigureDistrict(blocks[i],i*80-80);}
         for(int i=0;i<cars.Count;i++){cars[i].position=new Vector3(i%3==0?-1.85f:i%2==0?5.5f:1.85f,0,150+i*43);}
-        for(int i=0;i<racers.Count;i++){var r=racers[i];r.progress=12+i*14;r.velocity=0;r.x= i==0?1.85f:i==1?5.4f:-1.8f;r.target=r.x;r.finish=0;r.decision=1+i*.8f;r.root.gameObject.SetActive(true);}
+        for(int i=0;i<racers.Count;i++){var r=racers[i];r.progress=12+i*14;r.velocity=0;r.x= i==0?1.85f:i==1?5.4f:-1.8f;r.target=r.x;r.finish=0;r.decision=1+i*.8f;r.root.position=new Vector3(r.x,0,r.progress);r.root.gameObject.SetActive(true);}
         foreach(var p in pickups){p.taken=false;p.at=nextPickup;nextPickup+=p.kind==PickupKind.Fuel?55:22;p.x=p.kind==PickupKind.Fuel?1.85f:(p.at%2<1?1.85f:5.4f);p.root.gameObject.SetActive(true);}
         for(int i=0;i<hazards.Count;i++){hazards[i].position=new Vector3(i%2==0?5.5f:-5.5f,0,nextHazard);nextHazard+=350;hazards[i].gameObject.SetActive(true);}
         SetPage(Page.Riding);
@@ -128,7 +130,8 @@ public partial class TrafficRidePrototype
         Ball("Tail",new Vector3(0,.83f,-.73f),new Vector3(.34f,.2f,.3f),color,r.body);
         var tail=Mat("Brake lamp",new Color(1,.03f,.015f));tail.EnableKeyword("_EMISSION");tail.SetColor("_EmissionColor",Color.red*2);
         Box("Tail light",new Vector3(0,.85f,-.9f),new Vector3(.21f,.06f,.025f),tail,r.body);
-        Ball("Armored jacket",new Vector3(0,1.22f,-.12f),new Vector3(.51f,.65f,.34f),color,r.body).transform.localRotation=Quaternion.Euler(28,0,0);
+        Ball("Armored jacket",new Vector3(0,1.22f,-.12f),new Vector3(.51f,.65f,.34f),rubber,r.body).transform.localRotation=Quaternion.Euler(28,0,0);
+        Box("Back racing stripe",new Vector3(0,1.23f,-.29f),new Vector3(.13f,.4f,.025f),color,r.body).transform.localRotation=Quaternion.Euler(28,0,0);
         Ball("Full face helmet",new Vector3(0,1.58f,.16f),new Vector3(.34f,.37f,.39f),color,r.body);
         Ball("Visor",new Vector3(0,1.59f,.32f),new Vector3(.30f,.13f,.13f),glass,r.body);
         for(int side=-1;side<=1;side+=2){
@@ -167,28 +170,31 @@ public partial class TrafficRidePrototype
     void Collision(float mass)
     {
         if(hitCooldown>0)return;
-        float severity=Mathf.Clamp(.12f+speed/600+mass*.12f,.2f,.8f);
-        speed*=1-severity;gear=Mathf.Clamp(1+(int)(speed/45),1,6);shiftDelay=.45f;impact=1;hitCooldown=1.2f;boosting=false;
-        Feedback(hitSound);Announce("CONTACT  /  KEEP RACING");
+        float severity=Mathf.Clamp(.12f+speed/1200+mass*.12f,.2f,.8f);
+        health=Mathf.Max(0,health-(.08f+speed/TopSpeed*.23f+mass*.09f));cleanTime=0;healthPulse=1;
+        speed*=1-severity;gear=Mathf.Clamp(1+(int)(speed/85),1,6);shiftDelay=.45f;impact=1;hitCooldown=1.2f;boosting=false;
+        Feedback(hitSound);Announce("CONTACT / BIKE "+Mathf.CeilToInt(health*100)+"%");
+        if(health<=0){crashResult=true;Feedback(Resources.Load<AudioClip>("GrandTour/Audio/Crash"));FinishRace(false);}
     }
     void Update()
     {
         if(view==null)return;
         float dt=Mathf.Min(Time.deltaTime,.05f);animationTime+=dt;
-        music.mute=!musicOn;engine.mute=!soundOn;wind.mute=!soundOn;wind.volume=page==Page.Riding?speed/330*.22f:0;
+        music.mute=!musicOn;engine.mute=!soundOn;wind.mute=!soundOn;wind.volume=page==Page.Riding?Mathf.Clamp01(speed/TopSpeed)*.22f:0;
         if(Input.GetKeyDown(KeyCode.Escape)||Input.GetKeyDown(KeyCode.P)){
             if(page==Page.Riding)SetPage(Page.Pause);else if(page==Page.Pause)SetPage(Page.Riding);else SetPage(Page.Home);}
-        if(page!=Page.Riding){engineVolume=0;if(page!=Page.Pause&&page!=Page.Results){view.transform.position=new Vector3(1.85f,1.65f,0);view.transform.rotation=Quaternion.Euler(0,Mathf.Sin(Time.time*.12f)*4,0);}return;}
+        if(page!=Page.Riding){engineVolume=0;engine.volume=0;if(page!=Page.Pause&&page!=Page.Results){view.transform.position=new Vector3(1.85f,1.65f,0);view.transform.rotation=Quaternion.Euler(0,Mathf.Sin(Time.time*.12f)*4,0);}return;}
         if(countdown>0){countdown=Mathf.Max(0,countdown-dt);if(countdown==0){Feedback(coinSound);Announce("GO / RACE TO THE FINISH");}return;}
+        RestoreLogicalWorld();
         ReadControls();
         if(Input.GetKeyDown(KeyCode.Space))JumpBike();if(Input.GetKeyDown(KeyCode.LeftShift)||Input.GetKeyDown(KeyCode.N))ActivateNitro();
         if(qaMode){throttle=captureStage==0;brake=captureStage==1;steerInput=0;}
-        float acceleration=Mathf.Lerp(34,13,speed/TopSpeed);
+        float acceleration=Mathf.Lerp(52,22,speed/TopSpeed);
         shiftDelay=Mathf.Max(0,shiftDelay-dt);
         float cap=boosting?TopSpeed*1.3f:TopSpeed;
         float force=brake?-100:fuel<=0?-35:throttle?(shiftDelay>0?2:acceleration)*(boosting?2.2f:1):-10;
         speed=Mathf.Clamp(speed+force*dt,0,Mathf.Max(cap,speed-28*dt));
-        int wanted=Mathf.Clamp(1+(int)(speed/45),1,6);
+        int wanted=Mathf.Clamp(1+(int)(speed/85),1,6);
         if(wanted>gear&&shiftDelay==0){gear++;shiftDelay=.22f;Feedback(clickSound,false);}else if(wanted<gear)gear=wanted;
         fuel=Mathf.Max(0,fuel-dt/95*(boosting?1.35f:1));
         if(boosting){nitro=Mathf.Max(0,nitro-dt*.17f);if(nitro<=0||fuel<=0)boosting=false;}else nitro=Mathf.Min(1,nitro+dt*.035f);
@@ -198,15 +204,16 @@ public partial class TrafficRidePrototype
         lean=Mathf.Lerp(lean,-steerInput*10,dt*7);impact=Mathf.MoveTowards(impact,0,dt*3);hitCooldown-=dt;
         float travel=speed/3.6f*dt;distance+=travel;elapsed+=dt;
         district=DistrictName(distance);
-        foreach(var block in blocks){block.position-=Vector3.forward*travel;if(block.position.z< -160){block.position+=Vector3.forward*560;ConfigureDistrict(block,distance+block.position.z);}}
+        foreach(var block in blocks){block.position-=Vector3.forward*travel;if(block.position.z< -160){block.position+=Vector3.forward*(blocks.Count*80);ConfigureDistrict(block,distance+block.position.z);}}
         AdvanceTraffic(dt,travel);AdvanceRacers(dt);AdvancePickups();
         foreach(var h in hazards){h.position-=Vector3.forward*travel;if(h.position.z<-20){h.position=new Vector3(h.position.x,0,nextHazard-distance);nextHazard+=400;}
-            if(Mathf.Abs(h.position.z)<1.8f&&Mathf.Abs(h.position.x-PlayerX)<1.1f&&jump<.8f)Collision(.6f);}
+            if(h.position.z<1.8f&&h.position.z> -travel-1.8f&&Mathf.Abs(h.position.x-PlayerX)<1.1f&&jump<.8f)Collision(.6f);}
         view.transform.position=new Vector3(PlayerX,1.55f+jump+Mathf.Sin(Time.time*24)*speed/300*.006f,0);
         view.transform.rotation=Quaternion.Euler(impact*3+(brake?1.5f:0),steerInput*1.5f,lean*.25f);
-        view.fieldOfView=Mathf.Lerp(view.fieldOfView,75+speed/300*7+(boosting?5:0),dt*3);
-        enginePitch=45+gear*8+(speed%45)*2;engineVolume=throttle?.055f:.025f;
+        view.fieldOfView=Mathf.Lerp(view.fieldOfView,75+Mathf.Clamp01(speed/TopSpeed)*8+(boosting?5:0),dt*3);
+        enginePitch=45+gear*8+(speed%85)*2;engineVolume=throttle?.055f:.025f;
         place=1;foreach(var r in racers)if(r.progress>distance)place++;
+        AdvanceGrandTour(dt);ProjectCourseWorld();
         if(distance>=finishDistance)FinishRace(true);
         else if(fuel<=0&&speed<=.1f)FinishRace(false);
     }
@@ -241,9 +248,9 @@ public partial class TrafficRidePrototype
             // Brake behind a work site or slower vehicle instead of driving through it.
             foreach(var h in hazards)if(Mathf.Abs(h.position.x-car.position.x)<1.5f&&h.position.z-car.position.z>0&&h.position.z-car.position.z<25&&own>0)own=5;
             car.position+=Vector3.forward*(own*dt-travel);
-            if(car.position.z<-35){car.position=new Vector3(i%3==0?-1.85f:i%2==0?5.5f:1.85f,0,350+i*31);}
+            if(car.position.z<-35){car.position=new Vector3(i%3==0?-1.85f:i%2==0?5.5f:1.85f,0,600+i*85);}
             if(oldZ>0&&car.position.z<=0&&Mathf.Abs(car.position.x-PlayerX)>1.6f&&Mathf.Abs(car.position.x-PlayerX)<2.7f){nearMisses++;Feedback(passSound,false);Announce("CLOSE PASS +5");}
-            if(Mathf.Abs(car.position.z)<2.8f&&Mathf.Abs(car.position.x-PlayerX)<1.55f)Collision(1.6f);
+            if(car.position.z<2.8f&&oldZ> -2.8f&&Mathf.Abs(car.position.x-PlayerX)<1.55f)Collision(1.6f);
         }
         for(int w=0;w<wheels.Count;w++){float own=w/4%3==0?24:24+w/4*1.3f;wheels[w].Rotate(Vector3.right,own/.34f*Mathf.Rad2Deg*dt,Space.Self);}
     }
@@ -252,17 +259,17 @@ public partial class TrafficRidePrototype
         for(int i=0;i<racers.Count;i++){
             var r=racers[i];float gap=distance-r.progress;
             // Bounded catch-up: rivals race independently and can be beaten with clean riding and nitro.
-            float target=TopSpeed*(.87f+i*.025f)+Mathf.Clamp(gap*.025f,-14,15);
+            float target=Mathf.Min(TopSpeed*(.995f+i*.015f),Mathf.Max(65,speed*.85f+TopSpeed*.15f)+Mathf.Clamp((gap+18+i*14)*.65f,-65,55));
             float avoid=0;
             foreach(var c in cars)if(c.position.z-(r.progress-distance)>0&&c.position.z-(r.progress-distance)<38&&Mathf.Abs(c.position.x-r.x)<2)avoid=c.position.x>2?1.85f:5.4f;
             foreach(var h in hazards)if(h.position.z-(r.progress-distance)>0&&h.position.z-(r.progress-distance)<30&&Mathf.Abs(h.position.x-r.x)<1.5f)avoid=1.85f;
             r.decision-=dt;if(avoid!=0)r.target=avoid;else if(r.decision<=0){r.target=(i+(int)(elapsed/7))%2==0?1.85f:5.4f;r.decision=4+i;}
-            r.velocity=Mathf.MoveTowards(r.velocity,target,dt*(r.velocity<150?29:16));
+            r.velocity=Mathf.MoveTowards(r.velocity,target,dt*(r.velocity<250?55:26));
             r.progress+=r.velocity/3.6f*dt;float old=r.x;r.x=Mathf.MoveTowards(r.x,r.target,dt*2.4f);
             r.root.position=new Vector3(r.x,0,r.progress-distance);r.body.localRotation=Quaternion.Euler(0,0,-(r.x-old)/Mathf.Max(dt,.001f)*6);
             foreach(var tire in r.tires)tire.Rotate(Vector3.up,r.velocity/3.6f/.325f*Mathf.Rad2Deg*dt,Space.Self);
             if(r.progress>=finishDistance&&r.finish==0)r.finish=elapsed;
-            if(Mathf.Abs(r.root.position.z)<1.7f&&Mathf.Abs(r.x-PlayerX)<.65f){Collision(.4f);r.velocity*=.85f;}
+            if(Mathf.Abs(r.root.position.z)<1.7f+Mathf.Abs(speed-r.velocity)/3.6f*dt&&Mathf.Abs(r.x-PlayerX)<.65f){Collision(.4f);r.velocity*=.85f;}
         }
     }
     void AdvancePickups()
@@ -272,44 +279,21 @@ public partial class TrafficRidePrototype
             p.root.gameObject.SetActive(!p.taken&&p.at-distance<500);
             p.root.position=new Vector3(p.x,p.kind==PickupKind.Coin?2.15f:.65f,p.at-distance);
             p.root.rotation=Quaternion.Euler(0,Time.time*120,0);
-            if(!p.taken&&Mathf.Abs(p.at-distance)<3&&Mathf.Abs(p.x-PlayerX)<1){
+            if(!p.taken&&p.at-distance<3&&p.at-distance> -3-speed/3.6f*Mathf.Min(Time.deltaTime,.05f)&&Mathf.Abs(p.x-PlayerX)<1){
                 if(p.kind==PickupKind.Coin&&jump>.4f){p.taken=true;raceCoins++;Feedback(coinSound);Announce("AIR COIN +1");}
                 else if(p.kind==PickupKind.Fuel&&jump<.4f){p.taken=true;fuel=Mathf.Min(1,fuel+.4f);Feedback(fuelSound);Announce("FUEL +40%");}
             }
         }
     }
-    string DistrictName(float at){int zone=((int)(at/2200)+route)%3;return zone==0?"DOWNTOWN":zone==1?"RIVERSIDE":"GARDEN DISTRICT";}
-    void ConfigureDistrict(Transform block,float at)
-    {
-        int zone=((int)(Mathf.Max(0,at)/2200)+route)%3;
-        foreach(Transform child in block){
-            if(child.name=="Leafy street tree"||child.name=="Tree planter")child.gameObject.SetActive(zone!=1);
-            if(child.name=="Building"||child.name=="Roof cornice"||child.name=="Masonry plinth")child.gameObject.SetActive(zone==0||(zone==2&&child.localPosition.z%30<10));
-        }
-        // Continuous road and curbs remain identical at district boundaries.
-        var extra=block.Find("District scenery");if(extra!=null)Destroy(extra.gameObject);
-        var scenery=new GameObject("District scenery").transform;scenery.SetParent(block,false);
-        if(zone==1){
-            var water=riverMaterial;
-            Box("River",new Vector3(-110,-1,40),new Vector3(195,.2f,80),water,scenery);
-            Box("River east",new Vector3(110,-1,40),new Vector3(195,.2f,80),water,scenery);
-            for(int side=-1;side<=1;side+=2){
-                Box("Bridge deck",new Vector3(side*9,-.25f,40),new Vector3(3,.5f,80),concrete,scenery);
-                Bar("Guardrail",new Vector3(side*10.3f,1,0),new Vector3(side*10.3f,1,80),.09f,metal,scenery);
-                for(int k=0;k<10;k++)Bar("Rail post",new Vector3(side*10.3f,0,k*8),new Vector3(side*10.3f,1,k*8),.08f,metal,scenery);
-            }
-        }else if(zone==2){
-            var grass=grassMaterial;
-            for(int side=-1;side<=1;side+=2)Box("Park",new Vector3(side*27,-.1f,40),new Vector3(33,.2f,80),grass,scenery);
-        }
-    }
+    string DistrictName(float at)=>SectionAt(at).name;
+    void ConfigureDistrict(Transform block,float at)=>GrandConfigure(block,at);
     void FinishRace(bool finished)
     {
         if(earned)return;earned=true;finishTime=elapsed;boosting=false;
-        resultHeading=finished?(place==1?"VICTORY":"RACE COMPLETE"):"OUT OF FUEL";
+        resultHeading=finished?(place==1?"VICTORY":"RACE COMPLETE"):crashResult?"BIKE WRECKED":"OUT OF FUEL";
         resultsReward=raceCoins+nearMisses*5+(finished?(5-place)*30:0);credits+=(int)resultsReward;
         if(!qaMode){PlayerPrefs.SetInt("sr2_credits",credits);if(finished){float best=PlayerPrefs.GetFloat("sr2_best_"+route,float.MaxValue);PlayerPrefs.SetFloat("sr2_best_"+route,Mathf.Min(best,elapsed));}PlayerPrefs.Save();}
-        SetPage(Page.Results);Feedback(coinSound);
+        SetPage(Page.Results);if(finished)Feedback(Resources.Load<AudioClip>("GrandTour/Audio/Finish"));
     }
     void OnApplicationPause(bool value){if(value&&page==Page.Riding)SetPage(Page.Pause);}
     void OnApplicationFocus(bool value){if(!value&&page==Page.Riding&&!qaMode)SetPage(Page.Pause);}

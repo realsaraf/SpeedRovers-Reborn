@@ -10,11 +10,16 @@ public static class TrafficRideBuild
         var scene=EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Single);
         var root=new GameObject("Speed Rovers 2").AddComponent<TrafficRidePrototype>();
         root.carPrefab=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prototype3D/Models/CarConcept.glb");
-        root.surfaceShader=Shader.Find("Standard");
+        root.surfaceShader=Shader.Find("Standard");root.waterShader=Shader.Find("SpeedRovers/RiverSurface");
         foreach(var path in new[]{"Assets/Prototype3D/Art/Cockpit.png","Assets/Prototype3D/Art/Facades.png"}){
             var importer=(TextureImporter)AssetImporter.GetAtPath(path);importer.textureType=TextureImporterType.Default;
             importer.alphaIsTransparency=path.Contains("Cockpit");importer.mipmapEnabled=!path.Contains("Cockpit");
             importer.maxTextureSize=2048;importer.textureCompression=TextureImporterCompression.Uncompressed;importer.SaveAndReimport();}
+        foreach(var asset in AssetDatabase.FindAssets("t:AudioClip",new[]{"Assets/Resources/GrandTour/Audio"})){
+            var importer=(AudioImporter)AssetImporter.GetAtPath(AssetDatabase.GUIDToAssetPath(asset));var settings=importer.defaultSampleSettings;
+            settings.compressionFormat=AudioCompressionFormat.Vorbis;settings.quality=.75f;
+            settings.loadType=importer.assetPath.Contains("Score")?AudioClipLoadType.Streaming:AudioClipLoadType.CompressedInMemory;importer.defaultSampleSettings=settings;importer.SaveAndReimport();}
+        var pine=(TextureImporter)AssetImporter.GetAtPath("Assets/Resources/GrandTour/Pine.png");pine.alphaIsTransparency=true;pine.mipmapEnabled=true;pine.maxTextureSize=1024;pine.SaveAndReimport();
         root.cockpitArt=AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Prototype3D/Art/Cockpit.png");
         root.facadeArt=AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Prototype3D/Art/Facades.png");
         root.roadArt=AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Resources/Painted/CityAsphalt.png");
@@ -33,7 +38,7 @@ public static class TrafficRideBuild
         PlayerSettings.defaultInterfaceOrientation=UIOrientation.AutoRotation;
         PlayerSettings.allowedAutorotateToLandscapeLeft=true;PlayerSettings.allowedAutorotateToLandscapeRight=true;
         PlayerSettings.allowedAutorotateToPortrait=false;PlayerSettings.allowedAutorotateToPortraitUpsideDown=false;
-        PlayerSettings.productName="Speed Rovers 2";PlayerSettings.bundleVersion="2.0.0";
+        PlayerSettings.productName="Speed Rovers 2";PlayerSettings.bundleVersion="2.1.0";
         AssetDatabase.SaveAssets();
     }
     public static void Build()

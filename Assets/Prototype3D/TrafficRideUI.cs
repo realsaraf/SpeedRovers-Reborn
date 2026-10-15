@@ -42,6 +42,7 @@ public partial class TrafficRidePrototype
     }
     void DrawRideHUD()
     {
+        DrawSpeedAir();
         // Cockpit stays at rider eye level during nitro. Only the explicit jump moves the camera.
         if(cockpitArt!=null){var old=GUI.matrix;GUIUtility.RotateAroundPivot(lean*.25f,new Vector2(640,720));
             GUI.DrawTexture(new Rect(-12,150+Mathf.Sin(Time.time*22)*speed/300,1304,734),cockpitArt,ScaleMode.StretchToFill,true);
@@ -66,9 +67,9 @@ public partial class TrafficRidePrototype
             if(Button("JUMP ↑",310,590,150,78,false,jumpCooldown<=0))JumpBike();
             Text(Application.isMobilePlatform?(tiltControl?"TILT TO STEER":"DRAG WHILE HOLDING THROTTLE"):"W / S  THROTTLE / BRAKE     A / D  STEER     SPACE  JUMP     SHIFT  NITRO",320,692,700,22,tinyStyle,muted);
             if(countdown>0)Text(Mathf.CeilToInt(countdown).ToString(),540,220,200,150,new GUIStyle(titleStyle){alignment=TextAnchor.MiddleCenter,fontSize=120},accent);
-            if(boosting){for(int i=0;i<14;i++){float y=(animationTime*550+i*57)%600+105;Fill(new Rect(5+i%3*7,y,2,25+i%4*8),new Color(.3f,1,1,.12f));Fill(new Rect(1255-i%3*7,y,2,25+i%4*8),new Color(.3f,1,1,.12f));}}
             if(fuel<.2f&&Mathf.Sin(Time.time*5)>0)Text("LOW FUEL — COLLECT RED CANS",430,180,500,35,bodyStyle,new Color(1,.4f,.2f));
         }
+        DrawGrandTourHUD();
         if(impact>0)Fill(new Rect(0,0,1280,720),new Color(1,.25f,.1f,impact*.17f));
     }
     void DrawMenu()
@@ -104,7 +105,7 @@ public partial class TrafficRidePrototype
             Text("YOUR NEXT ADVANTAGE",40,124,1100,90,titleStyle);
             for(int i=0;i<3;i++){float x=40+i*407;bool owned=OwnBike(i);Fill(new Rect(x,240,385,330),ink);Fill(new Rect(x,240,385,5),liveries[i]);
                 Text(bikeNames[i],x+22,266,350,50,subStyle,liveries[i]);
-                Text((255+i*12)+" KM/H",x+22,337,340,58,new GUIStyle(titleStyle){fontSize=45});
+                Text((510+i*24)+" KM/H",x+22,337,340,58,new GUIStyle(titleStyle){fontSize=45});
                 Meter("POWER",.72f+i*.1f,x+22,412,335,liveries[i]);Meter("NITRO",.8f,x+22,457,335,accent);
                 if(Button(i==bike?"EQUIPPED":owned?"EQUIP":(i*250)+" CREDITS / UNLOCK",x+22,515,340,44,i==bike)){
                     if(owned||credits>=i*250){if(!owned){credits-=i*250;if(!qaMode)PlayerPrefs.SetInt("sr2_bike_owned_"+i,1);}bike=i;accent=liveries[i];
@@ -152,7 +153,7 @@ public partial class TrafficRidePrototype
         var safe=Screen.safeArea;float sc=Mathf.Min(safe.width/1280f,safe.height/720f);float lf=safe.x+(safe.width-1280*sc)*.5f,tp=Screen.height-safe.yMax+(safe.height-720*sc)*.5f;
         Check(ControlAt(new Vector2(lf+1100*sc,Screen.height-(tp+600*sc)))==1,"throttle aligns with wide-screen HUD");
         Check(ControlAt(new Vector2(lf+890*sc,Screen.height-(tp+600*sc)))==0,"nitro touch cannot trigger throttle");
-        StartRace();countdown=0;hitCooldown=10;yield return new WaitForSeconds(1);Check(speed>15&&speed<40,"throttle accelerates gradually");
+        StartRace();countdown=0;hitCooldown=10;yield return new WaitForSeconds(1);Check(speed>20&&speed<60,"throttle accelerates gradually");
         speed=150;captureStage=1;yield return new WaitForSeconds(.5f);Check(speed<115,"held brake slows the bike");captureStage=0;
         speed=140;float y=jump;nitro=.8f;ActivateNitro();yield return new WaitForSeconds(.4f);Check(boosting&&nitro<.8f&&jump==y,"nitro consumes charge without lifting rider");
         boosting=false;nitro=.49f;ActivateNitro();Check(!boosting,"nitro requires half charge");
@@ -165,8 +166,20 @@ public partial class TrafficRidePrototype
         SetPage(Page.Pause);float frozen=distance;yield return new WaitForSeconds(.3f);Check(distance==frozen,"pause freezes simulation");yield return Shot("04-pause");SetPage(Page.Riding);
         speed=180;hitCooldown=20;cars[1].position=new Vector3(1.85f,0,30);racers[0].progress=distance+20;racers[0].x=5.4f;yield return Shot("05-race");
         Check(racers.TrueForAll(r=>r.progress>0&&r.velocity>0),"all rivals advance independently");
-        Check(DistrictName(500)==DistrictName(2100)&&DistrictName(2300)!=DistrictName(2100),"districts last 2200 metres");
-        distance=2400;foreach(var block in blocks)ConfigureDistrict(block,distance+block.position.z);yield return Shot("06-riverside");
+        Check(DistrictName(500)==DistrictName(2100)&&DistrictName(3800)!=DistrictName(2100),"authored opening district lasts 3600 metres");
+        Check(TopSpeed>=510&&cars.Count==3,"double baseline top speed and reduced traffic");
+        float damaged=health;cleanTime=6;AdvanceGrandTour(1);Check(health>damaged,"bike health recovers after clean riding");
+        Check(courseBook.routes.Length==3&&CourseNow.sections.Length==8&&finishDistance>=28000,"three fixed long courses with eight authored sections");
+        for(int scene=0;scene<CourseNow.sections.Length;scene++){
+            RestoreLogicalWorld();distance=CourseNow.sections[scene].start+800;speed=TopSpeed;fuel=1;health=1;hitCooldown=20;noticeUntil=0;
+            for(int i=0;i<blocks.Count;i++){blocks[i].position=new Vector3(0,0,i*80-80);ConfigureDistrict(blocks[i],distance+blocks[i].position.z);}
+            for(int i=0;i<racers.Count;i++){racers[i].progress=distance+25+i*18;racers[i].velocity=TopSpeed;}
+            for(int i=0;i<cars.Count;i++)cars[i].position=new Vector3(i==0?-1.85f:5.4f,0,100+i*80);
+            yield return new WaitForSeconds(.3f);yield return Shot("tour-"+scene);
+            Check(!float.IsNaN(view.transform.position.y)&&Mathf.Abs(view.transform.position.y-CourseOffset(distance).y-1.55f)<.01f,"road and camera aligned in section "+scene);
+        }
+        health=.1f;hitCooldown=0;speed=400;Collision(1.6f);Check(page==Page.Results&&crashResult&&health==0,"accumulated impact damage wrecks the bike");
+        StartRace();countdown=0;
         distance=finishDistance;FinishRace(true);int reward=credits;FinishRace(true);Check(credits==reward&&page==Page.Results,"finish awards credits exactly once");yield return Shot("07-results");
         StartRace();countdown=0;fuel=0;speed=0;yield return null;Check(page==Page.Results&&resultHeading=="OUT OF FUEL","empty fuel coasts to a result");
         Debug.Log("RACE QA COMPLETE: "+qaFailures+" failures");System.IO.File.WriteAllText(System.IO.Path.Combine(captureDir,"result.txt"),qaFailures+" failures");Application.Quit(qaFailures==0?0:1);

@@ -15,3 +15,16 @@ Photographed HDRI: Kloofendal 48d Partly Cloudy (Pure Sky), Greg Zaal / Jarod Gu
 Source: https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky
 Downloaded 1K HDR for prototype use. Existing DayTree.png and CityAsphalt.png reused from the game.
 
+
+## Grand Tour revision (2026-10-14)
+Built-in image generation, production runtime textures.
+
+Cockpit edit: Remove only the grey curved windscreen above the dashboard, including rim and reflections. Replace with full alpha transparency. Keep same dimensions, dashboard location, mirrors, handlebars, gloves, tank, detail, framing and all other elements. No background, scenery, replacement glass or tint. Preserve transparency.
+
+Facade replacement: Four equal vertical strips in a square atlas. Flat orthographic modern city facades: charcoal steel and blue-grey curtain-wall glass; warm buff limestone and black windows; red-brown brick residences; dark granite and golden office windows. Twelve storeys, four bays, parallel lines, no perspective, roofs, ground, people, signs. Fine material detail, subtle dirt, diffuse reflections and neutral lighting.
+
+GrandTour/RockDiffuse.png: Seamless photorealistic mountain rock albedo. Grey and warm brown weathered sedimentary stone, strata, cracks, gravel, sparse moss. Orthographic evenly diffuse neutral light, no horizon or objects, no directional shadows or highlights. Fine multiscale variation and restrained contrast.
+
+Generation IDs: cockpit exec-606c594d-2f36-402f-848f-a5909ac1cf2c; facades exec-d23c3c13-51c9-471b-a724-2f11ce4749e0; rock exec-93758b2d-5051-43cf-990c-c3e70d24039a.
+
+Pine.png: One mature photorealistic alpine spruce, full trunk base and pointed top, irregular layered branches and fine needles, dark olive/forest greens, grey-brown bark, diffuse daylight, upright ground-eye-level cutout. True alpha, transparent branch gaps, no ground/scenery/text/shadow plane/fringe. Generated exec-2b04d42e-5d92-4689-aa06-179c5642099b.

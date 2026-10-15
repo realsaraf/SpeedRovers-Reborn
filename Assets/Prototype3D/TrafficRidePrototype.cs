@@ -79,12 +79,12 @@ public partial class TrafficRidePrototype : MonoBehaviour
         view=new GameObject("Rider eye camera").AddComponent<Camera>();view.transform.position=new Vector3(1.85f,1.55f,0);
         view.fieldOfView=75;view.nearClipPlane=.04f;view.farClipPlane=650;view.backgroundColor=RenderSettings.fogColor;view.tag="MainCamera";
         view.gameObject.AddComponent<AudioListener>();
-        for(int i=0;i<7;i++) CreateBlock(i*80-80,i);
+        for(int i=0;i<9;i++) CreateBlock(i*80-80,i);
         CreateCockpit();
         if(carPrefab==null) {Debug.LogError("Prototype car asset missing");enabled=false;return;}
-        for(int i=0;i<7;i++) CreateCar(i);
+        for(int i=0;i<3;i++) CreateCar(i);
         engine=gameObject.AddComponent<AudioSource>();engine.loop=true;engine.spatialBlend=0;
-        var clip=AudioClip.Create("Prototype procedural engine",44100,1,44100,true,EngineAudio);engine.clip=clip;engine.Play();
+        engine.clip=Resources.Load<AudioClip>("GrandTour/Audio/Engine");engine.Play();
         InitializeRaceGame();
     }
     void EngineAudio(float[] data)
@@ -104,7 +104,7 @@ public partial class TrafficRidePrototype : MonoBehaviour
             Box("Road edge",new Vector3(s*7.2f,.012f,40),new Vector3(.12f,.02f,80),white,root);
             for(int k=0;k<8;k++)
             {
-                float bz=k*10+5; float h=18+(index+k)%3*2;
+                float bz=k*10+5; float h=32+(index+k)%5*5;
                 var facade=Mat("Textured architecture",Color.white,0,.18f);
                 facade.mainTexture=facadeArt;facade.mainTextureScale=new Vector2(.25f,1);facade.mainTextureOffset=new Vector2(((index+k+(s+1))%4)*.25f,0);
                 Box("Building",new Vector3(s*15,h/2,bz),new Vector3(9,h,10),facade,root);
@@ -126,6 +126,7 @@ public partial class TrafficRidePrototype : MonoBehaviour
         for(int k=0;k<10;k++) foreach(float x in new[]{-3.65f,3.65f})
             Box("Lane dash",new Vector3(x,.015f,k*8+2),new Vector3(.13f,.025f,3.5f),white,root);
         foreach(float x in new[]{-.12f,.12f}) Box("Center line",new Vector3(x,.016f,40),new Vector3(.09f,.025f,80),amber,root);
+        RememberBlock(root);
     }
     void CreateCockpit()
     {
