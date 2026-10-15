@@ -16,4 +16,8 @@ Latest corrections: dashboard text shares cockpit bob and lean; nearest rival sh
 
 ## Remaining verification and limitations
 
-Codemagic signing/upload and Apple TestFlight processing require separate confirmation. Desktop results do not verify physical iPhone performance, installation, audio quality or haptics. NFS visual parity is not demonstrated: environment geometry and assembled riders remain simplified. App Store Connect browser navigation currently fails with a network error even after the user signed in.
+Desktop results do not verify physical iPhone performance, installation, audio quality or haptics. NFS visual parity is not demonstrated: environment geometry and assembled riders remain simplified. App Store Connect browser navigation currently fails with a network error even after the user signed in.
+
+## Upload evidence
+
+Commit 785249b was pushed to main. Codemagic build 20 successfully signed and uploaded version 2.1.0 (120) to Apple with no errors. Delivery UUID: 8e712b93-7cb6-4478-84b3-59d6051228c1. Build URL: https://codemagic.io/app/6acee7d9e28a90791b094ade/build/6ad0493ea90f016d29d5bdf0. Apple completed processing at 2026-10-15 03:41:46 UTC. TestFlight emailed realsaraf@gmail.com at 03:41:49 UTC that Speed Rovers 2 2.1.0 (120) is ready to test. Gmail message IDs: 1a13da6d612e3b63 (processing), 1a13da6e6ce80461 (tester availability). The tester message was read and confirms iOS 15.0 or later. This proves tester-account availability, not physical-device installation.
