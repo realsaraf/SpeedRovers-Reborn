@@ -23,11 +23,11 @@ public partial class TrafficRidePrototype
     {
         courseBook=JsonUtility.FromJson<CourseBook>(Resources.Load<TextAsset>("GrandTour/courses").text);
         stoneMaterial=Mat("Cut stone",new Color(.37f,.39f,.4f),0,.17f);
-        terrainMaterial=Mat("Mountain strata",new Color(.45f,.43f,.38f),0,.12f);
+        terrainMaterial=new Material(Resources.Load<Shader>("GrandTour/RockSurface"));terrainMaterial.color=new Color(.85f,.82f,.76f);
         var rock=Resources.Load<Texture2D>("GrandTour/RockDiffuse");if(rock!=null)terrainMaterial.mainTexture=rock;
         pineMaterial=new Material(foliageShader);pineMaterial.mainTexture=Resources.Load<Texture2D>("GrandTour/Pine");if(pineMaterial.mainTexture==null)pineMaterial.mainTexture=treeArt;
-        stoneMaterial.mainTexture=rock;stoneMaterial.mainTextureScale=Vector2.one*3;
-        towerGlass=Mat("Reflective tower glazing",new Color(.17f,.32f,.4f),.7f,.87f);
+        stoneMaterial=new Material(terrainMaterial);stoneMaterial.color=new Color(.65f,.68f,.7f);stoneMaterial.mainTexture=rock;
+        towerGlass=Mat("Reflective tower glazing",new Color(.57f,.68f,.73f),.3f,.5f);towerGlass.mainTexture=facadeArt;towerGlass.mainTextureScale=new Vector2(.25f,1);
         nightGlass=Mat("Warm office lighting",new Color(.7f,.55f,.27f),.2f,.65f);nightGlass.EnableKeyword("_EMISSION");nightGlass.SetColor("_EmissionColor",new Color(.6f,.34f,.12f)*.8f);
         waterMaterial=waterShader!=null?new Material(waterShader):riverMaterial;
         var rainGO=new GameObject("Weather rain");rainGO.transform.SetParent(view.transform,false);rainGO.transform.localPosition=new Vector3(0,12,20);
@@ -69,7 +69,7 @@ public partial class TrafficRidePrototype
         var origin=CourseOffset(distance);foreach(var block in blocks)block.position=new Vector3(-origin.x,0,block.position.z);
         for(int i=0;i<cars.Count;i++)ProjectActor(cars[i],i%3==0);
         foreach(var r in racers)ProjectActor(r.root);
-        foreach(var p in pickups){ProjectActor(p.root);p.root.Rotate(0,Time.time*120,0,Space.Self);}
+        foreach(var p in pickups){ProjectActor(p.root);p.root.Rotate(0,p.kind==PickupKind.Coin?Time.time*120:Mathf.Sin(Time.time*2)*8,0,Space.Self);}
         foreach(var h in hazards)ProjectActor(h);
         view.transform.position=new Vector3(PlayerX,1.55f+origin.y+jump,0);
         view.transform.rotation=Quaternion.Euler(CoursePitch(distance)+impact*2+(brake?1:0),CourseYaw(distance)+steerInput,lean*.25f);
@@ -137,15 +137,22 @@ public partial class TrafficRidePrototype
                 if(theme==2){CourseBar("cable",new Vector3(side*10,CableHeight(at+z),z),new Vector3(side*10,CableHeight(at+z+10),z+10),.16f,root,at);
                     CourseBar("hanger",new Vector3(side*10,.2f,z),new Vector3(side*10,CableHeight(at+z),z),.05f,root,at);}}
             if(theme==2&&Mathf.RoundToInt(at/80)%5==0){Box("Bridge tower",new Vector3(side*10,13,0),new Vector3(1.3f,26,2.8f),stoneMaterial,root);Box("Foundation",new Vector3(side*10,-3,0),new Vector3(3,6,6),stoneMaterial,root);}
-            if(theme==3)for(int k=0;k<2;k++){float z=20+k*40,h=25+Mathf.Abs(Mathf.Sin((at+z)*.013f))*30;Box("Waterfront skyline",new Vector3(side*180,h/2,z),new Vector3(18,h,24),towerGlass,root);}
+            if(theme==3)for(int k=0;k<2;k++){float z=20+k*40,h=25+Mathf.Abs(Mathf.Sin((at+z)*.013f))*30;
+                float x=side*(110+Mathf.Abs(Mathf.Sin((at+z)*.021f))*65);
+                Box("Waterfront skyline",new Vector3(x,h/2,z),new Vector3(18,h,24),towerGlass,root);
+                Box("Waterfront roof",new Vector3(x,h,z),new Vector3(19,.7f,25),stoneMaterial,root);
+                Box("Shoreline foundation",new Vector3(x,-3,z),new Vector3(50,5,40),stoneMaterial,root);
+                for(int f=1;f<h/4;f++)Box("Facade floor band",new Vector3(x,f*4,z),new Vector3(18.15f,.18f,24.15f),metal,root);
+            }
         }
         if(theme==2&&Mathf.RoundToInt(at/80)%5==0)Box("Tower crossbeam",new Vector3(0,23,0),new Vector3(21,1.6f,2.8f),stoneMaterial,root);
     }
     void Mountains(Transform root,float at,int theme)
     {
         for(int side=-1;side<=1;side+=2){
-            var mesh=new Mesh{name="Authored terrain patch"};const int nx=12,nz=9;var v=new Vector3[nx*nz];var uv=new Vector2[v.Length];var tris=new List<int>();
-            for(int z=0;z<nz;z++)for(int x=0;x<nx;x++){float across=x*18,along=z*10;float alongRoute=at+along;float height=(.25f+Mathf.Pow(Mathf.Sin(alongRoute*.004f+across*.018f),2)*.5f+Mathf.Sin(alongRoute*.017f+across*.12f)*.08f)*across;
+            var mesh=new Mesh{name="Authored terrain patch"};const int nx=30,nz=21;var v=new Vector3[nx*nz];var uv=new Vector2[v.Length];var tris=new List<int>();
+            for(int z=0;z<nz;z++)for(int x=0;x<nx;x++){float across=x*7,along=z*4;float alongRoute=at+along;float height=(.25f+Mathf.Pow(Mathf.Sin(alongRoute*.004f+across*.018f),2)*.5f+Mathf.Sin(alongRoute*.017f+across*.12f)*.08f)*across;
+                height+=Mathf.SmoothStep(0,1,across/30)*(Mathf.PerlinNoise(alongRoute*.033f,across*.07f)*14+Mathf.PerlinNoise(alongRoute*.11f,across*.19f)*5);
                 v[z*nx+x]=OnCourse(new Vector3(side*(11+across),height-.5f,along),at);uv[z*nx+x]=new Vector2(across/10,(at+along)/10);
                 if(x>0&&z>0){int a=z*nx+x;tris.AddRange(side>0?new[]{a,a-nx,a-nx-1,a,a-nx-1,a-1}:new[]{a,a-nx-1,a-nx,a,a-1,a-nx-1});}}
             mesh.vertices=v;mesh.uv=uv;mesh.triangles=tris.ToArray();mesh.RecalculateNormals();mesh.RecalculateBounds();var g=new GameObject("Mountain terrain");g.transform.SetParent(root,false);g.AddComponent<MeshFilter>().sharedMesh=mesh;g.AddComponent<MeshRenderer>().sharedMaterial=terrainMaterial;g.AddComponent<GrandTourMeshLifetime>();
@@ -184,8 +191,11 @@ public partial class TrafficRidePrototype
         int closest=-1;float best=220;for(int n=0;n<racers.Count;n++){float gap= racers[n].progress-distance;if(gap>0&&gap<best){best=gap;closest=n;}}
         for(int i=0;i<racers.Count;i++){
             var r=racers[i];float gap=r.progress-distance;var screen=view.WorldToScreenPoint(r.root.position+Vector3.up*2.1f);
-            if(i==closest&&screen.z>0&&Mathf.Abs(gap)<220){float x=Mathf.Clamp((screen.x-left)/scale,260,1000),y=Mathf.Clamp((Screen.height-screen.y-top)/scale,175,420);
-                Fill(new Rect(x-58,y-22,116,26),ink);Text(racerNames[i]+" "+Mathf.Abs(gap).ToString("0")+" M",x-55,y-20,110,24,new GUIStyle(tinyStyle){alignment=TextAnchor.MiddleCenter},liveries[i]);}
+            if(i==closest&&screen.z>0&&Mathf.Abs(gap)<220){
+                float x=(screen.x-left)/scale,y=(Screen.height-screen.y-top)/scale;
+                if(x>100&&x<1180&&y>140&&y<500)
+                    Text(Mathf.Abs(gap).ToString("0")+" m",x-25,y-34,50,20,new GUIStyle(tinyStyle){fontSize=14,alignment=TextAnchor.MiddleCenter},new Color(.85f,.97f,1,.58f));
+            }
             Text(racerNames[i]+" "+(gap>=0?"+":"-")+Mathf.Abs(gap).ToString("0")+" M",1045,115+i*24,220,24,tinyStyle,liveries[i]);
         }
         if(health<.3f)Text("CRITICAL DAMAGE / RIDE CLEAN TO REPAIR",430,180,600,30,bodyStyle,new Color(1,.4f,.2f));

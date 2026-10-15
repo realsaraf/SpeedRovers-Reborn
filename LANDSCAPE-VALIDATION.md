@@ -1,27 +1,19 @@
-# Landscape 2.0.0 validation
+# Grand Tour 2.1.0 validation - 2026-10-14
 
-- Windows build: succeeded (`TrafficRideBuild.Build`).
-- Runtime: 17 checks passed, 0 failures at 1560x720.
-- Earlier 1280x720 flow: 15 checks passed, 0 failures (before adding wide-screen input checks).
-- Screenshots inspected: home, downtown cockpit, riverside cockpit; runtime also captured garage, route selector, pause and results.
-- iOS export: succeeded (`SpeedRoversBuild.BuildIOS`), version 2.0.0.
-- Package: 332.0 MiB, source verifier matched 1170 files.
-- Package SHA256: f956221d2e1119df7869771718b0eaeed55283034db0af53fe5feadc582566d9.
-- Device installation, sustained mobile performance, multitouch and native haptics are not verified by desktop QA.
+Implemented: clear cockpit; 510/534/558 km/h bike caps plus nitro; reduced traffic; peripheral airflow; cumulative damage, delayed regeneration and crash; impact haptics; three rivals; fixed 28/32/36 km courses with eight sections, authored bends/elevations, weather and lighting; replacement original audio.
 
-Runtime evidence: C:/SpeedRoversCapture/full-game-verified-runtime.log
-Screenshots: C:/SpeedRoversCapture/full-game-verified-qa/
-Build evidence: C:/SpeedRoversCapture/full-game-verified-build.log and full-game-verified-ios.log
+Latest corrections: dashboard text shares cockpit bob and lean; nearest rival shows only translucent distance; fuel cans have handle/cap/label and spawn 3.2 km apart; waterfront towers have facades; rock uses world-space triplanar detail on slopes and tunnel walls; denser terrain has irregular silhouettes.
 
-Art limitations and controls are recorded in Assets/Prototype3D/README.md. No claim of reference-game visual parity.
+## Verified locally
 
+- Windows build succeeded: C:/SpeedRoversCapture/grand-tour-scenery-build.log.
+- 29 runtime checks, zero failures: C:/SpeedRoversCapture/grand-tour-scenery-qa/result.txt.
+- Inspected coastal, mountain and tunnel captures in that folder.
+- Full 28 km race completed in 240.6 seconds, all eight sections; average 59.88 FPS on this PC; 9 of 14425 frames above 33.4 ms; peak 663 km/h with nitro. Minimum health 4.7%; nearby rival on 65.5% of frames. Evidence: C:/SpeedRoversCapture/grand-tour-scenery-soak/soak.txt. Autopilot steering is a test aid; manual inputs can also affect the run.
+- iOS export succeeded: C:/SpeedRoversCapture/grand-tour-scenery-ios.log.
+- Version 2.1.0; export 330.8 MiB; manifest matches 1214 Unity files.
+- SHA256: 60ef59927b27e779af826f2d5b2f762ee27486075a7cef0c473178b72b32f097.
 
-## Grand Tour upgrade in progress - 2026-10-14
+## Remaining verification and limitations
 
-Implemented: clear cockpit artwork; 510/534/558 km/h bike caps; three traffic vehicles; peripheral airflow; damage, five-second repair delay and regenerating health; cumulative-damage crash; native impact haptics; named competitors and gap indicators; fixed JSON courses at 28/32/36 km with eight sections, authored bends/elevations, river, mountains, tunnel, forest, lighting and rain; replacement original scores and all event/engine/wind clips.
-
-Evidence: Windows build succeeded. `C:/SpeedRoversCapture/grand-tour-qa2/result.txt` reports 0 failures across 29 runtime checks, including all eight section camera elevations. Captures are in that directory. The subsequent visual refinements (spruce cutout, quieter water, tunnel lining, taller facade scale, leather rider jackets, single nearest-rival marker) compile successfully but still require a fresh build and visual/runtime pass. Audio files have nonzero signal and no clipping; this is not a listening/device quality assessment.
-
-Remaining: final visual pass and a complete timed race/performance run; fresh iOS export, source manifest, package, push/build and TestFlight processing/device verification. NFS visual parity is not demonstrated; rivals remain procedural assemblies and environments need further art review.
-
-Storage blocker: C: fell to roughly 160 MB free. User authorized deleting only Builds/CockpitLab, but automatic policy rejected that deletion even after approval. No deletion occurred. User was asked to manually free at least 2 GB. Do not push main with the old iOS export/manifest.
+Codemagic signing/upload and Apple TestFlight processing require separate confirmation. Desktop results do not verify physical iPhone performance, installation, audio quality or haptics. NFS visual parity is not demonstrated: environment geometry and assembled riders remain simplified. App Store Connect browser navigation currently fails with a network error even after the user signed in.

@@ -44,9 +44,17 @@ public partial class TrafficRidePrototype
     {
         DrawSpeedAir();
         // Cockpit stays at rider eye level during nitro. Only the explicit jump moves the camera.
-        if(cockpitArt!=null){var old=GUI.matrix;GUIUtility.RotateAroundPivot(lean*.25f,new Vector2(640,720));
-            GUI.DrawTexture(new Rect(-12,150+Mathf.Sin(Time.time*22)*speed/300,1304,734),cockpitArt,ScaleMode.StretchToFill,true);
-            Text(Mathf.RoundToInt(speed)+"\nGEAR "+gear,575,492,130,62,new GUIStyle(bodyStyle){alignment=TextAnchor.MiddleCenter},accent);GUI.matrix=old;}
+        if(cockpitArt!=null){
+            var old=GUI.matrix;GUIUtility.RotateAroundPivot(lean*.25f,new Vector2(640,720));
+            GUI.matrix=GUI.matrix*Matrix4x4.Translate(new Vector3(0,Mathf.Sin(Time.time*22)*speed/300,0));
+            GUI.DrawTexture(new Rect(-12,150,1304,734),cockpitArt,ScaleMode.StretchToFill,true);
+            // Instrument text shares the artwork transform, including vibration and lean.
+            var lcd=new Color(.48f,.79f,.73f,.87f);
+            Text(Mathf.RoundToInt(speed).ToString(),593,500,75,30,new GUIStyle(bodyStyle){fontSize=25,alignment=TextAnchor.MiddleCenter},lcd);
+            Text("KM/H",663,512,35,16,new GUIStyle(tinyStyle){fontSize=10},lcd);
+            Text("GEAR "+gear,592,532,100,20,new GUIStyle(tinyStyle){fontSize=13,alignment=TextAnchor.MiddleCenter},lcd);
+            GUI.matrix=old;
+        }
         Fill(new Rect(20,18,1160,84),ink);Fill(new Rect(20,100,1160*Mathf.Clamp01(distance/finishDistance),3),accent);
         Text(Mathf.RoundToInt(speed).ToString(),42,23,115,52,new GUIStyle(titleStyle){fontSize=48});Text("KM/H   G"+gear,43,75,120,22,tinyStyle,muted);
         Text("POSITION",180,29,125,24,tinyStyle,muted);Text(place+" / 4",180,53,130,42,subStyle);
@@ -120,7 +128,7 @@ public partial class TrafficRidePrototype
             if(Button("SOFT HAPTICS   /   "+(hapticsOn?"ON":"OFF"),40,350,580,78)){hapticsOn=!hapticsOn;SaveOption("haptics",hapticsOn);}
             if(Button("STEERING   /   "+(tiltControl?"TILT":"THUMB DRAG"),660,350,580,78)){tiltControl=!tiltControl;SaveOption("tilt",tiltControl);}
             Text("HOLD RIGHT TO ACCELERATE. HOLD LEFT TO BRAKE.",44,475,1100,35,bodyStyle,accent);
-            Text("Drag from your first touch to steer smoothly. Jump for airborne coins.\nNitro activates at 50% charge. Collect fuel cans to stay in the race.\nCollisions cost speed; they do not end your race.",44,520,1100,100,new GUIStyle(bodyStyle){wordWrap=true},muted);
+            Text("Drag from your first touch to steer smoothly. Jump for airborne coins.\nNitro activates at 50% charge. Collect fuel cans to stay in the race.\nHits cost speed and bike health. Ride clean to repair; repeated hits can wreck the bike.",44,520,1100,100,new GUIStyle(bodyStyle){wordWrap=true},muted);
         }
     }
     void SaveOption(string name,bool value){if(qaMode)return;PlayerPrefs.SetInt("sr2_"+name,value?1:0);PlayerPrefs.Save();}
