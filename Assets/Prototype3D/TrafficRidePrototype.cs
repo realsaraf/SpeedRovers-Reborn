@@ -21,8 +21,6 @@ public partial class TrafficRidePrototype : MonoBehaviour
     
     Material asphalt, concrete, metal, glass, paint, rubber, white, amber;
     AudioSource engine;
-    float audioPhase;
-    volatile float enginePitch = 55, engineVolume;
 
     string captureDir;
     TextMesh cockpitReadout;
@@ -83,14 +81,7 @@ public partial class TrafficRidePrototype : MonoBehaviour
         CreateCockpit();
         if(carPrefab==null) {Debug.LogError("Prototype car asset missing");enabled=false;return;}
         for(int i=0;i<3;i++) CreateCar(i);
-        engine=gameObject.AddComponent<AudioSource>();engine.loop=true;engine.spatialBlend=0;
         InitializeRaceGame();
-    }
-    void EngineAudio(float[] data)
-    {
-        float hz=enginePitch,vol=engineVolume;
-        for(int i=0;i<data.Length;i++){audioPhase+=hz/44100f;audioPhase-=Mathf.Floor(audioPhase);float p=audioPhase*6.283185f;
-            data[i]=(Mathf.Sin(p)+.3f*Mathf.Sin(p*2)+.12f*Mathf.Sin(p*4))*vol;}
     }
     void CreateBlock(float z,int index)
     {

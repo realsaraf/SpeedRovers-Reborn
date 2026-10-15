@@ -86,8 +86,7 @@ public partial class TrafficRidePrototype
         var hudWhite=new Color(.94f,.98f,1,.94f);
         RideHudText(place+" / 4",new Rect(28,24,105,46),34,hudWhite,TextAnchor.UpperLeft);
         RideHudText("POS",new Rect(137,43,46,22),14,new Color(.8f,.88f,.93f,.8f),TextAnchor.UpperLeft);
-        if(raceCoins>0)RideHudText(raceCoins+" COINS",new Rect(29,76,200,26),18,new Color(1,.78f,.3f,.9f),TextAnchor.UpperLeft);
-        RideHudText(district,new Rect(29,110,250,44),16,new Color(.82f,.9f,.94f,.72f),TextAnchor.UpperLeft);
+        RideHudText(district,new Rect(29,76,250,44),16,new Color(.82f,.9f,.94f,.72f),TextAnchor.UpperLeft);
 
         // Keep instrumentation beside the road; the skyline and central horizon stay open.
         RideHudText(Mathf.RoundToInt(speed).ToString(),new Rect(1084,112,112,52),44,hudWhite);
@@ -131,7 +130,7 @@ public partial class TrafficRidePrototype
             if(Button("ROUTES",40,620,280,64))SetPage(Page.Routes);
             if(Button("GARAGE",340,620,280,64))SetPage(Page.Garage);
             if(Button("SETTINGS",640,620,280,64))SetPage(Page.Settings);
-            if(Button("HOW TO RIDE",940,620,300,64))Announce(tiltControl?"HOLD RIGHT + TILT • LEFT BRAKES • JUMP FOR COINS":"HOLD RIGHT + DRAG • LEFT BRAKES • JUMP FOR COINS");
+            if(Button("HOW TO RIDE",940,620,300,64))Announce(tiltControl?"HOLD RIGHT + TILT • LEFT BRAKES • FOLLOW FUEL BEACONS":"HOLD RIGHT + DRAG • LEFT BRAKES • FOLLOW FUEL BEACONS");
         }else if(page==Page.Routes){
             Text("CHOOSE YOUR ROUTE",40,124,1000,90,titleStyle);
             for(int i=0;i<3;i++){float x=40+i*407;Fill(new Rect(x,240,385,330),ink);Fill(new Rect(x,240,385,5),i==route?accent:muted);
@@ -179,7 +178,7 @@ public partial class TrafficRidePrototype
         Text("POSITION",75,270,240,35,bodyStyle,muted);Text(place+" / 4",75,315,240,100,titleStyle);
         Text("RACE TIME",390,270,240,35,bodyStyle,muted);Text(TimeSpan.FromSeconds(finishTime).ToString(@"mm\:ss"),390,315,300,100,titleStyle);
         Text("CREDITS EARNED",800,270,360,35,bodyStyle,muted);Text("+"+resultsReward,800,315,350,100,titleStyle,new Color(1,.76f,.25f));
-        Text(raceCoins+" AIR COINS   /   "+nearMisses+" CLOSE PASSES",75,446,950,40,bodyStyle,muted);
+        Text(nearMisses+" CLOSE PASSES   /   RACE TO EARN CREDITS",75,446,950,40,bodyStyle,muted);
         if(Button("RACE AGAIN",70,560,540,75,true))StartRace();if(Button("HOME / UPGRADES",650,560,560,75))SetPage(Page.Home);
     }
     IEnumerator Shot(string name)
@@ -198,18 +197,25 @@ public partial class TrafficRidePrototype
         Check(ControlAt(new Vector2(lf+1100*sc,Screen.height-(tp+600*sc)))==1,"throttle aligns with wide-screen HUD");
         Check(ControlAt(new Vector2(lf+890*sc,Screen.height-(tp+600*sc)))==0,"nitro touch cannot trigger throttle");
         StartRace();countdown=0;hitCooldown=10;yield return new WaitForSeconds(1);Check(speed>20&&speed<60,"throttle accelerates gradually");
+        Check(pickups.Count==4&&pickups.TrueForAll(p=>p.marker!=null&&p.root.name=="Fuel service pickup"),"road pickup pool contains only marked fuel cans");
+        Check(pickups[0].at>=5000&&pickups[1].at-pickups[0].at>=5500,"fuel stops are scarce authored service points");
         speed=150;captureStage=1;yield return new WaitForSeconds(.5f);Check(speed<115,"held brake slows the bike");captureStage=0;
         speed=140;float y=jump;nitro=.8f;ActivateNitro();yield return new WaitForSeconds(.4f);Check(boosting&&nitro<.8f&&jump==y,"nitro consumes charge without lifting rider");
         boosting=false;nitro=.49f;ActivateNitro();Check(!boosting,"nitro requires half charge");
         speed=160;JumpBike();yield return new WaitForSeconds(.2f);Check(jump>.5f,"jump raises bike");
-        var coin=pickups.Find(p=>p.kind==PickupKind.Coin);coin.at=distance;coin.x=PlayerX;coin.taken=false;int before=raceCoins;AdvancePickups();Check(raceCoins==before+1,"airborne coin collection");
         yield return new WaitForSeconds(1);Check(jump==0,"jump lands on road");
-        fuel=.2f;var can=pickups.Find(p=>p.kind==PickupKind.Fuel);can.at=distance;can.x=PlayerX;can.taken=false;AdvancePickups();Check(fuel>.5f,"fuel pickup refills tank");
+        fuel=.2f;var can=pickups[0];can.at=distance;can.x=PlayerX;can.taken=false;AdvancePickups();Check(Mathf.Abs(fuel-.5f)<.001f,"fuel pickup adds thirty percent");
         hitCooldown=0;speed=240;gear=6;Collision(1.6f);Check(speed<150&&gear<6&&page==Page.Riding,"collision slows and downshifts without ending race");
+        float healthAfterContact=health;Collision(1.6f);Check(health==healthAfterContact,"one contact cannot inflict duplicate damage during cooldown");
         float after=speed;yield return new WaitForSeconds(.6f);Check(speed>after,"gradual collision recovery");
         SetPage(Page.Pause);float frozen=distance;yield return new WaitForSeconds(.3f);Check(distance==frozen,"pause freezes simulation");yield return Shot("04-pause");SetPage(Page.Riding);
         speed=180;hitCooldown=20;cars[1].position=new Vector3(1.85f,0,30);racers[0].progress=distance+20;racers[0].x=5.4f;yield return Shot("05-race");
         Check(racers.TrueForAll(r=>r.progress>0&&r.velocity>0),"all rivals advance independently");
+        var markedCan=pickups[0];markedCan.at=distance+230;markedCan.x=5.4f;markedCan.taken=false;
+        yield return Shot("10-fuel-marker-approach");
+        markedCan.at=distance+32;yield return Shot("11-fuel-marker-close");
+        Quaternion markerRotation=markedCan.marker.localRotation;yield return new WaitForSeconds(.1f);
+        Check(Quaternion.Angle(markerRotation,markedCan.marker.localRotation)>3,"fuel guidance marker visibly rotates while the can remains grounded");
         Check(DistrictName(500)==DistrictName(2100)&&DistrictName(3800)!=DistrictName(2100),"authored opening district lasts 3600 metres");
         Check(TopSpeed>=510&&cars.Count==3,"double baseline top speed and reduced traffic");
         float damaged=health;cleanTime=6;AdvanceGrandTour(1);Check(health>damaged,"bike health recovers after clean riding");
@@ -222,12 +228,18 @@ public partial class TrafficRidePrototype
             yield return new WaitForSeconds(.3f);yield return Shot("tour-"+scene);
             Check(!float.IsNaN(view.transform.position.y)&&Mathf.Abs(view.transform.position.y-CourseOffset(distance).y-1.55f)<.01f,"road and camera aligned in section "+scene);
         }
-        health=.1f;hitCooldown=0;speed=400;Collision(1.6f);Check(page==Page.Results&&crashResult&&health==0,"accumulated impact damage wrecks the bike");
+        health=1;cleanTime=0;countdown=10;
+        // Freeze traffic during the durability check, but space the sounds like real
+        // contacts. Clearing cooldown four times in one frame creates an impossible mix.
+        for(int hit=0;hit<3;hit++){hitCooldown=0;speed=TopSpeed;Collision(1.6f);yield return new WaitForSeconds(1.3f);}
+        Check(page==Page.Riding&&health>.09f,"fifty percent extra durability survives three full-speed car impacts");
+        countdown=0;hitCooldown=0;speed=TopSpeed;Collision(1.6f);Check(page==Page.Results&&crashResult&&health==0,"repeated heavy impacts still wreck the bike");
         StartRace();countdown=0;
         distance=finishDistance;FinishRace(true);int reward=credits;FinishRace(true);Check(credits==reward&&page==Page.Results,"finish awards credits exactly once");yield return Shot("07-results");
         StartRace();countdown=0;fuel=0;speed=0;yield return null;Check(page==Page.Results&&resultHeading=="OUT OF FUEL","empty fuel coasts to a result");
         yield return CheckRideControlsAndAudio();
         audioReview.Save(System.IO.Path.Combine(captureDir,"audio-mix.wav"));
+        yield return CheckEngineAudioOutput();
         Debug.Log("RACE QA COMPLETE: "+qaFailures+" failures");System.IO.File.WriteAllText(System.IO.Path.Combine(captureDir,"result.txt"),qaFailures+" failures");Application.Quit(qaFailures==0?0:1);
     }
 }

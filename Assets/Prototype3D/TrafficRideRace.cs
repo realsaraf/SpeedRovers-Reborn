@@ -7,10 +7,7 @@ using UnityEngine;
 public partial class TrafficRidePrototype
 {
     enum Page { Home, Routes, Garage, Settings, Riding, Pause, Results }
-    enum PickupKind { Coin, Fuel }
-    sealed class Pickup { public Transform root; public PickupKind kind; public float at, x; public bool taken; }
     sealed class Competitor { public Transform root, body; public readonly List<Transform> tires=new List<Transform>(); public float progress, velocity, x, target, decision, finish; }
-    readonly List<Pickup> pickups=new List<Pickup>();
     readonly List<Competitor> racers=new List<Competitor>();
     readonly List<Transform> hazards=new List<Transform>();
     readonly Dictionary<int,Vector2> touchStarts=new Dictionary<int,Vector2>();
@@ -19,9 +16,8 @@ public partial class TrafficRidePrototype
     readonly string[] bikeNames={"APEX 600","VECTOR R","PHANTOM RS"};
     readonly Color[] liveries={new Color(.1f,.8f,.91f),new Color(1,.32f,.12f),new Color(.7f,.48f,1)};
     Page page=Page.Home;
-    int route, bike, credits, raceCoins, place=4, nearMisses, gear=1;
-    float nextFuel=2200;
-    float fuel=1,nitro=.5f,jump,jumpVelocity,jumpCooldown,elapsed,countdown,finishDistance=6000,shiftDelay,nextPickup=180;
+    int route, bike, credits, place=4, nearMisses, gear=1;
+    float fuel=1,nitro=.5f,jump,jumpVelocity,jumpCooldown,elapsed,countdown,finishDistance=6000,shiftDelay;
     float noticeUntil, nextFeedback, steerInput, animationTime, finishTime, resultsReward, nextHazard=400;
     string notice="", resultHeading="", district="DOWNTOWN";
     bool soakMode;
@@ -56,7 +52,7 @@ public partial class TrafficRidePrototype
         InitializeRideAudio();
         InitGrandTour();foreach(var b in blocks)ConfigureDistrict(b,b.position.z);
         for(int i=0;i<3;i++)CreateCompetitor(i);
-        for(int i=0;i<24;i++)CreatePickup(i);
+        for(int i=0;i<4;i++)CreateFuelPickup();
         for(int i=0;i<5;i++){
             var hazard=new GameObject("Roadwork island").transform;
             Box("Warning barricade",new Vector3(0,.5f,0),new Vector3(1.4f,.7f,.45f),amber,hazard);
@@ -87,7 +83,7 @@ public partial class TrafficRidePrototype
     {
         if(next==Page.Home&&(page==Page.Riding||page==Page.Pause||page==Page.Results)){menuCameraPosition=view.transform.position;menuYaw=view.transform.eulerAngles.y;}
         if(next!=page)noticeUntil=0;
-        page=next;paused=next!=Page.Riding;engineVolume=0;if(next!=Page.Riding){touchStarts.Clear();throttle=brake=false;}else PrepareMotionFeedback();
+        page=next;paused=next!=Page.Riding;if(next!=Page.Riding){touchStarts.Clear();throttle=brake=false;}else PrepareMotionFeedback();
         SetRideAudioPage();
         Feedback(clickSound,false);
     }
@@ -96,12 +92,12 @@ public partial class TrafficRidePrototype
         RecenterTilt();PrepareMotionFeedback();
         RestoreLogicalWorld();health=1;cleanTime=0;crashResult=false;
         distance=0;speed=0;lateral=0;lean=0;impact=0;hitCooldown=0;fuel=1;nitro=.5f;boosting=false;jump=jumpVelocity=0;
-        jumpCooldown=0;elapsed=0;countdown=3;raceCoins=0;nearMisses=0;gear=1;shiftDelay=0;place=4;earned=false;finishTime=0;
-        finishDistance=CourseNow.length;district=DistrictName(0);nextPickup=150;nextFuel=2200;nextHazard=400;noticeUntil=0;
+        jumpCooldown=0;elapsed=0;countdown=3;nearMisses=0;gear=1;shiftDelay=0;place=4;earned=false;finishTime=0;
+        finishDistance=CourseNow.length;district=DistrictName(0);nextFuel=FirstFuelDistance;fuelStopsTaken=0;nextHazard=400;noticeUntil=0;
         for(int i=0;i<blocks.Count;i++){blocks[i].position=new Vector3(0,0,i*80-80);ConfigureDistrict(blocks[i],i*80-80);}
         for(int i=0;i<cars.Count;i++){cars[i].position=new Vector3(i%3==0?-1.85f:i%2==0?5.5f:1.85f,0,150+i*43);}
         for(int i=0;i<racers.Count;i++){var r=racers[i];r.progress=12+i*14;r.velocity=0;r.x= i==0?1.85f:i==1?5.4f:-1.8f;r.target=r.x;r.finish=0;r.decision=1+i*.8f;r.root.position=new Vector3(r.x,0,r.progress);r.root.gameObject.SetActive(true);}
-        foreach(var p in pickups){p.taken=false;PlaceNextPickup(p);p.x=p.kind==PickupKind.Fuel?1.85f:(p.at%2<1?1.85f:5.4f);p.root.gameObject.SetActive(true);}
+        foreach(var p in pickups){PlaceNextPickup(p);p.root.gameObject.SetActive(false);}
         for(int i=0;i<hazards.Count;i++){hazards[i].position=new Vector3(i%2==0?5.5f:-5.5f,0,nextHazard);nextHazard+=350;hazards[i].gameObject.SetActive(true);}
         SetPage(Page.Riding);
     }
@@ -136,34 +132,6 @@ public partial class TrafficRidePrototype
         Bar("Exhaust",new Vector3(.26f,.4f,-.4f),new Vector3(.26f,.5f,-.84f),.13f,metal,r.body);
         racers.Add(r);
     }
-    void PlaceNextPickup(Pickup p)
-    {
-        if(p.kind==PickupKind.Fuel){p.at=nextFuel;nextFuel+=3200;}
-        else {p.at=nextPickup;nextPickup+=95;}
-    }
-    void CreatePickup(int i)
-    {
-        var p=new Pickup{kind=i%6==0?PickupKind.Fuel:PickupKind.Coin};p.root=new GameObject(p.kind+" pickup").transform;
-        if(p.kind==PickupKind.Coin){
-            var coin=GameObject.CreatePrimitive(PrimitiveType.Cylinder);coin.transform.SetParent(p.root,false);coin.transform.localRotation=Quaternion.Euler(90,0,0);
-            coin.transform.localScale=new Vector3(.65f,.075f,.65f);coin.GetComponent<Renderer>().sharedMaterial=Mat("Gold",new Color(1,.66f,.12f),.85f,.75f);Destroy(coin.GetComponent<Collider>());
-            Ball("Coin emblem",Vector3.zero,new Vector3(.32f,.32f,.18f),amber,p.root);
-        }else{
-            var red=Mat("Fuel can red",new Color(.9f,.12f,.04f),.35f,.6f);
-            Box("Fuel can",Vector3.zero,new Vector3(.6f,.75f,.3f),red,p.root);Box("Fuel label",new Vector3(0,0,-.16f),new Vector3(.32f,.36f,.02f),white,p.root);
-            Bar("Handle top",new Vector3(-.18f,.58f,0),new Vector3(.13f,.58f,0),.045f,red,p.root);
-            Bar("Handle left",new Vector3(-.18f,.36f,0),new Vector3(-.18f,.58f,0),.045f,red,p.root);
-            Bar("Handle right",new Vector3(.13f,.36f,0),new Vector3(.13f,.58f,0),.045f,red,p.root);
-            Box("Pouring neck",new Vector3(.23f,.43f,0),new Vector3(.14f,.17f,.18f),metal,p.root);
-            Box("Cap",new Vector3(.23f,.53f,0),new Vector3(.18f,.05f,.21f),rubber,p.root);
-            Bar("Pressed steel diagonal",new Vector3(-.24f,-.31f,-.17f),new Vector3(.24f,.31f,-.17f),.018f,red,p.root);
-            Bar("Pressed steel diagonal",new Vector3(.24f,-.31f,-.17f),new Vector3(-.24f,.31f,-.17f),.018f,red,p.root);
-            var label=new GameObject("FUEL label");label.transform.SetParent(p.root,false);label.transform.localPosition=new Vector3(0,0,-.185f);label.transform.localRotation=Quaternion.Euler(0,180,0);
-            var text=label.AddComponent<TextMesh>();text.text="FUEL";text.anchor=TextAnchor.MiddleCenter;text.alignment=TextAlignment.Center;text.fontSize=48;text.characterSize=.06f;text.color=new Color(.12f,.14f,.16f);
-
-        }
-        pickups.Add(p);
-    }
     void ActivateNitro()
     {
         if(page!=Page.Riding||countdown>0||boosting||nitro<.5f||fuel<=0)return;
@@ -177,8 +145,11 @@ public partial class TrafficRidePrototype
     void Collision(float mass)
     {
         if(hitCooldown>0)return;
-        float severity=Mathf.Clamp(.12f+speed/1200+mass*.12f,.2f,.8f);
-        health=Mathf.Max(0,health-(.08f+speed/TopSpeed*.23f+mass*.09f));cleanTime=0;healthPulse=1;
+        float impactSpeed=speed;
+        float severity=Mathf.Clamp(.12f+impactSpeed/1200+mass*.12f,.2f,.8f);
+        // Fifty percent more effective durability; impact speed and vehicle size still matter.
+        float damage=(.08f+impactSpeed/TopSpeed*.23f+mass*.09f)/1.5f;
+        health=Mathf.Max(0,health-damage);cleanTime=0;healthPulse=1;
         speed*=1-severity;gear=Mathf.Clamp(1+(int)(speed/85),1,6);shiftDelay=.45f;impact=1;hitCooldown=1.2f;boosting=false;
         TriggerCollisionHaptic(severity);Feedback(hitSound,false);Announce("CONTACT / BIKE "+Mathf.CeilToInt(health*100)+"%");
         if(health<=0){crashResult=true;Feedback(Resources.Load<AudioClip>("GrandTour/Audio/Crash"));FinishRace(false);}
@@ -190,7 +161,7 @@ public partial class TrafficRidePrototype
         TickRideAudio(dt);
         if(Input.GetKeyDown(KeyCode.Escape)||Input.GetKeyDown(KeyCode.P)){
             if(page==Page.Riding)SetPage(Page.Pause);else if(page==Page.Pause)SetPage(Page.Riding);else SetPage(Page.Home);}
-        if(page!=Page.Riding){engineVolume=0;engine.volume=0;if(page!=Page.Pause&&page!=Page.Results){view.transform.position=menuCameraPosition;view.transform.rotation=Quaternion.Euler(0,menuYaw+Mathf.Sin(Time.time*.12f)*4,0);}return;}
+        if(page!=Page.Riding){if(page!=Page.Pause&&page!=Page.Results){view.transform.position=menuCameraPosition;view.transform.rotation=Quaternion.Euler(0,menuYaw+Mathf.Sin(Time.time*.12f)*4,0);}return;}
         ReadControls();if(page!=Page.Riding)return;
         if(countdown>0){countdown=Mathf.Max(0,countdown-dt);if(countdown==0){Feedback(coinSound);Announce("GO / RACE TO THE FINISH");}return;}
         RestoreLogicalWorld();
@@ -203,7 +174,7 @@ public partial class TrafficRidePrototype
         speed=Mathf.Clamp(speed+force*dt,0,Mathf.Max(cap,speed-28*dt));
         int wanted=Mathf.Clamp(1+(int)(speed/85),1,6);
         if(wanted>gear&&shiftDelay==0){gear++;shiftDelay=.22f;Feedback(shiftSound,false);}else if(wanted<gear)gear=wanted;
-        fuel=Mathf.Max(0,fuel-dt/95*(boosting?1.35f:1));
+        fuel=Mathf.Max(0,fuel-dt/FuelTankSeconds*Mathf.Lerp(.5f,1,Mathf.Clamp01(speed/TopSpeed))*(boosting?1.35f:1));
         if(boosting){nitro=Mathf.Max(0,nitro-dt*.17f);if(nitro<=0||fuel<=0)boosting=false;}else nitro=Mathf.Min(1,nitro+dt*.035f);
         jumpCooldown=Mathf.Max(0,jumpCooldown-dt);
         if(jump>0||jumpVelocity>0){jumpVelocity-=12*dt;jump=Mathf.Max(0,jump+jumpVelocity*dt);if(jump==0){jumpVelocity=0;Feedback(clickSound);}}
@@ -218,7 +189,6 @@ public partial class TrafficRidePrototype
         view.transform.position=new Vector3(PlayerX,1.55f+jump+Mathf.Sin(Time.time*24)*speed/300*.006f,0);
         view.transform.rotation=Quaternion.Euler(impact*3+(brake?1.5f:0),steerInput*1.5f,lean*.25f);
         view.fieldOfView=Mathf.Lerp(view.fieldOfView,75+Mathf.Clamp01(speed/TopSpeed)*8+(boosting?5:0),dt*3);
-        enginePitch=45+gear*8+(speed%85)*2;engineVolume=throttle?.055f:.025f;
         place=1;foreach(var r in racers)if(r.progress>distance)place++;
         AdvanceGrandTour(dt);ProjectCourseWorld();
         if(distance>=finishDistance)FinishRace(true);
@@ -281,26 +251,13 @@ public partial class TrafficRidePrototype
             if(Mathf.Abs(r.root.position.z)<1.7f+Mathf.Abs(speed-r.velocity)/3.6f*dt&&Mathf.Abs(r.x-PlayerX)<.65f){Collision(.4f);r.velocity*=.85f;}
         }
     }
-    void AdvancePickups()
-    {
-        foreach(var p in pickups){
-            if(p.at<distance-10){PlaceNextPickup(p);p.taken=false;p.x=p.kind==PickupKind.Fuel?1.85f:(Mathf.FloorToInt(p.at/100)%2==0?1.85f:5.4f);}
-            p.root.gameObject.SetActive(!p.taken&&p.at-distance<500);
-            p.root.position=new Vector3(p.x,p.kind==PickupKind.Coin?2.15f:.65f,p.at-distance);
-            p.root.rotation=Quaternion.Euler(0,Time.time*120,0);
-            if(!p.taken&&p.at-distance<3&&p.at-distance> -3-speed/3.6f*Mathf.Min(Time.deltaTime,.05f)&&Mathf.Abs(p.x-PlayerX)<1){
-                if(p.kind==PickupKind.Coin&&jump>.4f){p.taken=true;raceCoins++;Feedback(coinSound);Announce("AIR COIN +1");}
-                else if(p.kind==PickupKind.Fuel&&jump<.4f){p.taken=true;fuel=Mathf.Min(1,fuel+.4f);Feedback(fuelSound);Announce("FUEL +40%");}
-            }
-        }
-    }
     string DistrictName(float at)=>SectionAt(at).name;
     void ConfigureDistrict(Transform block,float at)=>GrandConfigure(block,at);
     void FinishRace(bool finished)
     {
         if(earned)return;earned=true;finishTime=elapsed;boosting=false;
         resultHeading=finished?(place==1?"VICTORY":"RACE COMPLETE"):crashResult?"BIKE WRECKED":"OUT OF FUEL";
-        resultsReward=raceCoins+nearMisses*5+(finished?(5-place)*30:0);credits+=(int)resultsReward;
+        resultsReward=nearMisses*5+(finished?(5-place)*30:0);credits+=(int)resultsReward;
         if(!qaMode){PlayerPrefs.SetInt("sr2_credits",credits);if(finished){float best=PlayerPrefs.GetFloat("sr2_best_"+route,float.MaxValue);PlayerPrefs.SetFloat("sr2_best_"+route,Mathf.Min(best,elapsed));}PlayerPrefs.Save();}
         SetPage(Page.Results);if(finished)Feedback(Resources.Load<AudioClip>("GrandTour/Audio/Finish"));
     }

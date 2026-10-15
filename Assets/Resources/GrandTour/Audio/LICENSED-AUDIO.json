@@ -90,29 +90,29 @@
       "sources": [
         "motorcycle.ogg"
       ],
-      "processing": "Recorded motorcycle excerpt 5.5-6.9 s, low-pass 2.6 kHz, 120 ms overlap loop, level normalization.",
+      "processing": "Recorded motorcycle excerpt 5.5-6.9 s; mobile speaker master: 180 Hz high-pass, 2.6 kHz low-pass, gentle saturation for midrange, 120 ms overlap loop and level normalization.",
       "duration_seconds": 1.28,
       "sample_rate": 44100,
       "channels": 1,
-      "rms_dbfs": -13.68,
-      "peak_dbfs": -1.94,
+      "rms_dbfs": -15.08,
+      "peak_dbfs": -2.38,
       "clipped_samples": 0,
-      "sha256": "f8918131d22e75b2b9257726919c96e6ac9ef76ddc358f8c0f90fa98733bc721",
-      "loop_boundary_delta": 0.00205856929170406
+      "sha256": "ca81bd0fd52e5edba5f70474a2129a13b5e30da217833ab81e26d674361d1488",
+      "loop_boundary_delta": 0.011317196021374765
     },
     "Engine": {
       "sources": [
         "motorcycle.ogg"
       ],
-      "processing": "Recorded motorcycle excerpt 1.05-2.85 s, 120 ms overlap loop, level normalization.",
+      "processing": "Recorded motorcycle excerpt 1.05-2.85 s; mobile speaker master: 220 Hz high-pass, gentle saturation for midrange, 120 ms overlap loop and level normalization.",
       "duration_seconds": 1.68,
       "sample_rate": 44100,
       "channels": 1,
-      "rms_dbfs": -13.56,
-      "peak_dbfs": -2.72,
+      "rms_dbfs": -14.74,
+      "peak_dbfs": -2.38,
       "clipped_samples": 0,
-      "sha256": "02b8455c161f0a2bea89a071575521d4be8d9f05166c40dcc365b2fc4a20be40",
-      "loop_boundary_delta": 0.01748172504074713
+      "sha256": "2f6141943b16b5ca8c4bb725750ee225ec182c84826eb744dfa81f95b075d818",
+      "loop_boundary_delta": 0.038751555651716924
     },
     "UI": {
       "sources": [

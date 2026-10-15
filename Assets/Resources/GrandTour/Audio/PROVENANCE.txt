@@ -13,6 +13,11 @@ DenisChardonnet, provided by BigSoundBank under CC0 (public domain).
 https://bigsoundbank.com/motorcycle-s0281.html
 The original contains motorcycle startup, acceleration and shutdown. The game
 uses trimmed, level-matched and crossfaded excerpts as idle/load loops.
+Engine masters revised after phone feedback: reduce sub-bass with 220 Hz (load)
+and 180 Hz (idle) high-pass filtering, gentle saturation to expose audible
+midrange, and peak-controlled normalization. The original source had about
+80-86 percent of its energy below 150 Hz and was easily masked by music on
+small phone speakers. Original recording, source hash and CC0 license unchanged.
 
 EFFECTS
 Impact/Crash: layered metal/plate/glass recordings from Kenney Impact Sounds 1.0.
@@ -33,8 +38,8 @@ Processed deliverables are PCM 16-bit 44.1 kHz; music is stereo. Unity compresse
 music for streaming and short effects in memory at build time.
 
 MIX AND PLAYBACK
-The two composed themes crossfade on race/menu transitions. Music is mixed above
-the quiet engine/airflow bed; recorded idle and loaded engine layers follow RPM,
+The two composed themes crossfade on race/menu transitions. Music accompanies
+the clearly audible engine/airflow bed; recorded idle and loaded engine layers follow RPM,
 throttle and gear changes. Nitro has a sustained combustion layer. Impacts briefly
 duck music. Saved music/effects choices remain respected through focus changes.
 The native iOS playback session supports Silent Mode and mixes with user audio;

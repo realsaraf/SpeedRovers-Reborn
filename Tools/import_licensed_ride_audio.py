@@ -49,6 +49,13 @@ def loop(x, fade=.1):
 def lowpass(x, hz):
     return sosfiltfilt(butter(3,hz,fs=RATE,output='sos'),x,axis=0)
 
+def motor_presence(x, cutoff):
+    # The source recording is dominated by sub-150 Hz exhaust energy, which
+    # vanishes on phone speakers. Preserve the recorded texture, reduce that
+    # inaudible bass load, and expose its midrange with gentle harmonic saturation.
+    presence=sosfiltfilt(butter(2,cutoff,btype='highpass',fs=RATE,output='sos'),x,axis=0)
+    return np.tanh(presence*3.0)
+
 def mix(parts):
     channels=max(x.shape[1] for x,_ in parts)
     y=np.zeros((max(len(x)+int(t*RATE) for x,t in parts),channels))
@@ -82,8 +89,8 @@ def main():
     save('MenuScore',gain(edge(load('racing_title.ogg'),.004),.205,.88),['racing_title.ogg'],'Full 140 BPM title score, stereo 44.1 kHz PCM; DC removal, level and 4 ms boundary fade.',True)
 
     motor=load('motorcycle.ogg')
-    save('EngineIdle',gain(loop(lowpass(motor[int(5.5*RATE):int(6.9*RATE)],2600),.12),.21,.8),['motorcycle.ogg'],'Recorded motorcycle excerpt 5.5-6.9 s, low-pass 2.6 kHz, 120 ms overlap loop, level normalization.',True)
-    save('Engine',gain(loop(motor[int(1.05*RATE):int(2.85*RATE)],.12),.21,.8),['motorcycle.ogg'],'Recorded motorcycle excerpt 1.05-2.85 s, 120 ms overlap loop, level normalization.',True)
+    save('EngineIdle',gain(loop(motor_presence(lowpass(motor[int(5.5*RATE):int(6.9*RATE)],2600),180),.12),.23,.76),['motorcycle.ogg'],'Recorded motorcycle excerpt 5.5-6.9 s; mobile speaker master: 180 Hz high-pass, 2.6 kHz low-pass, gentle saturation for midrange, 120 ms overlap loop and level normalization.',True)
+    save('Engine',gain(loop(motor_presence(motor[int(1.05*RATE):int(2.85*RATE)],220),.12),.23,.76),['motorcycle.ogg'],'Recorded motorcycle excerpt 1.05-2.85 s; mobile speaker master: 220 Hz high-pass, gentle saturation for midrange, 120 ms overlap loop and level normalization.',True)
     ui=lambda f:load('interface-sounds/Audio/'+f+'.ogg')
     impact=lambda f:load('impact/Audio/'+f+'.ogg')
     scifi=lambda f:load('sci-fi-sounds/Audio/'+f+'.ogg')

@@ -1,3 +1,16 @@
+# Engine, fuel and collision balance 2.1.2 - 2026-10-15
+
+Changes: engine idle/load recordings remastered for phone-speaker midrange; dedicated resident engine sources start immediately and recover stopped playback. Music retained. Removed road coins and related HUD/help/result references; finish and close-pass credits remain. Fuel cans carry rotating luminous arrows above rider height, with a target screen height of about 18 pixels at 844 x 390. Fixed fuel stops begin at 5.2 km, recur every 5.6 km, refill 30%, and exclude the final 1.5 km. Impact health damage is divided by 1.5 for 50% more effective durability, retaining speed loss, haptics, cooldown and clean-riding repair.
+
+## Current local evidence
+
+- Final Windows build succeeded: C:/SpeedRoversCapture/engine-fuel-build.log.
+- 59 runtime checks, zero failures: C:/SpeedRoversCapture/engine-fuel-runtime-release.log and engine-fuel-qa-release/result.txt. Includes removal of coin actors, fuel spacing/refill, marker rotation, surviving three full-speed car hits, fourth-hit wreck, duplicate-contact cooldown, controls, music and isolated engine output.
+- Inspected actual approach and close captures: engine-fuel-qa-release/10-fuel-marker-approach.png and 11-fuel-marker-close.png.
+- Isolated engine output captured in engine-fuel-qa-release/engine-only.wav. Checks measure listener audio at idle, throttle, maximum speed, stopped-source recovery, pause silence and resume. Engine recording: -25.70 dBFS RMS, -11.30 dBFS peak; full mix: -21.30 dBFS RMS, -5.59 dBFS peak. Both have zero clipped samples. Collision QA spaces contacts by 1.3 seconds, matching the production cooldown rather than stacking four impact sounds in one frame. This is desktop audio evidence; iPhone speaker balance still requires physical testing.
+- Full 28 km race passed in 233.23 seconds through all eight sections, collecting four fuel stops and finishing with 22.1% fuel. Minimum bike health was 48.6%, peak speed 663 km/h. Evidence: C:/SpeedRoversCapture/engine-fuel-soak/soak.txt. Automated steering follows the same pickup rules as the player; no health or fuel grants. An iOS export ran concurrently, so this run is used for gameplay balance rather than performance claims.
+- iOS export succeeded: C:/SpeedRoversCapture/engine-fuel-ios.log. Version 2.1.2; 334.3 MiB package; 1248 source/settings files. SHA256: 00519822406909712331be331ba558624a9ac0b7afc890707f75b99758ad147c. Native signing and tester availability are verified separately after the push.
+
 # Sound, motion and transparent HUD 2.1.1 - 2026-10-15
 
 Changes: composed CC0 menu/race music, recorded motorcycle idle/load audio, Kenney CC0 effects, crossfade and interruption recovery. Phone tilt defaults on with neutral calibration and optional thumb-drag mode. Dedicated severity-based Core Haptics collision pulses have UIKit/vibrator fallback. Settings includes recenter and impact-vibration test controls. Multitouch abilities work while throttle is held, including a hold begun during countdown.

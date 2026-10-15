@@ -68,7 +68,7 @@ public partial class TrafficRidePrototype
         var origin=CourseOffset(distance);foreach(var block in blocks)block.position=new Vector3(-origin.x,0,block.position.z);
         for(int i=0;i<cars.Count;i++)ProjectActor(cars[i],i%3==0);
         foreach(var r in racers)ProjectActor(r.root);
-        foreach(var p in pickups){ProjectActor(p.root);p.root.Rotate(0,p.kind==PickupKind.Coin?Time.time*120:Mathf.Sin(Time.time*2)*8,0,Space.Self);}
+        foreach(var p in pickups)ProjectActor(p.root);
         foreach(var h in hazards)ProjectActor(h);
         view.transform.position=new Vector3(PlayerX,1.55f+origin.y+jump,0);
         view.transform.rotation=Quaternion.Euler(CoursePitch(distance)+impact*2+(brake?1:0),CourseYaw(distance)+steerInput,lean*.25f);

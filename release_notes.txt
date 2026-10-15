@@ -1,3 +1,5 @@
-Speed Rovers 2 2.1.1 - Sound and Ride Controls
-New CC0 racing soundtrack, recorded motorcycle engine layers, and rebuilt impact, nitro, jump, pickup and menu effects. Music stays audible and recovers after interruptions. Translucent brake/throttle lever outlines glow when held; compact right-side instruments leave the horizon open. Hold throttle and tilt your phone to steer; neutral calibration and a Recenter Tilt option are included. Jump and nitro work with a second finger while throttle stays held. Collisions use dedicated soft impact haptics with strength based on impact severity.
-On your iPhone, please test: hold throttle and tilt in both landscape orientations; brake, jump and nitro while holding throttle; music after locking/unlocking or an interruption; collision vibration. Settings includes Test Impact Vibration, Recenter Tilt, music/effect toggles and optional thumb-drag steering. Desktop checks pass, but device vibration and sensor feel require physical testing.
+Speed Rovers 2 2.1.2 - Engine, Fuel and Durability
+Engine sound remastered for phone speakers, with louder acceleration and idle layers, immediate startup and recovery after interrupted playback. Background music remains.
+Removed road coins. Fuel cans now have glowing rotating arrows for advance visibility. Fuel stops are 5.6 km apart, restore 30%, and do not appear just before the finish. Race and close-pass credits still unlock bikes.
+The bike tolerates 50% more cumulative impact damage, while collisions still slow it down and clean riding repairs damage.
+Please test engine audibility on your iPhone at idle, acceleration and top speed, then after pausing or locking/unlocking. Also check fuel marker visibility and the more forgiving collision balance.

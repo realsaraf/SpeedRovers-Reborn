@@ -18,7 +18,9 @@ public static class TrafficRideBuild
         foreach(var asset in AssetDatabase.FindAssets("t:AudioClip",new[]{"Assets/Resources/GrandTour/Audio"})){
             var importer=(AudioImporter)AssetImporter.GetAtPath(AssetDatabase.GUIDToAssetPath(asset));var settings=importer.defaultSampleSettings;
             settings.compressionFormat=AudioCompressionFormat.Vorbis;settings.quality=.75f;
-            settings.loadType=importer.assetPath.Contains("Score")?AudioClipLoadType.Streaming:AudioClipLoadType.CompressedInMemory;importer.defaultSampleSettings=settings;importer.SaveAndReimport();}
+            bool engineLoop=importer.assetPath.EndsWith("/Engine.wav")||importer.assetPath.EndsWith("/EngineIdle.wav");
+            settings.loadType=engineLoop?AudioClipLoadType.DecompressOnLoad:importer.assetPath.Contains("Score")?AudioClipLoadType.Streaming:AudioClipLoadType.CompressedInMemory;
+            settings.preloadAudioData=true;importer.defaultSampleSettings=settings;importer.SaveAndReimport();}
         var pine=(TextureImporter)AssetImporter.GetAtPath("Assets/Resources/GrandTour/Pine.png");pine.alphaIsTransparency=true;pine.mipmapEnabled=true;pine.maxTextureSize=1024;pine.SaveAndReimport();
         root.cockpitArt=AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Prototype3D/Art/Cockpit.png");
         root.facadeArt=AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Prototype3D/Art/Facades.png");
@@ -38,7 +40,7 @@ public static class TrafficRideBuild
         PlayerSettings.defaultInterfaceOrientation=UIOrientation.AutoRotation;
         PlayerSettings.allowedAutorotateToLandscapeLeft=true;PlayerSettings.allowedAutorotateToLandscapeRight=true;
         PlayerSettings.allowedAutorotateToPortrait=false;PlayerSettings.allowedAutorotateToPortraitUpsideDown=false;
-        PlayerSettings.productName="Speed Rovers 2";PlayerSettings.bundleVersion="2.1.1";
+        PlayerSettings.productName="Speed Rovers 2";PlayerSettings.bundleVersion="2.1.2";
         AssetDatabase.SaveAssets();
     }
     public static void Build()
