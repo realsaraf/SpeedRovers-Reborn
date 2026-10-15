@@ -84,7 +84,6 @@ public partial class TrafficRidePrototype : MonoBehaviour
         if(carPrefab==null) {Debug.LogError("Prototype car asset missing");enabled=false;return;}
         for(int i=0;i<3;i++) CreateCar(i);
         engine=gameObject.AddComponent<AudioSource>();engine.loop=true;engine.spatialBlend=0;
-        engine.clip=Resources.Load<AudioClip>("GrandTour/Audio/Engine");engine.Play();
         InitializeRaceGame();
     }
     void EngineAudio(float[] data)

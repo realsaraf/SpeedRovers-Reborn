@@ -36,7 +36,6 @@ public partial class TrafficRidePrototype
         var velocity=rainParticles.velocityOverLifetime;velocity.enabled=true;velocity.y=-25;velocity.z=-12;
         var emission=rainParticles.emission;emission.rateOverTime=0;
         var render=rainGO.GetComponent<ParticleSystemRenderer>();render.renderMode=ParticleSystemRenderMode.Stretch;render.lengthScale=5;render.velocityScale=.06f;render.sharedMaterial=white;
-        engine.Stop();engine.clip=Resources.Load<AudioClip>("GrandTour/Audio/Engine");engine.Play();
     }
     CourseSection SectionAt(float at)
     {
@@ -186,19 +185,17 @@ public partial class TrafficRidePrototype
     }
     void DrawGrandTourHUD()
     {
-        Fill(new Rect(26,112,220,49),ink);Meter("BIKE "+Mathf.CeilToInt(health*100)+"%"+(cleanTime>5&&health<1?" REPAIRING":""),health,36,115,200,health<.3f?new Color(1,.3f,.15f):accent);
         var safe=Screen.safeArea;float scale=Mathf.Min(safe.width/1280f,safe.height/720f),left=safe.x+(safe.width-1280*scale)*.5f,top=Screen.height-safe.yMax+(safe.height-720*scale)*.5f;
+        if(scale<=0)return;
         int closest=-1;float best=220;for(int n=0;n<racers.Count;n++){float gap= racers[n].progress-distance;if(gap>0&&gap<best){best=gap;closest=n;}}
         for(int i=0;i<racers.Count;i++){
             var r=racers[i];float gap=r.progress-distance;var screen=view.WorldToScreenPoint(r.root.position+Vector3.up*2.1f);
             if(i==closest&&screen.z>0&&Mathf.Abs(gap)<220){
                 float x=(screen.x-left)/scale,y=(Screen.height-screen.y-top)/scale;
                 if(x>100&&x<1180&&y>140&&y<500)
-                    Text(Mathf.Abs(gap).ToString("0")+" m",x-25,y-34,50,20,new GUIStyle(tinyStyle){fontSize=14,alignment=TextAnchor.MiddleCenter},new Color(.85f,.97f,1,.58f));
+                    Text(Mathf.Abs(gap).ToString("0")+" m",x-25,y-34,50,20,RideHudStyle(14,TextAnchor.MiddleCenter),new Color(.85f,.97f,1,.58f));
             }
-            Text(racerNames[i]+" "+(gap>=0?"+":"-")+Mathf.Abs(gap).ToString("0")+" M",1045,115+i*24,220,24,tinyStyle,liveries[i]);
         }
-        if(health<.3f)Text("CRITICAL DAMAGE / RIDE CLEAN TO REPAIR",430,180,600,30,bodyStyle,new Color(1,.4f,.2f));
     }
     void AdvanceGrandTour(float dt)
     {
@@ -212,7 +209,6 @@ public partial class TrafficRidePrototype
         if(RenderSettings.skybox!=null)RenderSettings.skybox.SetFloat("_Exposure",Mathf.Lerp(.75f,.3f,cloudAmount));
         asphalt.SetFloat("_Glossiness",Mathf.Lerp(.18f,.83f,rainAmount));asphalt.SetFloat("_Metallic",rainAmount*.32f);
         var emission=rainParticles.emission;emission.rateOverTime=rainAmount*650;
-        engine.pitch=.65f+(speed%85)/85*.75f+gear*.09f;engine.volume=throttle?.26f:.15f;
     }
 }
 public sealed class GrandTourMeshLifetime:MonoBehaviour

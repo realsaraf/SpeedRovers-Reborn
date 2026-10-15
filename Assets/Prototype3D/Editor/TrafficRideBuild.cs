@@ -38,7 +38,7 @@ public static class TrafficRideBuild
         PlayerSettings.defaultInterfaceOrientation=UIOrientation.AutoRotation;
         PlayerSettings.allowedAutorotateToLandscapeLeft=true;PlayerSettings.allowedAutorotateToLandscapeRight=true;
         PlayerSettings.allowedAutorotateToPortrait=false;PlayerSettings.allowedAutorotateToPortraitUpsideDown=false;
-        PlayerSettings.productName="Speed Rovers 2";PlayerSettings.bundleVersion="2.1.0";
+        PlayerSettings.productName="Speed Rovers 2";PlayerSettings.bundleVersion="2.1.1";
         AssetDatabase.SaveAssets();
     }
     public static void Build()

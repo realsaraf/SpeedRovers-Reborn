@@ -35,15 +35,12 @@ public partial class TrafficRidePrototype
     Vector2 pointerStart;
     Vector3 menuCameraPosition=new Vector3(1.85f,1.65f,0);
     float menuYaw;
-#if UNITY_IOS && !UNITY_EDITOR
-    [DllImport("__Internal")] static extern void SRSoftImpact();
-#endif
     void InitializeRaceGame()
     {
         qaMode=capture;
         foreach(var a in Environment.GetCommandLineArgs()) if(a.StartsWith("-race-qa=")){captureDir=a.Substring(9);qaMode=true;capture=true;}
         foreach(var a in Environment.GetCommandLineArgs())if(a.StartsWith("-race-soak=")){captureDir=a.Substring(11);qaMode=true;capture=true;soakMode=true;}
-        Screen.orientation=ScreenOrientation.LandscapeLeft;
+        Screen.orientation=ScreenOrientation.AutoRotation;
         Screen.autorotateToLandscapeLeft=true;Screen.autorotateToLandscapeRight=true;
         Screen.autorotateToPortrait=false;Screen.autorotateToPortraitUpsideDown=false;
         Screen.sleepTimeout=SleepTimeout.NeverSleep;
@@ -51,17 +48,12 @@ public partial class TrafficRidePrototype
         credits=qaMode?0:PlayerPrefs.GetInt("sr2_credits",0);
         bike=qaMode?0:Mathf.Clamp(PlayerPrefs.GetInt("sr2_bike",0),0,2);
         route=0; soundOn=PlayerPrefs.GetInt("sr2_sound",1)==1;musicOn=PlayerPrefs.GetInt("sr2_music",1)==1;
-        hapticsOn=PlayerPrefs.GetInt("sr2_haptics",1)==1;tiltControl=PlayerPrefs.GetInt("sr2_tilt",0)==1;
+        hapticsOn=PlayerPrefs.GetInt("sr2_haptics",1)==1;InitializeMotionFeedback();
         gameFont=Resources.Load<Font>("Interface/Fonts/Rajdhani-Bold");
         riverMaterial=Mat("River water",new Color(.11f,.38f,.48f),.65f,.86f);
         grassMaterial=Mat("Park lawn",new Color(.25f,.38f,.2f));
-        effects=gameObject.AddComponent<AudioSource>();effects.volume=.5f;
-        music=gameObject.AddComponent<AudioSource>();music.loop=true;music.volume=.18f;
-        music.clip=Resources.Load<AudioClip>("GrandTour/Audio/MenuScore");if(music.clip!=null)music.Play();
-        wind=gameObject.AddComponent<AudioSource>();wind.loop=true;wind.clip=Resources.Load<AudioClip>("GrandTour/Audio/Wind");if(wind.clip!=null)wind.Play();
-        hitSound=Resources.Load<AudioClip>("GrandTour/Audio/Impact");passSound=Resources.Load<AudioClip>("GrandTour/Audio/Pass");
-        clickSound=Resources.Load<AudioClip>("GrandTour/Audio/UI");coinSound=Resources.Load<AudioClip>("GrandTour/Audio/Coin");fuelSound=Resources.Load<AudioClip>("GrandTour/Audio/Fuel");
-        boostSound=Resources.Load<AudioClip>("GrandTour/Audio/Boost");jumpSound=Resources.Load<AudioClip>("GrandTour/Audio/Jump");
+        if(qaMode){musicOn=soundOn=true;}
+        InitializeRideAudio();
         InitGrandTour();foreach(var b in blocks)ConfigureDistrict(b,b.position.z);
         for(int i=0;i<3;i++)CreateCompetitor(i);
         for(int i=0;i<24;i++)CreatePickup(i);
@@ -84,14 +76,8 @@ public partial class TrafficRidePrototype
     }
     void Feedback(AudioClip clip,bool vibrate=true)
     {
-        if(soundOn&&clip!=null)effects.PlayOneShot(clip);
-        if(!vibrate||!hapticsOn||qaMode||Time.unscaledTime<nextFeedback)return;
-        nextFeedback=Time.unscaledTime+.1f;
-#if UNITY_IOS && !UNITY_EDITOR
-        SRSoftImpact();
-#elif UNITY_ANDROID && !UNITY_EDITOR
-        Handheld.Vibrate();
-#endif
+        PlayRideSound(clip);
+        if(vibrate)TriggerSoftHaptic();
     }
     void Announce(string message){notice=message;noticeUntil=Time.unscaledTime+2.8f;}
     float TopSpeed=>510+bike*24;
@@ -100,13 +86,14 @@ public partial class TrafficRidePrototype
     void SetPage(Page next)
     {
         if(next==Page.Home&&(page==Page.Riding||page==Page.Pause||page==Page.Results)){menuCameraPosition=view.transform.position;menuYaw=view.transform.eulerAngles.y;}
-        page=next;paused=next!=Page.Riding;engineVolume=0;
-        if(music!=null){var desired=Resources.Load<AudioClip>(next==Page.Riding||next==Page.Pause?"GrandTour/Audio/RaceScore":"GrandTour/Audio/MenuScore");
-            if(desired!=music.clip){music.clip=desired;if(desired!=null)music.Play();}}
+        if(next!=page)noticeUntil=0;
+        page=next;paused=next!=Page.Riding;engineVolume=0;if(next!=Page.Riding){touchStarts.Clear();throttle=brake=false;}else PrepareMotionFeedback();
+        SetRideAudioPage();
         Feedback(clickSound,false);
     }
     void StartRace()
     {
+        RecenterTilt();PrepareMotionFeedback();
         RestoreLogicalWorld();health=1;cleanTime=0;crashResult=false;
         distance=0;speed=0;lateral=0;lean=0;impact=0;hitCooldown=0;fuel=1;nitro=.5f;boosting=false;jump=jumpVelocity=0;
         jumpCooldown=0;elapsed=0;countdown=3;raceCoins=0;nearMisses=0;gear=1;shiftDelay=0;place=4;earned=false;finishTime=0;
@@ -193,20 +180,20 @@ public partial class TrafficRidePrototype
         float severity=Mathf.Clamp(.12f+speed/1200+mass*.12f,.2f,.8f);
         health=Mathf.Max(0,health-(.08f+speed/TopSpeed*.23f+mass*.09f));cleanTime=0;healthPulse=1;
         speed*=1-severity;gear=Mathf.Clamp(1+(int)(speed/85),1,6);shiftDelay=.45f;impact=1;hitCooldown=1.2f;boosting=false;
-        Feedback(hitSound);Announce("CONTACT / BIKE "+Mathf.CeilToInt(health*100)+"%");
+        TriggerCollisionHaptic(severity);Feedback(hitSound,false);Announce("CONTACT / BIKE "+Mathf.CeilToInt(health*100)+"%");
         if(health<=0){crashResult=true;Feedback(Resources.Load<AudioClip>("GrandTour/Audio/Crash"));FinishRace(false);}
     }
     void Update()
     {
         if(view==null)return;
-        float dt=Mathf.Min(Time.deltaTime,.05f);animationTime+=dt;
-        music.mute=!musicOn;engine.mute=!soundOn;wind.mute=!soundOn;wind.volume=page==Page.Riding?Mathf.Clamp01(speed/TopSpeed)*.22f:0;
+        float dt=Mathf.Min(Time.deltaTime,.05f);animationTime+=dt;TickMotionControls();
+        TickRideAudio(dt);
         if(Input.GetKeyDown(KeyCode.Escape)||Input.GetKeyDown(KeyCode.P)){
             if(page==Page.Riding)SetPage(Page.Pause);else if(page==Page.Pause)SetPage(Page.Riding);else SetPage(Page.Home);}
         if(page!=Page.Riding){engineVolume=0;engine.volume=0;if(page!=Page.Pause&&page!=Page.Results){view.transform.position=menuCameraPosition;view.transform.rotation=Quaternion.Euler(0,menuYaw+Mathf.Sin(Time.time*.12f)*4,0);}return;}
+        ReadControls();if(page!=Page.Riding)return;
         if(countdown>0){countdown=Mathf.Max(0,countdown-dt);if(countdown==0){Feedback(coinSound);Announce("GO / RACE TO THE FINISH");}return;}
         RestoreLogicalWorld();
-        ReadControls();
         if(Input.GetKeyDown(KeyCode.Space))JumpBike();if(Input.GetKeyDown(KeyCode.LeftShift)||Input.GetKeyDown(KeyCode.N))ActivateNitro();
         if(qaMode){throttle=captureStage==0;brake=captureStage==1;steerInput=soakMode?SoakSteer():0;}
         float acceleration=Mathf.Lerp(52,22,speed/TopSpeed);
@@ -215,7 +202,7 @@ public partial class TrafficRidePrototype
         float force=brake?-100:fuel<=0?-35:throttle?(shiftDelay>0?2:acceleration)*(boosting?2.2f:1):-10;
         speed=Mathf.Clamp(speed+force*dt,0,Mathf.Max(cap,speed-28*dt));
         int wanted=Mathf.Clamp(1+(int)(speed/85),1,6);
-        if(wanted>gear&&shiftDelay==0){gear++;shiftDelay=.22f;Feedback(clickSound,false);}else if(wanted<gear)gear=wanted;
+        if(wanted>gear&&shiftDelay==0){gear++;shiftDelay=.22f;Feedback(shiftSound,false);}else if(wanted<gear)gear=wanted;
         fuel=Mathf.Max(0,fuel-dt/95*(boosting?1.35f:1));
         if(boosting){nitro=Mathf.Max(0,nitro-dt*.17f);if(nitro<=0||fuel<=0)boosting=false;}else nitro=Mathf.Min(1,nitro+dt*.035f);
         jumpCooldown=Mathf.Max(0,jumpCooldown-dt);
@@ -246,20 +233,22 @@ public partial class TrafficRidePrototype
         if(Input.touchCount==0&&Input.GetMouseButton(0)){
             int control=ControlAt(pointerStart);if(control==1){throttle=true;steerInput=Mathf.Clamp((Input.mousePosition.x-pointerStart.x)/(Screen.width*.1f),-1,1);}else if(control==-1)brake=true;}
         for(int i=0;i<Input.touchCount;i++){
-            var t=Input.GetTouch(i);if(t.phase==TouchPhase.Began)touchStarts[t.fingerId]=t.position;
-            if(t.phase==TouchPhase.Ended||t.phase==TouchPhase.Canceled){touchStarts.Remove(t.fingerId);continue;}
-            if(!touchStarts.TryGetValue(t.fingerId,out var start))continue;
-            int control=ControlAt(start);if(control==1){throttle=true;if(!tiltControl)steerInput=Mathf.Clamp((t.position.x-start.x)/(Screen.width*.1f),-1,1);}else if(control==-1)brake=true;
+            var touch=Input.GetTouch(i);ProcessRideTouch(touch.fingerId,touch.position,touch.phase);
+            if(page!=Page.Riding)break;
         }
-        if(tiltControl&&Application.isMobilePlatform)steerInput=Mathf.Clamp(Input.acceleration.x*2.8f,-1,1);
+        if(tiltControl&&TiltAvailable)steerInput=TiltSteering;
     }
     int ControlAt(Vector2 point)
     {
         var safe=Screen.safeArea;float scale=Mathf.Min(safe.width/1280f,safe.height/720f);
         float left=safe.x+(safe.width-1280*scale)*.5f,top=Screen.height-safe.yMax+(safe.height-720*scale)*.5f;
         var p=new Vector2((point.x-left)/scale,(Screen.height-point.y-top)/scale);
-        if(p.y<250||p.y>720)return 0;
-        return p.x>=1000?1:p.x<=280?-1:0;
+        if(PauseControl.Contains(p))return 4;
+        if(NitroControl.Contains(p))return 2;
+        if(JumpControl.Contains(p))return 3;
+        // Pedals retain a generous lower-corner hold zone; abilities have priority.
+        if(p.y<450||p.y>720)return 0;
+        return p.x>=1040?1:p.x<=236?-1:0;
     }
     void AdvanceTraffic(float dt,float travel)
     {
@@ -315,6 +304,4 @@ public partial class TrafficRidePrototype
         if(!qaMode){PlayerPrefs.SetInt("sr2_credits",credits);if(finished){float best=PlayerPrefs.GetFloat("sr2_best_"+route,float.MaxValue);PlayerPrefs.SetFloat("sr2_best_"+route,Mathf.Min(best,elapsed));}PlayerPrefs.Save();}
         SetPage(Page.Results);if(finished)Feedback(Resources.Load<AudioClip>("GrandTour/Audio/Finish"));
     }
-    void OnApplicationPause(bool value){if(value&&page==Page.Riding)SetPage(Page.Pause);}
-    void OnApplicationFocus(bool value){if(!value&&page==Page.Riding&&!qaMode)SetPage(Page.Pause);}
 }

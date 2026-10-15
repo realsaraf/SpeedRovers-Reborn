@@ -25,6 +25,33 @@ public partial class TrafficRidePrototype
     {
         Text(name,x,y,w,22,tinyStyle);Fill(new Rect(x,y+26,w,5),new Color(.2f,.26f,.3f));Fill(new Rect(x,y+26,w*Mathf.Clamp01(value),5),c);
     }
+    readonly System.Collections.Generic.Dictionary<int,GUIStyle> rideHudStyles=new System.Collections.Generic.Dictionary<int,GUIStyle>();
+    GUIStyle RideHudStyle(int size,TextAnchor alignment=TextAnchor.UpperRight)
+    {
+        int key=size*10+(int)alignment;
+        if(!rideHudStyles.TryGetValue(key,out var style)){
+            style=new GUIStyle(bodyStyle){fontSize=size,alignment=alignment,wordWrap=true};rideHudStyles[key]=style;
+        }
+        return style;
+    }
+    void RideHudText(string value,Rect rect,int size,Color color,TextAnchor alignment=TextAnchor.UpperRight)
+    {
+        var style=RideHudStyle(size,alignment);
+        Text(value,rect.x+1.5f,rect.y+1.5f,rect.width,rect.height,style,new Color(0,0,0,color.a*.8f));
+        Text(value,rect.x,rect.y,rect.width,rect.height,style,color);
+    }
+    void RideHudGauge(string label,float value,float y,Color color)
+    {
+        RideHudText(label,new Rect(1090,y,168,22),16,color);
+        Fill(new Rect(1090,y+24,168,3),new Color(.02f,.035f,.05f,.5f));
+        Fill(new Rect(1090,y+24,168*Mathf.Clamp01(value),3),new Color(color.r,color.g,color.b,.8f));
+    }
+    void DrawRideNotice()
+    {
+        if(Time.unscaledTime>=noticeUntil)return;
+        float alpha=Mathf.Clamp01((noticeUntil-Time.unscaledTime)*2)*.9f;
+        RideHudText(notice,new Rect(1064,342,194,62),18,new Color(accent.r,accent.g,accent.b,alpha));
+    }
     void OnGUI()
     {
         if(view==null)return;Styles();
@@ -36,7 +63,7 @@ public partial class TrafficRidePrototype
         bool racing=page==Page.Riding||page==Page.Pause||page==Page.Results;
         if(racing)DrawRideHUD();else DrawMenu();
         if(page==Page.Pause)DrawPause();if(page==Page.Results)DrawResults();
-        if(Time.unscaledTime<noticeUntil){float alpha=Mathf.Clamp01((noticeUntil-Time.unscaledTime)*2);GUI.color=new Color(1,1,1,alpha);
+        if(!racing&&Time.unscaledTime<noticeUntil){float alpha=Mathf.Clamp01((noticeUntil-Time.unscaledTime)*2);GUI.color=new Color(1,1,1,alpha);
             Fill(new Rect(390,125,500,42),ink);Text(notice,405,130,470,35,buttonStyle,accent);GUI.color=Color.white;}
         GUI.matrix=Matrix4x4.identity;
     }
@@ -55,28 +82,33 @@ public partial class TrafficRidePrototype
             Text("GEAR "+gear,592,532,100,20,new GUIStyle(tinyStyle){fontSize=13,alignment=TextAnchor.MiddleCenter},lcd);
             GUI.matrix=old;
         }
-        Fill(new Rect(20,18,1160,84),ink);Fill(new Rect(20,100,1160*Mathf.Clamp01(distance/finishDistance),3),accent);
-        Text(Mathf.RoundToInt(speed).ToString(),42,23,115,52,new GUIStyle(titleStyle){fontSize=48});Text("KM/H   G"+gear,43,75,120,22,tinyStyle,muted);
-        Text("POSITION",180,29,125,24,tinyStyle,muted);Text(place+" / 4",180,53,130,42,subStyle);
-        Text("DISTANCE",320,29,140,24,tinyStyle,muted);Text((distance/1000).ToString("0.0")+" / "+(finishDistance/1000).ToString("0")+" KM",320,53,180,42,bodyStyle);
-        Text("RACE TIME",510,29,140,24,tinyStyle,muted);Text(TimeSpan.FromSeconds(elapsed).ToString(@"mm\:ss"),510,53,145,42,subStyle);
-        Meter("FUEL  "+Mathf.CeilToInt(fuel*100)+"%",fuel,680,34,180,fuel<.2f?new Color(1,.3f,.15f):accent);
-        Text("AIR COINS",900,29,130,24,tinyStyle,muted);Text(raceCoins.ToString(),900,53,100,42,subStyle,new Color(1,.76f,.25f));
-        Text(district,1030,36,140,50,new GUIStyle(tinyStyle){wordWrap=true},muted);
-        if(Button("Ⅱ",1192,18,66,84)&&page==Page.Riding)SetPage(Page.Pause);
-        if(page==Page.Riding){
-            Fill(new Rect(26,570,240,112),brake?new Color(.7f,.18f,.08f,.9f):ink);Text("BRAKE",46,593,200,45,subStyle);Text("HOLD LEFT",46,641,200,24,tinyStyle,muted);
-            Fill(new Rect(1014,570,240,112),throttle?new Color(.04f,.45f,.45f,.94f):ink);Text("THROTTLE",1034,593,210,45,subStyle);Text(tiltControl?"HOLD + TILT":"HOLD + DRAG TO STEER",1034,641,210,24,tinyStyle,muted);
-            // Nitro cylinder is a distinct, large touch target with a visible charge fill.
-            Fill(new Rect(824,550,146,124),ink);Fill(new Rect(875,558,42,8),metal.color);Fill(new Rect(870,568,52,56),new Color(.14f,.2f,.24f));
-            Fill(new Rect(873,621-50*nitro,46,50*nitro),boosting?Color.white:accent);Text(boosting?"BOOSTING":"NITRO",824,625,146,28,buttonStyle,nitro>=.5f?accent:muted);
-            Text(Mathf.RoundToInt(nitro*100)+"%",824,651,146,22,new GUIStyle(tinyStyle){alignment=TextAnchor.MiddleCenter},muted);
-            if(GUI.Button(new Rect(824,550,146,124),GUIContent.none,GUIStyle.none))ActivateNitro();
-            if(Button("JUMP ↑",310,590,150,78,false,jumpCooldown<=0))JumpBike();
-            Text(Application.isMobilePlatform?(tiltControl?"TILT TO STEER":"DRAG WHILE HOLDING THROTTLE"):"W / S  THROTTLE / BRAKE     A / D  STEER     SPACE  JUMP     SHIFT  NITRO",320,692,700,22,tinyStyle,muted);
-            if(countdown>0)Text(Mathf.CeilToInt(countdown).ToString(),540,220,200,150,new GUIStyle(titleStyle){alignment=TextAnchor.MiddleCenter,fontSize=120},accent);
-            if(fuel<.2f&&Mathf.Sin(Time.time*5)>0)Text("LOW FUEL — COLLECT RED CANS",430,180,500,35,bodyStyle,new Color(1,.4f,.2f));
-        }
+        if(page!=Page.Riding)return;
+        var hudWhite=new Color(.94f,.98f,1,.94f);
+        RideHudText(place+" / 4",new Rect(28,24,105,46),34,hudWhite,TextAnchor.UpperLeft);
+        RideHudText("POS",new Rect(137,43,46,22),14,new Color(.8f,.88f,.93f,.8f),TextAnchor.UpperLeft);
+        if(raceCoins>0)RideHudText(raceCoins+" COINS",new Rect(29,76,200,26),18,new Color(1,.78f,.3f,.9f),TextAnchor.UpperLeft);
+        RideHudText(district,new Rect(29,110,250,44),16,new Color(.82f,.9f,.94f,.72f),TextAnchor.UpperLeft);
+
+        // Keep instrumentation beside the road; the skyline and central horizon stay open.
+        RideHudText(Mathf.RoundToInt(speed).ToString(),new Rect(1084,112,112,52),44,hudWhite);
+        RideHudText("KM/H",new Rect(1200,136,58,24),15,new Color(.85f,.92f,.96f,.85f));
+        RideHudText("GEAR "+gear,new Rect(1090,165,168,22),15,new Color(accent.r,accent.g,accent.b,.9f));
+        RideHudText((distance/1000).ToString("0.0")+" / "+(finishDistance/1000).ToString("0")+" KM",new Rect(1090,194,168,30),23,hudWhite);
+        RideHudText("TIME",new Rect(1090,234,56,22),14,new Color(.82f,.9f,.94f,.8f),TextAnchor.UpperLeft);
+        RideHudText(TimeSpan.FromSeconds(elapsed).ToString(@"mm\:ss"),new Rect(1152,225,106,34),26,hudWhite);
+        Color fuelColor=fuel<.2f?new Color(1,.42f,.2f,.95f):new Color(.8f,.92f,.92f,.85f);
+        RideHudGauge((fuel<.2f?"LOW FUEL  ":"FUEL  ")+Mathf.CeilToInt(fuel*100)+"%",fuel,264,fuelColor);
+        bool repairing=cleanTime>5&&health<1;
+        Color bikeColor=health<.3f?new Color(1,.4f,.2f,.95f):new Color(.8f,.92f,.92f,.85f);
+        RideHudGauge((repairing?"REPAIRING  ":"BIKE  ")+Mathf.CeilToInt(health*100)+"%",health,302,bikeColor);
+        RideHudText("Ⅱ",PauseControl,34,new Color(1,1,1,.8f),TextAnchor.MiddleCenter);
+        if(!Application.isMobilePlatform&&GUI.Button(PauseControl,GUIContent.none,GUIStyle.none))SetPage(Page.Pause);
+        if(page!=Page.Riding)return;
+        DrawRideControls();
+        if(!Application.isMobilePlatform)Text("W / S  THROTTLE / BRAKE     A / D  STEER     SPACE  JUMP     SHIFT  NITRO",320,692,700,22,tinyStyle,muted);
+        if(TiltIsCalibrating)RideHudText("HOLD STEADY / CENTERING TILT",new Rect(400,460,480,28),20,new Color(accent.r,accent.g,accent.b,.9f),TextAnchor.MiddleCenter);
+        if(countdown>0)RideHudText(Mathf.CeilToInt(countdown).ToString(),new Rect(540,220,200,150),120,accent,TextAnchor.MiddleCenter);
+        DrawRideNotice();
         DrawGrandTourHUD();
         if(impact>0)Fill(new Rect(0,0,1280,720),new Color(1,.25f,.1f,impact*.17f));
     }
@@ -99,7 +131,7 @@ public partial class TrafficRidePrototype
             if(Button("ROUTES",40,620,280,64))SetPage(Page.Routes);
             if(Button("GARAGE",340,620,280,64))SetPage(Page.Garage);
             if(Button("SETTINGS",640,620,280,64))SetPage(Page.Settings);
-            if(Button("HOW TO RIDE",940,620,300,64))Announce("HOLD RIGHT + DRAG • LEFT BRAKES • JUMP FOR COINS");
+            if(Button("HOW TO RIDE",940,620,300,64))Announce(tiltControl?"HOLD RIGHT + TILT • LEFT BRAKES • JUMP FOR COINS":"HOLD RIGHT + DRAG • LEFT BRAKES • JUMP FOR COINS");
         }else if(page==Page.Routes){
             Text("CHOOSE YOUR ROUTE",40,124,1000,90,titleStyle);
             for(int i=0;i<3;i++){float x=40+i*407;Fill(new Rect(x,240,385,330),ink);Fill(new Rect(x,240,385,5),i==route?accent:muted);
@@ -126,9 +158,11 @@ public partial class TrafficRidePrototype
             if(Button("ENGINE & EFFECTS   /   "+(soundOn?"ON":"OFF"),40,250,580,78)){soundOn=!soundOn;SaveOption("sound",soundOn);}
             if(Button("MUSIC   /   "+(musicOn?"ON":"OFF"),660,250,580,78)){musicOn=!musicOn;SaveOption("music",musicOn);}
             if(Button("SOFT HAPTICS   /   "+(hapticsOn?"ON":"OFF"),40,350,580,78)){hapticsOn=!hapticsOn;SaveOption("haptics",hapticsOn);}
-            if(Button("STEERING   /   "+(tiltControl?"TILT":"THUMB DRAG"),660,350,580,78)){tiltControl=!tiltControl;SaveOption("tilt",tiltControl);}
-            Text("HOLD RIGHT TO ACCELERATE. HOLD LEFT TO BRAKE.",44,475,1100,35,bodyStyle,accent);
-            Text("Drag from your first touch to steer smoothly. Jump for airborne coins.\nNitro activates at 50% charge. Collect fuel cans to stay in the race.\nHits cost speed and bike health. Ride clean to repair; repeated hits can wreck the bike.",44,520,1100,100,new GUIStyle(bodyStyle){wordWrap=true},muted);
+            if(Button("STEERING   /   "+(tiltControl?"TILT":"THUMB DRAG"),660,350,580,78)){SetTiltControl(!tiltControl);}
+            if(Button("RECENTER TILT",40,447,580,52,false,TiltAvailable)){RecenterTilt();Announce("HOLD PHONE COMFORTABLY / CALIBRATING TILT");}
+            if(Button("TEST IMPACT VIBRATION",660,447,580,52)){TestHaptics();}
+            Text(tiltControl?"HOLD THROTTLE AND TILT YOUR PHONE TO STEER.":"HOLD THROTTLE AND DRAG YOUR THUMB TO STEER.",44,515,1100,35,bodyStyle,accent);
+            Text("Hold left to brake. Tap jump or nitro with your other thumb while accelerating.\nNitro activates at 50%. Collect fuel cans. Ride clean to repair collision damage.",44,560,1100,60,new GUIStyle(bodyStyle){wordWrap=true},muted);
         }
     }
     void SaveOption(string name,bool value){if(qaMode)return;PlayerPrefs.SetInt("sr2_"+name,value?1:0);PlayerPrefs.Save();}
@@ -156,7 +190,9 @@ public partial class TrafficRidePrototype
     void Check(bool condition,string message){if(condition)Debug.Log("RACE QA PASS: "+message);else{qaFailures++;Debug.LogError("RACE QA FAIL: "+message);}}
     IEnumerator FullGameQA()
     {
-        System.IO.Directory.CreateDirectory(captureDir);yield return new WaitForSeconds(2);yield return Shot("01-home");
+        System.IO.Directory.CreateDirectory(captureDir);
+        var audioReview=view.gameObject.AddComponent<SpeedRovers.Reborn.RaceAudioCapture>();audioReview.Begin(45);
+        yield return new WaitForSeconds(2);yield return Shot("01-home");
         SetPage(Page.Garage);yield return Shot("02-garage");SetPage(Page.Routes);yield return Shot("03-routes");
         var safe=Screen.safeArea;float sc=Mathf.Min(safe.width/1280f,safe.height/720f);float lf=safe.x+(safe.width-1280*sc)*.5f,tp=Screen.height-safe.yMax+(safe.height-720*sc)*.5f;
         Check(ControlAt(new Vector2(lf+1100*sc,Screen.height-(tp+600*sc)))==1,"throttle aligns with wide-screen HUD");
@@ -190,6 +226,8 @@ public partial class TrafficRidePrototype
         StartRace();countdown=0;
         distance=finishDistance;FinishRace(true);int reward=credits;FinishRace(true);Check(credits==reward&&page==Page.Results,"finish awards credits exactly once");yield return Shot("07-results");
         StartRace();countdown=0;fuel=0;speed=0;yield return null;Check(page==Page.Results&&resultHeading=="OUT OF FUEL","empty fuel coasts to a result");
+        yield return CheckRideControlsAndAudio();
+        audioReview.Save(System.IO.Path.Combine(captureDir,"audio-mix.wav"));
         Debug.Log("RACE QA COMPLETE: "+qaFailures+" failures");System.IO.File.WriteAllText(System.IO.Path.Combine(captureDir,"result.txt"),qaFailures+" failures");Application.Quit(qaFailures==0?0:1);
     }
 }

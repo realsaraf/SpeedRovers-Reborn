@@ -1,3 +1,19 @@
+# Sound, motion and transparent HUD 2.1.1 - 2026-10-15
+
+Changes: composed CC0 menu/race music, recorded motorcycle idle/load audio, Kenney CC0 effects, crossfade and interruption recovery. Phone tilt defaults on with neutral calibration and optional thumb-drag mode. Dedicated severity-based Core Haptics collision pulses have UIKit/vibrator fallback. Settings includes recenter and impact-vibration test controls. Multitouch abilities work while throttle is held, including a hold begun during countdown.
+
+Visual direction: translucent brake/throttle grip and lever outlines with pressed glow, unobstructed jump/nitro icons, a narrow right-side speed/distance/time/fuel/health stack, small position top-left, and faint distance-only rival markers. No full-width top bar, rival name list, central event panel or opaque pedal buttons.
+
+## Local evidence
+
+- Windows build succeeded: C:/SpeedRoversCapture/minimal-hud-build.log.
+- 43 runtime checks, zero failures: C:/SpeedRoversCapture/minimal-hud-qa/result.txt and C:/SpeedRoversCapture/minimal-hud-runtime.log. Includes simultaneous throttle/abilities, countdown hold, pause release, injected tilt calibration/left/right/dead-zone input, music playback recovery and mute preservation.
+- Inspected real runtime screenshots at 844 x 390: C:/SpeedRoversCapture/minimal-hud-qa/05-race.png and 08-new-controls.png. This exercises a translated, scaled landscape UI; it is not an iPhone screenshot.
+- Listener output captured in C:/SpeedRoversCapture/minimal-hud-qa/audio-mix.wav. Earlier same audio mix capture measured -20.63 dBFS RMS, -4.25 dBFS peak and zero clipped samples. Runtime confirms 60-second menu and 96-second race tracks loaded and playing.
+- Audio source licenses, transformations and hashes are in Assets/Resources/GrandTour/Audio/LICENSED-AUDIO.json and PROVENANCE.txt.
+- iOS export succeeded: C:/SpeedRoversCapture/minimal-hud-ios.log. Version 2.1.1; 334.2 MiB export; 1244 Unity source/settings files; SHA256 6773284fb62c8084f0913f669b1e522cc8a5452777b1d41f12921dc44954d8eb. CoreHaptics is linked and both native audio/feedback plugins are included in the Xcode project.
+- Native haptic/audio-session code and motion framework linkage require the Mac build. Physical iPhone tilt direction/feel, vibration, interruption handling and speaker balance still require device testing; desktop injected inputs do not prove these.
+
 # Grand Tour 2.1.0 validation - 2026-10-14
 
 Implemented: clear cockpit; 510/534/558 km/h bike caps plus nitro; reduced traffic; peripheral airflow; cumulative damage, delayed regeneration and crash; impact haptics; three rivals; fixed 28/32/36 km courses with eight sections, authored bends/elevations, weather and lighting; replacement original audio.

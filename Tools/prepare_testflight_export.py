@@ -10,7 +10,7 @@ parser.add_argument('--unity',default=r'C:\Program Files\Unity\Hub\Editor\6000.6
 args=parser.parse_args()
 if not args.package_only:
     log=root/'ios-export.log'
-    subprocess.run([args.unity,'-batchmode','-nographics','-quit','-projectPath',str(root),'-executeMethod','SpeedRoversBuild.BuildIOS','-logFile',str(log)],check=True)
+    subprocess.run([args.unity,'-batchmode','-nographics','-quit','-buildTarget','iOS','-projectPath',str(root),'-executeMethod','SpeedRoversBuild.BuildIOS','-logFile',str(log)],check=True)
     if 'Build Finished, Result: Success.' not in log.read_text(errors='replace'):raise SystemExit('Unity did not confirm export success')
 source=root/'Builds/iOS'
 with (source/'Info.plist').open('rb') as f:info=plistlib.load(f)

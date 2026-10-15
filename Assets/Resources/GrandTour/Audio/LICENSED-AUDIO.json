@@ -1,0 +1,280 @@
+{
+  "verified_date": "2026-10-14",
+  "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "sources": [
+    {
+      "file": "pure_raceway.ogg",
+      "title": "Pure Raceway",
+      "author": "MintoDog",
+      "source": "https://opengameart.org/content/pure-raceway",
+      "download": "https://opengameart.org/sites/default/files/pure_raceway_bpm160_0.ogg",
+      "license": "CC0-1.0",
+      "sha256": "e384208fc0bed123b68fd31e28df2d7bc3e8463551e49d681d700b2c21565e5d"
+    },
+    {
+      "file": "racing_title.ogg",
+      "title": "Racing Game Title",
+      "author": "MintoDog",
+      "source": "https://opengameart.org/content/racing-game-title",
+      "download": "https://opengameart.org/sites/default/files/racing_game_title_bpm140_0.ogg",
+      "license": "CC0-1.0",
+      "sha256": "61134b6be3d9f65e39d74d9d8645accf77d815bd37e9d30e7697d4b6eb00f680"
+    },
+    {
+      "file": "motorcycle.ogg",
+      "title": "Motorcycle #0281",
+      "author": "DenisChardonnet",
+      "source": "https://bigsoundbank.com/motorcycle-s0281.html",
+      "download": "https://bigsoundbank.com/UPLOAD/ogg/0281.ogg",
+      "license": "CC0-1.0",
+      "sha256": "edd99fbe3776dfe43dfa28b44b153c042515a586b50758fa8c33cd1c3c051cc1"
+    },
+    {
+      "file": "impact.zip",
+      "title": "Impact Sounds 1.0",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/impact-sounds",
+      "download": "https://kenney.nl/media/pages/assets/impact-sounds/87b4ddecda-1677589768/kenney_impact-sounds.zip",
+      "license": "CC0-1.0",
+      "sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8"
+    },
+    {
+      "file": "interface-sounds.zip",
+      "title": "Interface Sounds 1.0",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/interface-sounds",
+      "download": "https://kenney.nl/media/pages/assets/interface-sounds/fa43c1dd4d-1677589452/kenney_interface-sounds.zip",
+      "license": "CC0-1.0",
+      "sha256": "f2193d072726d6758a5f7871b2dcc54dcce0d5c35c6f0a62f92549b327c81232"
+    },
+    {
+      "file": "sci-fi-sounds.zip",
+      "title": "Sci-fi Sounds 1.0",
+      "author": "Kenney",
+      "source": "https://kenney.nl/assets/sci-fi-sounds",
+      "download": "https://kenney.nl/media/pages/assets/sci-fi-sounds/6b296f9ecf-1677589334/kenney_sci-fi-sounds.zip",
+      "license": "CC0-1.0",
+      "sha256": "119340f351a5098ad814f78719438c0da355a9ce8a4c8a3af6a8d48aa3d49e04"
+    }
+  ],
+  "outputs": {
+    "RaceScore": {
+      "sources": [
+        "pure_raceway.ogg"
+      ],
+      "processing": "Full 160 BPM score, stereo 44.1 kHz PCM; DC removal, level and 4 ms boundary fade.",
+      "duration_seconds": 96.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "rms_dbfs": -14.19,
+      "peak_dbfs": -1.11,
+      "clipped_samples": 0,
+      "sha256": "46dc74370707f182e78ec69daa99d912e72e3a833080e2725948867da9ffbf88",
+      "loop_boundary_delta": 0.0
+    },
+    "MenuScore": {
+      "sources": [
+        "racing_title.ogg"
+      ],
+      "processing": "Full 140 BPM title score, stereo 44.1 kHz PCM; DC removal, level and 4 ms boundary fade.",
+      "duration_seconds": 60.0,
+      "sample_rate": 44100,
+      "channels": 2,
+      "rms_dbfs": -13.76,
+      "peak_dbfs": -2.64,
+      "clipped_samples": 0,
+      "sha256": "a05a9aafbc155237575857d9bb22f3306d28f9597fd89f1ec1d47b70ed6f0b37",
+      "loop_boundary_delta": 0.0
+    },
+    "EngineIdle": {
+      "sources": [
+        "motorcycle.ogg"
+      ],
+      "processing": "Recorded motorcycle excerpt 5.5-6.9 s, low-pass 2.6 kHz, 120 ms overlap loop, level normalization.",
+      "duration_seconds": 1.28,
+      "sample_rate": 44100,
+      "channels": 1,
+      "rms_dbfs": -13.68,
+      "peak_dbfs": -1.94,
+      "clipped_samples": 0,
+      "sha256": "f8918131d22e75b2b9257726919c96e6ac9ef76ddc358f8c0f90fa98733bc721",
+      "loop_boundary_delta": 0.00205856929170406
+    },
+    "Engine": {
+      "sources": [
+        "motorcycle.ogg"
+      ],
+      "processing": "Recorded motorcycle excerpt 1.05-2.85 s, 120 ms overlap loop, level normalization.",
+      "duration_seconds": 1.68,
+      "sample_rate": 44100,
+      "channels": 1,
+      "rms_dbfs": -13.56,
+      "peak_dbfs": -2.72,
+      "clipped_samples": 0,
+      "sha256": "02b8455c161f0a2bea89a071575521d4be8d9f05166c40dcc365b2fc4a20be40",
+      "loop_boundary_delta": 0.01748172504074713
+    },
+    "UI": {
+      "sources": [
+        "interface-sounds.zip:Audio/click_003.ogg"
+      ],
+      "processing": "DC removal, level normalization, click-free edges.",
+      "duration_seconds": 0.01,
+      "sample_rate": 44100,
+      "channels": 1,
+      "rms_dbfs": -17.72,
+      "peak_dbfs": -7.75,
+      "clipped_samples": 0,
+      "sha256": "996e388d0c5a15b26760eb37324a8c4a639826d432a2b75cac991b59650ada4f"
+    },
+    "Shift": {
+      "sources": [
+        "interface-sounds.zip:Audio/switch_004.ogg"
+      ],
+      "processing": "Mechanical shift click, DC removal, level normalization, click-free edges.",
+      "duration_seconds": 0.5,
+      "sample_rate": 44100,
+      "channels": 2,
+      "rms_dbfs": -26.61,
+      "peak_dbfs": -3.1,
+      "clipped_samples": 0,
+      "sha256": "7228cb07dafec0f866962fcaa04e64967021741aaa3f7181ad152c760c20849d"
+    },
+    "Coin": {
+      "sources": [
+        "interface-sounds.zip:Audio/confirmation_001.ogg"
+      ],
+      "processing": "Short collection cue, level normalization, click-free edges.",
+      "duration_seconds": 0.2898,
+      "sample_rate": 44100,
+      "channels": 1,
+      "rms_dbfs": -13.98,
+      "peak_dbfs": -3.86,
+      "clipped_samples": 0,
+      "sha256": "3f486fa49f0a2b21cccfd840f2a1152f88bfa03b7e5f8a205c5950db83c2b087"
+    },
+    "Fuel": {
+      "sources": [
+        "interface-sounds.zip:Audio/confirmation_002.ogg"
+      ],
+      "processing": "Distinct longer pickup cue, level normalization, click-free edges.",
+      "duration_seconds": 0.539,
+      "sample_rate": 44100,
+      "channels": 1,
+      "rms_dbfs": -15.48,
+      "peak_dbfs": -1.94,
+      "clipped_samples": 0,
+      "sha256": "4b328df7f43df1e340619987ef6e7fb6b40b8b6adcd662f00e235a148988b6f3"
+    },
+    "Jump": {
+      "sources": [
+        "interface-sounds.zip:Audio/open_003.ogg"
+      ],
+      "processing": "Short upward gesture sound, level normalization, click-free edges.",
+      "duration_seconds": 0.3138,
+      "sample_rate": 44100,
+      "channels": 1,
+      "rms_dbfs": -15.92,
+      "peak_dbfs": -5.23,
+      "clipped_samples": 0,
+      "sha256": "366d34f9f5d5a8fc9c56a9f632a7ba7cec9359db60b980e43a6bb03eb7a71bce"
+    },
+    "Impact": {
+      "sources": [
+        "impact.zip:Audio/impactMetal_heavy_001.ogg",
+        "impact.zip:Audio/impactPlate_heavy_002.ogg"
+      ],
+      "processing": "Layered recorded metal impacts, low-pass on plate layer, level normalization, click-free edges.",
+      "duration_seconds": 0.5192,
+      "sample_rate": 44100,
+      "channels": 2,
+      "rms_dbfs": -21.6,
+      "peak_dbfs": -1.72,
+      "clipped_samples": 0,
+      "sha256": "9f8e20fd5f2def2ca15fcbbbed77daf287715cee9b430c3641deb3cf4ce00412"
+    },
+    "Crash": {
+      "sources": [
+        "impact.zip:Audio/impactMetal_heavy_001.ogg",
+        "impact.zip:Audio/impactMetal_heavy_003.ogg",
+        "impact.zip:Audio/impactGlass_heavy_001.ogg"
+      ],
+      "processing": "Layered impacts and short glass debris, level normalization, click-free edges.",
+      "duration_seconds": 0.469,
+      "sample_rate": 44100,
+      "channels": 2,
+      "rms_dbfs": -23.6,
+      "peak_dbfs": -1.72,
+      "clipped_samples": 0,
+      "sha256": "bdb4fd5b399e35391ab25be04c11489034d4b239b899cc24a19c7102d7a79a0a"
+    },
+    "Boost": {
+      "sources": [
+        "sci-fi-sounds.zip:Audio/thrusterFire_000.ogg"
+      ],
+      "processing": "1.5 s air/combustion burst, low-pass 9 kHz, level normalization, 80 ms release.",
+      "duration_seconds": 1.5,
+      "sample_rate": 44100,
+      "channels": 1,
+      "rms_dbfs": -17.73,
+      "peak_dbfs": -1.94,
+      "clipped_samples": 0,
+      "sha256": "8b1c84387eb372f8f2760029ca4d594457b19c2410fe55b0040f3b389ef8be51"
+    },
+    "BoostLoop": {
+      "sources": [
+        "sci-fi-sounds.zip:Audio/thrusterFire_000.ogg"
+      ],
+      "processing": "1.2-3.2 s combustion excerpt, 150 ms overlap loop, low-pass 9 kHz, level normalization.",
+      "duration_seconds": 1.85,
+      "sample_rate": 44100,
+      "channels": 1,
+      "rms_dbfs": -15.92,
+      "peak_dbfs": -3.4,
+      "clipped_samples": 0,
+      "sha256": "3deeadda15fd3fe043a8bb2f689732b1ae69e30ab8f85b143ee214ecd75482f9",
+      "loop_boundary_delta": 0.003763256745233673
+    },
+    "Pass": {
+      "sources": [
+        "interface-sounds.zip:Audio/open_002.ogg"
+      ],
+      "processing": "Time-stretched airy sweep with level normalization and 20 ms edge fades.",
+      "duration_seconds": 0.7531,
+      "sample_rate": 44100,
+      "channels": 1,
+      "rms_dbfs": -15.39,
+      "peak_dbfs": -2.7,
+      "clipped_samples": 0,
+      "sha256": "343e6e93b529661985168d018d5e30833f9258411d427b15cc697709667daa71"
+    },
+    "Finish": {
+      "sources": [
+        "interface-sounds.zip:Audio/confirmation_004.ogg",
+        "interface-sounds.zip:Audio/confirmation_001.ogg"
+      ],
+      "processing": "Two-stage finish cue, level normalization, click-free edges.",
+      "duration_seconds": 0.6898,
+      "sample_rate": 44100,
+      "channels": 1,
+      "rms_dbfs": -14.89,
+      "peak_dbfs": -3.61,
+      "clipped_samples": 0,
+      "sha256": "02cff0fb80f33b4aa56e3e81baf1c263f23384e63af8a401184f70ab1daca75f"
+    },
+    "Wind": {
+      "sources": [
+        "Original procedural wind: Tools/import_licensed_ride_audio.py"
+      ],
+      "processing": "Original deterministic band-limited noise, 220 Hz-4.2 kHz, 120 ms overlap seam, level normalization.",
+      "duration_seconds": 7.88,
+      "sample_rate": 44100,
+      "channels": 2,
+      "rms_dbfs": -19.21,
+      "peak_dbfs": -4.44,
+      "clipped_samples": 0,
+      "sha256": "65d3b87fca98c706ba3f2ce7b16af7478ffb7c3141acba9b022be1c332c93f87",
+      "loop_boundary_delta": 0.02859204729424991
+    }
+  }
+}
